@@ -168,6 +168,7 @@ pgxFreqplot(freq_pgxseg, group_id='icdom-85003')
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(freq_pgxseg, chrom=c(1,2,3), layout = c(3,1), group_id='NCIT:C4038')  
 ```
+
 ### CNV frequency circos plot 
 
 ```{r,fig.width=6, fig.height=6}
