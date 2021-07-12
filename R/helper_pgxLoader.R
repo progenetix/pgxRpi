@@ -22,6 +22,8 @@ read_sample <- function(url){
     data <- read.table(url, skip = 1, stringsAsFactors = FALSE, sep = "\t",fill=TRUE)
     data <- data[, c(1:31, 38:39)]
     names(data) <- names[c(1:31, 38:39)]
+    suppressWarnings(data$death <- as.numeric(data$death))
+    suppressWarnings(data$followup_months <- as.numeric(data$followup_months))
     return(data.frame(data))
 }
 
