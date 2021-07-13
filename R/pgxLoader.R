@@ -2,11 +2,11 @@
 #'
 #' This function loads various data from `Progenetix` database.   
 #'
-#' @param type A string specifying output data type. Avaiable options are "biosample", 
+#' @param type A string specifying output data type. Available options are "biosample", 
 #' "variant" or "frequency". 
-#' @param output A string specifying output file format. Avaiable options are NULL, 
-#' 'pgxseg' or 'seg' when the paramter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
-#' when the paramter `type` is "frequency".
+#' @param output A string specifying output file format. Available options are NULL, 
+#' 'pgxseg' or 'seg' when the parameter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
+#' when the parameter `type` is "frequency".
 #' @param group_id A single or a comma-concatenated list of identifiers for cancer type,
 #' literature, and cohorts such as c("NCIT:C7376","icdom-98353","PMID:22824167", "pgxcohort-TCGAcancers")
 #' @param codematches A logical value determining whether to exclude samples 
@@ -15,7 +15,7 @@
 #' @param biosample_id  A single or a comma-concatenated list of identifiers used 
 #' in Progenetix database for identifying biosamples 
 #' @param save_file A logical value determining whether to save the variant data as file 
-#' instead of direct return. Only used when the paramter `type` is "variant". Default is FALSE.
+#' instead of direct return. Only used when the parameter `type` is "variant". Default is FALSE.
 #' @param filename A string specifying the path and name of the file to be saved. 
 #' Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" 
 #' in current work directory.

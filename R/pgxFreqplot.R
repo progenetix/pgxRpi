@@ -3,7 +3,7 @@
 #' Thie function plots the frequency of deletions and amplifications
 #'
 #' @param data CNV frequency data returned by `pgxLoader` function. The frequency matrices
-#' in `data` slot must stored as `.pgxseg` format, which can be specified by `output` 
+#' in `data` slot must be stored as `.pgxseg` format, which can be specified by `output` 
 #' parameter of `pgxLoader` function. 
 #' @param chrom A vector with chromosomes to be plotted. If NULL, return the plot
 #' by genome. If specified the frequencies are plotted with one panel for each

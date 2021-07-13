@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hangjia Zhao" />
 
-<meta name="date" content="2021-07-06" />
+<meta name="date" content="2021-07-13" />
 
 <title>Introduction_1_loadvariants</title>
 
@@ -141,7 +141,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">Introduction_1_loadvariants</h1>
 <h4 class="author">Hangjia Zhao</h4>
-<h4 class="date">2021-07-06</h4>
+<h4 class="date">2021-07-13</h4>
 
 
 
@@ -153,12 +153,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>This function loads various data from <code>Progenetix</code> database.</p>
 <p>The parameters of this function:</p>
 <ul>
-<li><code>type</code> A string specifying output data type. Avaiable options are “biosample”, “variant” or “frequency”.</li>
-<li><code>output</code> A string specifying output file format. Avaiable options are NULL, ‘pgxseg’ or ‘seg’ when the parameter <code>type</code> is “variant”; ‘pgxseg’ or ‘pgxmatrix’ when the paramter <code>type</code> is “frequency”.</li>
+<li><code>type</code> A string specifying output data type. Available options are “biosample”, “variant” or “frequency”.</li>
+<li><code>output</code> A string specifying output file format. Available options are NULL, ‘pgxseg’ or ‘seg’ when the parameter <code>type</code> is “variant”; ‘pgxseg’ or ‘pgxmatrix’ when the parameter <code>type</code> is “frequency”.</li>
 <li><code>group_id</code> A single or a comma-concatenated list of identifiers for cancer type, literature, and cohorts such as c(“NCIT:C7376”,“icdom-98353”,“<a href="PMID:22824167" class="uri">PMID:22824167</a>”, “pgxcohort-TCGAcancers”). Only used if the parameter <code>type</code> is “biosample” or “frequency”.</li>
 <li><code>codematches</code> A logical value determining whether to exclude samples from child terms of specified group id. If FALSE, retrieved samples include child terms of specified group id. Only used when <code>group_id</code> is specified. Default is FALSE.</li>
 <li><code>biosample_id</code> A single or a comma-concatenated list of identifiers used in Progenetix database for identifying biosamples.</li>
-<li><code>save_file</code> A logical value determining whether to save the variant data as file instead of direct return. Only used when the paramter <code>type</code> is “variant”. Default is FALSE.</li>
+<li><code>save_file</code> A logical value determining whether to save the variant data as file instead of direct return. Only used when the parameter <code>type</code> is “variant”. Default is FALSE.</li>
 <li><code>filename</code> A string specifying the path and name of the file to be saved. Only used if the parameter <code>save_file</code> is TRUE. Default is “variants.seg/pgxseg” in current work directory.</li>
 </ul>
 </div>
@@ -179,12 +179,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva601 pgxind-kftx266t pgxcs-kftvlil9 glioblastoma        NA    NA</span></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva603 pgxind-kftx266v pgxcs-kftvlilq glioblastoma        NA    NA</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   age_iso death followup_months        geoprov_label geoprov_precision</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1      NA                       Yamaguchi-shi, Japan              city</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2      NA                       Yamaguchi-shi, Japan              city</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3      NA                       Yamaguchi-shi, Japan              city</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4      NA                       Yamaguchi-shi, Japan              city</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5      NA                       Yamaguchi-shi, Japan              city</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6      NA                       Yamaguchi-shi, Japan              city</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1      NA    NA              NA Yamaguchi-shi, Japan              city</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2      NA    NA              NA Yamaguchi-shi, Japan              city</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3      NA    NA              NA Yamaguchi-shi, Japan              city</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4      NA    NA              NA Yamaguchi-shi, Japan              city</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5      NA    NA              NA Yamaguchi-shi, Japan              city</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6      NA    NA              NA Yamaguchi-shi, Japan              city</span></span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    geoprov_city geoprov_country geoprov_iso_alpha3 geoprov_lat geoprov_long</span></span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 Yamaguchi-shi           Japan                JPN       34.19       131.47</span></span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Yamaguchi-shi           Japan                JPN       34.19       131.47</span></span>
@@ -243,8 +243,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva5zv pgxind-kftx266l pgxcs-kftvlijb glioblastoma        NA    NA</span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva5zw pgxind-kftx266n pgxcs-kftvlijs glioblastoma        NA    NA</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   age_iso death followup_months        geoprov_label geoprov_precision</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1      NA                       Yamaguchi-shi, Japan              city</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2      NA                       Yamaguchi-shi, Japan              city</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1      NA    NA              NA Yamaguchi-shi, Japan              city</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2      NA    NA              NA Yamaguchi-shi, Japan              city</span></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    geoprov_city geoprov_country geoprov_iso_alpha3 geoprov_lat geoprov_long</span></span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 Yamaguchi-shi           Japan                JPN       34.19       131.47</span></span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Yamaguchi-shi           Japan                JPN       34.19       131.47</span></span>
@@ -323,7 +323,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="the-third-output-format-output-seg" class="section level2">
 <h2>The third output format (<code>output</code> = “seg”)</h2>
-<p>This format is similar with the general ‘.seg’ file format and compatible with IGV tool for visualization. The only difference between this file format and the general ‘.seg’ file format is the fifth column. It represents variant type in this format while in the general ‘.seg’ file format, it represents number of probes or bins covered by the segment. In addition, the point mutation variants are excluded in this file format.</p>
+<p>This format is similar to the general ‘.seg’ file format and compatible with IGV tool for visualization. The only difference between this file format and the general ‘.seg’ file format is the fifth column. It represents variant type in this format while in the general ‘.seg’ file format, it represents number of probes or bins covered by the segment. In addition, the point mutation variants are excluded in this file format.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>variant_3 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id,<span class="at">output =</span> <span class="st">&quot;seg&quot;</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_3)</span>
@@ -338,7 +338,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="export-variants-data-for-visualization" class="section level1">
 <h1>Export variants data for visualization</h1>
-<p>Setting <code>save_file</code> as TRUE in <code>pgxLoader</code> function would make this function doesn’t return variants data directly but let the retrieved data to be saved in current work directory by default or other paths (specified by <code>filename</code>). The export is only available for variants data (type=‘variant’).</p>
+<p>Setting <code>save_file</code> as TRUE in <code>pgxLoader</code> function would make this function doesn’t return variants data directly but let the retrieved data saved in the current work directory by default or other paths (specified by <code>filename</code>). The export is only available for variants data (type=‘variant’).</p>
 <div id="upload-pgxseg-file-to-progenetix-website" class="section level2">
 <h2>Upload ‘pgxseg’ file to Progenetix website</h2>
 <p>The following command creates a ‘.pgxseg’ file named by “variants.pgxseg” in “~/Downloads/” folder.</p>

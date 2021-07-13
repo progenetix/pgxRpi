@@ -28,11 +28,11 @@ This function loads various data from `Progenetix` database.
 
 The parameters of this function:
 
-* `type` A string specifying output data type. Avaiable options are "biosample", 
+* `type` A string specifying output data type. Available options are "biosample", 
 "variant" or "frequency". 
-* `output` A string specifying output file format. Avaiable options are NULL, 
+* `output` A string specifying output file format. Available options are NULL, 
 'pgxseg' or 'seg' when the parameter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
-when the paramter `type` is "frequency".
+when the parameter `type` is "frequency".
 * `group_id` A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","icdom-98353","PMID:22824167", "pgxcohort-TCGAcancers").
 Only used if the parameter `type` is "biosample" or "frequency".
@@ -42,7 +42,7 @@ terms of specified group id. Only used when `group_id` is specified. Default is 
 * `biosample_id` A single or a comma-concatenated list of identifiers used in Progenetix 
 database for identifying biosamples. 
 * `save_file` A logical value determining whether to save the variant data as file 
-instead of direct return. Only used when the paramter `type` is "variant". Default is FALSE.
+instead of direct return. Only used when the parameter `type` is "variant". Default is FALSE.
 * `filename` A string specifying the path and name of the file to be saved. 
 Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
 
@@ -109,7 +109,7 @@ head(variant_2)
 
 ## The third output format (`output` = "seg")
 
-This format is similar with the general '.seg' file format and compatible with IGV tool for visualization. The only difference between this file format and the general '.seg' file format is the fifth column. It represents variant type in this format while in the general '.seg' file format, it represents number of probes or bins covered by the segment. In addition, the point mutation variants are excluded in this file format.
+This format is similar to the general '.seg' file format and compatible with IGV tool for visualization. The only difference between this file format and the general '.seg' file format is the fifth column. It represents variant type in this format while in the general '.seg' file format, it represents number of probes or bins covered by the segment. In addition, the point mutation variants are excluded in this file format.
 
 ```{r}
 variant_3 <- pgxLoader(type="variant", biosample_id = biosample_id,output = "seg")
@@ -119,7 +119,7 @@ head(variant_3)
 # Export variants data for visualization
 
 Setting `save_file` as TRUE in `pgxLoader` function would make this function doesn't return 
-variants data directly but let the retrieved data to be saved in current work directory by default or other 
+variants data directly but let the retrieved data saved in the current work directory by default or other 
 paths (specified by `filename`). The export is only available for variants data (type='variant'). 
 
 ## Upload 'pgxseg' file to Progenetix website

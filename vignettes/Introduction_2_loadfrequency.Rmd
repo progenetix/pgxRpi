@@ -28,9 +28,9 @@ This function loads various data from `Progenetix` database.
 
 The parameters of this function:
 
-* `type` A string specifying output data type. Avaiable options are "biosample", 
+* `type` A string specifying output data type. Available options are "biosample", 
 "variant" or "frequency". 
-* `output` A string specifying output file format. Avaiable options are NULL, 
+* `output` A string specifying output file format. Available options are NULL, 
 'pgxseg' or 'seg' when the parameter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
 when the paramter `type` is "frequency".
 * `group_id` A single or a comma-concatenated list of identifiers for cancer type,
@@ -91,7 +91,7 @@ losses overlapping the segment, respectively
 
 ## The second output format (`output` = "pgxmatrix")
 
-Choose 9 NCIT codes of interests which correspond to different tumor types
+Choose 9 NCIT codes of interests that correspond to different tumor types
 
 ```{r}
 code <-c("C3059","C3716","C4917","C3512","C3493","C3771","C4017","C4001")
@@ -117,7 +117,7 @@ matrices looks like this
 freq_pgxmatrix$data[['NCIT:C3059']][,c(1:4,3104:3106)]
 ```
 
-In the pgxmatrix matrix, `group id` is same as that in pgxseg matrix. It's followed by all “gain status” columns (3102 intervals) plus all “loss status” columns (3102 intervals).
+In the pgxmatrix matrix, `group id` is the same as that in pgxseg matrix. It's followed by all “gain status” columns (3102 intervals) plus all “loss status” columns (3102 intervals).
 
 You can also access the total matrix for analyzing multiple frequency sets.
 
@@ -150,7 +150,7 @@ This function provides CNV frequency plots by genome or chromosomes as you reque
 The parameters of this function:
 
 * `data`: frequency data returned by `pgxLoader` function. The frequency matrices in `data` 
-slot must stored as `.pgxseg` format, which can be specified by `output` parameter of `pgxLoader` function.   
+slot must be stored as `.pgxseg` format, which can be specified by `output` parameter of `pgxLoader` function.   
 * `chrom`: a vector with chromosomes to be plotted. If NULL, return the plot by genome. If specified the frequencies are plotted with one panel for each chromosome. Default is NULL.
 * `layout`: number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1). 
 * `group_id`: a string value to indicate which group id to be plotted. The length of id is limited to one if the parameter `circos` is False. Default is the first group id.
@@ -168,7 +168,6 @@ pgxFreqplot(freq_pgxseg, group_id='icdom-85003')
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(freq_pgxseg, chrom=c(1,2,3), layout = c(3,1), group_id='NCIT:C4038')  
 ```
-
 ### CNV frequency circos plot 
 
 ```{r,fig.width=6, fig.height=6}
@@ -183,9 +182,9 @@ pgxFreqplot(freq_pgxseg,circos = TRUE,group_id= c("NCIT:C4038","icdom-85003"))
 
 # Clustering of CNV frequency data using '.pgxmatrix' file
 
-## Hierarchical clustring
+## Hierarchical clustering
 
-Use hierarchical clustring to cluster the tumor types which are picked before by NCIt code.
+Use hierarchical clustering to cluster the tumor types which are picked before by NCIt code.
 
 ```{r}
 freq_mat <- freq_pgxmatrix$data[['total']][,2:dim(freq_pgxmatrix$data[['total']])[2]]
@@ -194,7 +193,7 @@ dist_mat <- dist(freq_mat, method = 'euclidean')
 hclust_res <- hclust(dist_mat, method = "ward.D")
 ```
 
-The cluster result is showed below. 
+The clustering result is shown below. 
 
 ```{r}
 hcd <- as.dendrogram(hclust_res)
@@ -213,7 +212,7 @@ and loss frequency per interval (gain-loss)
 diff_mat <- freq_mat[,1:3102]-freq_mat[,3103, 6204]
 ```
 
-Sort the merged matrix by clustring membership 
+Sort the merged matrix by clustering membership 
 
 ```{r}
 sort_idx <- order(cut)
@@ -231,7 +230,7 @@ meta <- freq_pgxmatrix$meta[sort_idx,]
 
 ## Plot heatmap
 
-Plot a heatmap to show the merged matrix. The color in rowside shows cluster membership calculated by the original frequency matrix   
+Plot a heatmap to show the merged matrix. The color in the rowside shows cluster membership calculated by the original frequency matrix   
 
 ```{r fig.width=10, fig.height=5}
 library("RColorBrewer")
@@ -271,7 +270,7 @@ pgxCount(group_id = code)
 ```
 
 In the returned result, the third column is the number of all the samples of the code and its child terms. 
-The forth column is the number of samples for the exact code matches.
+The fourth column is the number of samples for the exact code matches.
 
 # Session Info
 
