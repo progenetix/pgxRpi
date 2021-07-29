@@ -172,7 +172,10 @@ pgxSampleLoader <- function(biosample_id,group_id,codematches){
     if (codematches){
         idx <- res$NCIT_code %in% group_id | res$UBERON_code %in% group_id | res$icdom_code %in% group_id |
             res$icdot_code %in% group_id | res$PMID %in% group_id | res$id %in% biosample_id
-        res <- res[idx,]}
+        res <- res[idx,]
+        if (dim(res)[1] == 0){
+            cat("Attention: the option `codematches=TRUE` filters out all samples \n")
+        }}
     return(res)
 }
 
