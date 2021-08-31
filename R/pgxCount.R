@@ -20,7 +20,7 @@ pgxCount <- function(
         }
         id_name <- temp
     } else{
-        id_name <- id
+        id_name <- group_id
     }
     url <- paste0("https://progenetix.org/services/collations?filters=",id_name,"&method=counts&output=text")
     id_url <- url(description=url,
