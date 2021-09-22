@@ -8,7 +8,7 @@ pgxFreqplot(
   data,
   chrom = NULL,
   layout = c(1, 1),
-  group_id = NULL,
+  filters = NULL,
   circos = FALSE
 )
 }
@@ -24,12 +24,12 @@ chromosome. Default is NULL.}
 \item{layout}{Number of columns and rows in plot. Only used in plot by chromosome.
 Default is c(1,1).}
 
-\item{group_id}{String value to indicate which group id to be plotted, such as 1
-(the first group id in \code{data} slot of object ) or 'NCIT:C4038' (specific group id name). The length of id
+\item{filters}{String value to indicate which filter to be plotted, such as 1
+(the first filters in \code{data} slot of object ) or 'NCIT:C4038' (specific filter name). The length of filters
 is limited to one if the parameter \code{circos} is False. Default is 1.}
 
 \item{circos}{A logical value to indicate if return a circos plot. If TRUE, it
-can return a circos plot with multiple group ids for display and comparison.
+can return a circos plot with multiple filters for display and comparison.
 Default is FALSE.}
 }
 \value{

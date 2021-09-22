@@ -2,18 +2,18 @@
 % Please edit documentation in R/pgxFreqselect.R
 \name{pgxFreqselect}
 \alias{pgxFreqselect}
-\title{Return object with selected ids}
+\title{Return object with selected filters}
 \usage{
-pgxFreqselect(data, id)
+pgxFreqselect(data, filters)
 }
 \arguments{
 \item{data}{CNV frequency data returned by \code{pgxLoader} function}
 
-\item{id}{A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","icdom-98353")}
+\item{filters}{A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","icdom-98353")}
 }
 \value{
-A list object with the same format of input but only containing selected id
+A list object with the same format of input but only containing selected filters
 }
 \description{
-This function helps select ids of interests from input object.
+This function helps select filters of interests from input object.
 }

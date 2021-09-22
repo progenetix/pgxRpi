@@ -7,7 +7,7 @@
 pgxLoader(
   type = NULL,
   output = NULL,
-  group_id = NULL,
+  filters = NULL,
   codematches = FALSE,
   biosample_id = NULL,
   save_file = FALSE,
@@ -22,7 +22,7 @@ pgxLoader(
 'pgxseg' or 'seg' when the parameter \code{type} is "variant"; 'pgxseg' or 'pgxmatrix'
 when the parameter \code{type} is "frequency".}
 
-\item{group_id}{A single or a comma-concatenated list of identifiers for cancer type,
+\item{filters}{A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","icdom-98353","PMID:22824167", "pgxcohort-TCGAcancers")}
 
 \item{codematches}{A logical value determining whether to exclude samples

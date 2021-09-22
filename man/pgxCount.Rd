@@ -2,17 +2,17 @@
 % Please edit documentation in R/pgxCount.R
 \name{pgxCount}
 \alias{pgxCount}
-\title{Count samples in one collation of a given id}
+\title{Count samples in one collation of a given filter}
 \usage{
-pgxCount(group_id = NULL)
+pgxCount(filters = NULL)
 }
 \arguments{
-\item{group_id}{A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","icdom-98353")}
+\item{filters}{A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","icdom-98353")}
 }
 \value{
-Count of samples in the given id
+Count of samples in the given filter
 }
 \description{
-This function returns the number of samples for every group id in
+This function returns the number of samples for every filter in
 Progenetix database.
 }
