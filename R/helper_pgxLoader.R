@@ -16,12 +16,12 @@ transform_id <- function(id){
 }
 
 read_sample <- function(url){
-    names <- read.table(url, nrow = 1, stringsAsFactors = FALSE, sep = "\t")
-    names[c(24:31,38:39)] <- c("UBERON_code","UBERON_label", "NCIT_code", "NCIT_label",
-                               "icdom_code", "icdom_label","icdot_code", "icdot_label","PMID","PMID_label")
-    data <- read.table(url, skip = 1, stringsAsFactors = FALSE, sep = "\t",fill=TRUE)
-    data <- data[, c(1:31, 38:39)]
-    names(data) <- names[c(1:31, 38:39)]
+    header <- read.table(url, nrow=1,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,quote="",header=F)
+    data <- read.table(url, skip=1,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,quote="",header=F)
+    header <- gsub('\\.\\.','_',header)
+    header <- gsub('___','_',header)
+    header <- gsub('::','_',header)
+    colnames(data) <- header
     suppressWarnings(data$death <- as.numeric(data$death))
     suppressWarnings(data$followup_months <- as.numeric(data$followup_months))
     return(data.frame(data))
@@ -59,15 +59,15 @@ pgidCheck <- function(id){
     return(id %in% unlist(info[1]))
 }
 
-pgxFreqLoader <- function(output, codematches, group_id) {
+pgxFreqLoader <- function(output, codematches, filters) {
     # check output format
     stop_if(.x=!(output %in% c('pgxseg','pgxmatrix')),msg="\n Output is invalid. Only support 'pgxseg' or 'pgxmatrix' \n")
-    # check if group id exists
-    idcheck <- pgidCheck(group_id)
+    # check if filters exists
+    idcheck <- pgidCheck(filters)
 
     if (!all(idcheck)){
-        cat(" No results for id", group_id[!idcheck], "in progenetix database.\n","\n Only query id:", group_id[idcheck],'\n')
-        group_id <- group_id[idcheck]
+        cat(" No results for id", filters[!idcheck], "in progenetix database.\n","\n Only query id:", filters[idcheck],'\n')
+        filters <- filters[idcheck]
     }
     # start query
     cat("\n accessing", "IntervalFrequencies service","from Progenetix \n")
@@ -75,31 +75,32 @@ pgxFreqLoader <- function(output, codematches, group_id) {
     pg.url <- paste0("http://www.progenetix.org/services/intervalFrequencies/?output=",output)
 
 
-    ## check group id again
-    stop_if(.x=length(group_id) < 1, msg="\n at least one valid group id has to be provided \n")
+    ## check filters again
+    stop_if(.x=length(filters) < 1, msg="\n at least one valid filter has to be provided \n")
 
-    if (length(group_id)>1){
-        filter <- transform_id(group_id)
+    if (length(filters)>1){
+        filter <- transform_id(filters)
         pg.url  <- paste(pg.url,'&filters=',filter,sep="")
         } else{
-        pg.url  <- paste(pg.url, '&', 'id', '=', group_id,sep="")
+        pg.url  <- paste(pg.url, '&', 'id', '=', filters,sep="")
     }
 
     if (codematches){
         pg.url  <- paste0(pg.url, '&method=codematches')
     }
 
-    meta <- readLines(pg.url)[c(1:(length(group_id)+1))]
+    meta <- readLines(pg.url)[c(1:(length(filters)+1))]
     meta_lst <- unlist(strsplit(meta,split = ';'))
     label <- meta_lst[grep("label",meta_lst)]
     label<- gsub('.*=','',label)
     count <- meta_lst[grep("sample_count",meta_lst)]
     count <- as.numeric(gsub('.*=','',count))
-    meta <- data.frame(code = group_id, label=label, sample_count=count)
+    meta <- data.frame(code = filters, label=label, sample_count=count)
     pg.data  <- read.table(pg.url, header=T, sep="\t", na="NA")
+    colnames(pg.data)[1] <- 'filters'
     data_lst <- list()
-    for (i in group_id){
-        data_lst[[i]] <- pg.data[pg.data$group_id == i,]
+    for (i in filters){
+        data_lst[[i]] <- pg.data[pg.data$filters == i,]
     }
     data_lst[['total']] <- pg.data
     result <- list(meta = meta, data = data_lst)
@@ -107,22 +108,22 @@ pgxFreqLoader <- function(output, codematches, group_id) {
     return(result)
 }
 
-pgxSampleLoader <- function(biosample_id,group_id,codematches){
+pgxSampleLoader <- function(biosample_id,filters,codematches){
     cat("\n accessing", "biosample information","from Progenetix \n\n")
 
-    if (!(is.null(group_id))){
-        for (i in c(1:length(group_id))) {
+    if (!(is.null(filters))){
+        for (i in c(1:length(filters))) {
             if_next <- FALSE
             url <- paste0("http://progenetix.org/cgi/bycon/beaconServer/biosamples.py?filters=",
-                              group_id[i],"&output=table")
+                              filters[i],"&output=table")
             if (!(exists('res_1'))){
                 try_catch(res_1 <- read_sample(url),.e= function(e){
-                    cat(paste("No samples with the group id", group_id[i],"\n"))
+                    cat(paste("No samples with the filter", filters[i],"\n"))
                     if_next <<- TRUE})
                 if (if_next){ next }
             }else {
                 try_catch(temp <- read_sample(url),.e= function(e){
-                    cat(paste("No samples with the group id", group_id[i],"\n"))
+                    cat(paste("No samples with the filter", filters[i],"\n"))
                     if_next <<- TRUE
                     })
                 if (if_next){ next }
@@ -170,8 +171,11 @@ pgxSampleLoader <- function(biosample_id,group_id,codematches){
         res <- res[-(which(duplicated(res$id))),]}
 
     if (codematches){
-        idx <- res$NCIT_code %in% group_id | res$UBERON_code %in% group_id | res$icdom_code %in% group_id |
-            res$icdot_code %in% group_id | res$PMID %in% group_id | res$id %in% biosample_id
+        idx <- res$histological_diagnosis_id %in% filters | res$sampled_tissue_id %in% filters | res$icdo_morphology_id %in% filters |
+            res$icdo_topography_id %in% filters | res$external_references_id_PMID %in% filters | res$id %in% biosample_id | 
+            res$external_references_id_geo.GSM %in% filters | res$external_references_id_geo.GSE %in% filters | 
+            res$external_references_id_geo.GPL %in% filters | res$external_references_id_cellosaurus %in% filters | 
+            res$external_references_id_arrayexpress %in% filters
         res <- res[idx,]
         if (dim(res)[1] == 0){
             cat("Attention: the option `codematches=TRUE` filters out all samples \n")

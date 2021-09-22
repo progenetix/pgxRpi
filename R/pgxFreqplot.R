@@ -10,38 +10,38 @@
 #' chromosome. Default is NULL.
 #' @param layout Number of columns and rows in plot. Only used in plot by chromosome.
 #' Default is c(1,1).
-#' @param group_id String value to indicate which group id to be plotted, such as 1
-#' (the first group id in `data` slot of object ) or 'NCIT:C4038' (specific group id name). The length of id
+#' @param filters String value to indicate which filter to be plotted, such as 1
+#' (the first filters in `data` slot of object ) or 'NCIT:C4038' (specific filter name). The length of filters
 #' is limited to one if the parameter `circos` is False. Default is 1.
 #' @param circos A logical value to indicate if return a circos plot. If TRUE, it
-#' can return a circos plot with multiple group ids for display and comparison.
+#' can return a circos plot with multiple filters for display and comparison.
 #' Default is FALSE.
 #' @return The binned CNV frequency plot
 #' @export
 
 
-pgxFreqplot <- function(data,chrom=NULL,layout=c(1,1),group_id=NULL,circos = FALSE){
-    if (is.null(group_id)){
-        group_id <- names(data$data)[1]
+pgxFreqplot <- function(data,chrom=NULL,layout=c(1,1),filters=NULL,circos = FALSE){
+    if (is.null(filters)){
+        filters <- names(data$data)[1]
     }
 
-    if (all(!(group_id %in% names(data$data)))){
-        stop(paste("The group id is not contained in data:", group_id[!(group_id %in% names(data$data))]))
+    if (all(!(filters %in% names(data$data)))){
+        stop(paste("The filter is not contained in data:", filters[!(filters %in% names(data$data))]))
     }
 
     if (circos){
-        return(cplotpgxFreq(data$data[group_id]))
+        return(cplotpgxFreq(data$data[filters]))
     }
 
-    if (length(group_id) > 1){
-        stop("The length of group id exceeds limit")
+    if (length(filters) > 1){
+        stop("The length of filters exceeds limit")
     }
 
     pos.unit="bp"
     type <- ifelse(is.null(chrom),"genome","bychrom")
     switch(type,
-            genome = genomeFreq(data,pos.unit,group_id),
-            bychrom = chromosomeFreq(data,pos.unit,chrom,layout,group_id))
+            genome = genomeFreq(data,pos.unit,filters),
+            bychrom = chromosomeFreq(data,pos.unit,chrom,layout,filters))
 }
 
 genomeFreq <- function(data,pos.unit,id){

@@ -7,7 +7,7 @@
 #' @param output A string specifying output file format. Available options are NULL, 
 #' 'pgxseg' or 'seg' when the parameter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
 #' when the parameter `type` is "frequency".
-#' @param group_id A single or a comma-concatenated list of identifiers for cancer type,
+#' @param filters A single or a comma-concatenated list of identifiers for cancer type,
 #' literature, and cohorts such as c("NCIT:C7376","icdom-98353","PMID:22824167", "pgxcohort-TCGAcancers")
 #' @param codematches A logical value determining whether to exclude samples 
 #' from child terms of specified group id. If FALSE, retrieved samples include child 
@@ -25,7 +25,7 @@
 pgxLoader <- function(
     type = NULL,
     output  = NULL, 
-    group_id= NULL,
+    filters= NULL,
     codematches = FALSE, 
     biosample_id = NULL,
     save_file=FALSE,
@@ -34,9 +34,11 @@ pgxLoader <- function(
     if (!(any(type %in% c("biosample", "variant","frequency")))){
         stop("type is invalid (\"biosample\", \"variant\", or \"frequency\")")
     }
+    
+    
     switch(type,
-           biosample = pgxSampleLoader(biosample_id = biosample_id, group_id = group_id,codematches = codematches),
+           biosample = pgxSampleLoader(biosample_id = biosample_id, filters = filters,codematches = codematches),
            variant= pgxVariantLoader(biosample_id,output=output,save_file=save_file, filename = filename),
-           frequency =pgxFreqLoader(output = output, codematches = codematches, group_id=group_id))
+           frequency =pgxFreqLoader(output = output, codematches = codematches, filters=filters))
 } 
 

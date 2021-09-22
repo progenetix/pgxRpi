@@ -33,12 +33,12 @@ The parameters of this function:
 * `output` A string specifying output file format. Available options are NULL, 
 'pgxseg' or 'seg' when the parameter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
 when the parameter `type` is "frequency".
-* `group_id` A single or a comma-concatenated list of identifiers for cancer type,
+* `filters` A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","icdom-98353","PMID:22824167", "pgxcohort-TCGAcancers").
 Only used if the parameter `type` is "biosample" or "frequency".
 * `codematches` A logical value determining whether to exclude samples 
-from child terms of specified group id. If FALSE, retrieved samples include child 
-terms of specified group id. Only used when `group_id` is specified. Default is FALSE.
+from child terms of specified filters. If FALSE, retrieved samples include child 
+terms of specified filters. Only used when `filters` is specified. Default is FALSE.
 * `biosample_id` A single or a comma-concatenated list of identifiers used in Progenetix 
 database for identifying biosamples. 
 * `save_file` A logical value determining whether to save the variant data as file 
@@ -48,32 +48,41 @@ Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg"
 
 # Retrieve biosamples from specific groups of interests
 
-Relevant parameters of `pgxLoader` function: type, group_id, codematches, biosample_id
+Relevant parameters of `pgxLoader` function: type, filters, codematches, biosample_id
 
 ```{r}
-biosamples <- pgxLoader(type="biosample", group_id = "NCIT:C3059")
+biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059")
 ```
 
-The data contains 33 columns representing different aspects of biosample information
+The data contains 44 columns representing different aspects of biosample information
 
 ```{r}
 head(biosamples)
 ```
 
-The NCIt code of retrieved biosamples doesn't only contain specified group id but contains child terms. 
-Setting `codematches` as TRUE allows this function to only return biosamples with exact match to group id.
+The NCIt code of retrieved biosamples doesn't only contain specified filters but contains child terms. 
 
 ```{r}
-biosamples <- pgxLoader(type="biosample", group_id = "NCIT:C3059",codematches = TRUE)
-unique(biosamples$NCIT_code)
+unique(biosamples$histological_diagnosis_id)
+```
+
+Setting `codematches` as TRUE allows this function to only return biosamples with exact match to the filter.
+
+```{r}
+biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059",codematches = TRUE)
+unique(biosamples$histological_diagnosis_id)
 ```
 
 You can also retrieve biosamples by biosample id used in Progenetix database
 
 ```{r}
-biosamples <- pgxLoader(type="biosample", group_id = "NCIT:C3059",codematches = TRUE,
+biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059",codematches = TRUE,
                         biosample_id = c("pgxbs-kftva5zv","pgxbs-kftva5zw"))
-biosamples[biosamples$NCIT_code != "NCIT:C3059",]
+```
+The result only contains samples with the specified filter NCIT:C3059 and the specified biosample id 
+
+```{r}
+biosamples[biosamples$histological_diagnosis_id != "NCIT:C3059",'id']
 ```
 
 # Retrieve variants by  biosampleid
@@ -83,7 +92,7 @@ Relevant parameters of `pgxLoader` function: type, output, biosample_id, save_fi
 ## Get biosamples id from previously retrieved biosample information
 
 ```{r}
-biosample_id <- biosamples$id[c(1:100)]
+biosample_id <- biosamples$id[c(1:20)]
 ```
 
 There are three output formats. 
@@ -91,7 +100,7 @@ There are three output formats.
 ## The first output format (by default)
 
  This format contains variant id and associated biosample id. The variant is represented as 'DUP' 
-(duplication) or 'DEL' (deletion) in specific chromosome locations.
+(duplication) or 'DEL' (deletion) in specific chromosome locations. The column referenceName is chromosome.
 
 ```{r}
 variant_1 <- pgxLoader(type="variant", biosample_id = biosample_id)
@@ -124,7 +133,7 @@ paths (specified by `filename`). The export is only available for variants data 
 
 ## Upload 'pgxseg' file to Progenetix website
 
-The following command creates a '.pgxseg' file named by "variants.pgxseg" in "~/Downloads/" folder. 
+The following command creates a '.pgxseg' file with the name "variants.pgxseg" in "~/Downloads/" folder. 
 
 ```{r}
 pgxLoader(type='variant', output='pgxseg', biosample_id=biosample_id, save_file=TRUE, 
@@ -136,7 +145,7 @@ for visualization.
 
 ## Upload '.seg' file to IGV
 
-The following command creates a special '.seg' file named by "variants.seg" in "~/Downloads/" folder. 
+The following command creates a special '.seg' file with the name "variants.seg" in "~/Downloads/" folder. 
 
 ```{r}
 pgxLoader(type='variant', output='seg', biosample_id=biosample_id, save_file=TRUE, 

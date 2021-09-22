@@ -33,7 +33,7 @@ The parameters of this function:
 * `output` A string specifying output file format. Available options are NULL, 
 'pgxseg' or 'seg' when the parameter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
 when the paramter `type` is "frequency".
-* `group_id` A single or a comma-concatenated list of identifiers for cancer type,
+* `filters` A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","icdom-98353","PMID:22824167", "pgxcohort-TCGAcancers").
 Only used if the parameter `type` is "biosample" or "frequency".
 * `codematches` A logical value determining whether to exclude samples 
@@ -48,14 +48,15 @@ Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg"
 
 # Retrieve CNV frequency data
 
-Relevant parameters of `pgxLoader` function: type, output, group_id, codematches
+Relevant parameters of `pgxLoader` function: type, output, filters, codematches
 
 There are two output formats
 
 ## The first output format (`output` = "pgxseg")
 
 ```{r}
-freq_pgxseg <- pgxLoader(type="frequency", output ='pgxseg',group_id=c("NCIT:C4038","icdom-85003"), 
+freq_pgxseg <- pgxLoader(type="frequency", output ='pgxseg',
+                         filters=c("NCIT:C4038","icdom-85003"), 
                          codematches = TRUE)
 ```
 
@@ -68,14 +69,14 @@ freq_pgxseg$meta
 ```
 
 The `data` slot contains a list of the CNV frequency matrices named by the corresponding 
-group id. The matrix with the name 'total' is the the CNV frequency matrix where all 
-group ids are concatenated.
+filters. The matrix with the name 'total' is the the CNV frequency matrix where matrices from all 
+filters are concatenated.
 
 ```{r}
 names(freq_pgxseg$data)
 ```
 
-You can access the pgxseg matrix of one id from this list.  
+You can access the pgxseg matrix of one filter from this list.  
 
 ```{r}
 head(freq_pgxseg$data[['NCIT:C4038']])
@@ -83,25 +84,26 @@ head(freq_pgxseg$data[['NCIT:C4038']])
 
 In the pgxseg matrix, 
 
-* `group_id`: identifiers for grouping. 
-* `chro`, `start` and `end` represent interval location.
+* `filters`: identifiers for grouping. 
+* `reference_name`, `start` and `end` specify interval location in chromosome.
 * `gain_frequency` and `loss_frequency` indicate the percent values for gains and 
-losses overlapping the segment, respectively
+losses overlapping the interval, respectively
 
 
 ## The second output format (`output` = "pgxmatrix")
 
-Choose 9 NCIT codes of interests that correspond to different tumor types
+Choose 8 NCIT codes of interests that correspond to different tumor types
 
 ```{r}
 code <-c("C3059","C3716","C4917","C3512","C3493","C3771","C4017","C4001")
+# add prefix for query
 code <- sub(".",'NCIT:C',code)
 ```
 
 load data with the specified code
 
 ```{r}
-freq_pgxmatrix <- pgxLoader(type='frequency',output = 'pgxmatrix',group_id=code,codematches=TRUE)
+freq_pgxmatrix <- pgxLoader(type='frequency',output = 'pgxmatrix',filters=code,codematches=TRUE)
 ```
 
 The `meta` slot of this object looks like this
@@ -110,14 +112,14 @@ The `meta` slot of this object looks like this
 freq_pgxmatrix$meta
 ```
 
-The `data` slot contains a list of the nine CNV frequency matrices. One of these nine
+The `data` slot contains a list of the nine CNV frequency matrices. One of these eight
 matrices looks like this
 
 ```{r}
 freq_pgxmatrix$data[['NCIT:C3059']][,c(1:4,3104:3106)]
 ```
 
-In the pgxmatrix matrix, `group id` is the same as that in pgxseg matrix. It's followed by all “gain status” columns (3102 intervals) plus all “loss status” columns (3102 intervals).
+In the pgxmatrix matrix, `filters` is the same as that in the pgxseg matrix. It's followed by all “gain status” columns (3102 intervals) plus all “loss status” columns (3102 intervals).
 
 You can also access the total matrix for analyzing multiple frequency sets.
 
@@ -129,19 +131,20 @@ freq_pgxmatrix$data[['total']][,c(1:4,3104:3106)]
 
 It is realized by `pgxFreqselect` function.
 
-This function can select id of interests from input object and return a new object 
-with selected ids.
+This function can select filters of interests from input object and return a new object 
+with selected filters.
 
 The parameters of this function:
 
 * `data`: CNV frequency data returned by `pgxLoader` function. 
-* `id`: identifiers of interests such as c("NCIT:C7376","icdom-98353").
+* `filters`: identifiers of interests such as c("NCIT:C7376","icdom-98353").
 
 ```{r}
-freq_sel <- pgxFreqselect(data=freq_pgxmatrix, id = c("NCIT:C4917","NCIT:C3512","NCIT:C3493"))
+freq_sel <- pgxFreqselect(data=freq_pgxmatrix, 
+                          filters = c("NCIT:C4917","NCIT:C3512","NCIT:C3493"))
 freq_sel$data$total[,c(1:5)]
 ```
-# Visualization of CNV frequency data using '.pgxseg' file
+# Visualization of CNV frequency data using 'pgxseg' matrix
 
 ## `pgxFeqplot` function
 
@@ -153,42 +156,45 @@ The parameters of this function:
 slot must be stored as `.pgxseg` format, which can be specified by `output` parameter of `pgxLoader` function.   
 * `chrom`: a vector with chromosomes to be plotted. If NULL, return the plot by genome. If specified the frequencies are plotted with one panel for each chromosome. Default is NULL.
 * `layout`: number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1). 
-* `group_id`: a string value to indicate which group id to be plotted. The length of id is limited to one if the parameter `circos` is False. Default is the first group id.
+* `filters`: a string value to indicate which filter to be plotted. The length of filters is limited to one if the parameter `circos` is False. Default is the first filter.
 * `circos`: a logical value to indicate if return a circos plot. If TRUE, it can 
 return a circos plot with multiple group ids for display and comparison. Default is FALSE.
 
 ### CNV frequency plot by genome (GRCh38)
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxseg, group_id='icdom-85003')
+pgxFreqplot(freq_pgxseg, filters='icdom-85003')
 ```
 
 ### CNV frequency plot by chromosomes
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxseg, chrom=c(1,2,3), layout = c(3,1), group_id='NCIT:C4038')  
+pgxFreqplot(freq_pgxseg, filters='NCIT:C4038',chrom=c(1,2,3), layout = c(3,1))  
 ```
+
 ### CNV frequency circos plot 
 
 ```{r,fig.width=6, fig.height=6}
-pgxFreqplot(freq_pgxseg, circos = TRUE,group_id = 'icdom-85003')
+pgxFreqplot(freq_pgxseg, filters='icdom-85003', circos = TRUE)
 ```
 
 The circos plot also supports multiple group comparison
 
 ```{r,fig.width=6, fig.height=6}
-pgxFreqplot(freq_pgxseg,circos = TRUE,group_id= c("NCIT:C4038","icdom-85003")) 
+pgxFreqplot(freq_pgxseg,filters= c("NCIT:C4038","icdom-85003"),circos = TRUE) 
 ```
 
-# Clustering of CNV frequency data using '.pgxmatrix' file
+# Clustering of CNV frequency data using 'pgxmatrix' matrix
 
 ## Hierarchical clustering
 
 Use hierarchical clustering to cluster the tumor types which are picked before by NCIt code.
 
 ```{r}
+# extract CNV frequency data from `total` slot
 freq_mat <- freq_pgxmatrix$data[['total']][,2:dim(freq_pgxmatrix$data[['total']])[2]]
-rownames(freq_mat) <- freq_pgxmatrix$data[['total']]$group_id
+rownames(freq_mat) <- freq_pgxmatrix$data[['total']]$filters
+# do clustering
 dist_mat <- dist(freq_mat, method = 'euclidean')
 hclust_res <- hclust(dist_mat, method = "ward.D")
 ```
@@ -198,7 +204,7 @@ The clustering result is shown below.
 ```{r}
 hcd <- as.dendrogram(hclust_res)
 plot(hcd, type = "rectangle", ylab = "Height")
-# Based on the plot, the number of clusters is set to 3.
+# Based on the plot, the number of clusters is set to 4.
 cut<- cutree(hclust_res, k = 4)
 rect.hclust(hclust_res , k = 4, border = 2:6)
 ```
@@ -260,13 +266,13 @@ pheatmap(as.matrix(diff_mat), scale = "none",cluster_cols = FALSE, cluster_rows 
 
 The parameter of this function:
 
-* `id`: A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","icdom-98353")
+* `filters`: A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","icdom-98353")
 
-This function returns the number of samples for every group id in Progenetix database 
+This function returns the number of samples for every filter in Progenetix database 
 by using `count` method in `collations` service.
 
 ```{r}
-pgxCount(group_id = code)
+pgxCount(filters = code)
 ```
 
 In the returned result, the third column is the number of all the samples of the code and its child terms. 
