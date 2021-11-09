@@ -7,7 +7,7 @@ url <- "http://progenetix.org/cgi/bycon/beaconServer/variants.py?biosampleIds=pg
 test_that("retrieve variants with JSON",{
         cat(paste("\n trying:",url,"\n"))
         table <- rjson::fromJSON(file = url)
-        table <- lapply(table$resultSets[[1]]$results,unlist)
+        table <- lapply(table$response$resultSets[[1]]$results,unlist)
         table <- as.data.frame(dplyr::bind_rows(table))
         expect_gt(nrow(table),0)
 })

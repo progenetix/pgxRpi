@@ -214,7 +214,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
         }else{
             try_catch(temp <- rjson::fromJSON(file = url), .e = function(e){if_next <<- TRUE}, .w = function(w){if_next <<- TRUE})
             if (if_next){  next }
-            temp <- lapply(temp$resultSets[[1]]$results,unlist)
+            temp <- lapply(temp$response$resultSets[[1]]$results,unlist)
             temp <- as.data.frame(dplyr::bind_rows(temp))
             temp <- temp[,c("id","biosampleId","callsetId","digest","info.varLength","referenceName",
                             "start","end","variantType")]
