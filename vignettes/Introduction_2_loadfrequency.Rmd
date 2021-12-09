@@ -156,7 +156,7 @@ The parameters of this function:
 slot must be stored as `.pgxseg` format, which can be specified by `output` parameter of `pgxLoader` function.   
 * `chrom`: a vector with chromosomes to be plotted. If NULL, return the plot by genome. If specified the frequencies are plotted with one panel for each chromosome. Default is NULL.
 * `layout`: number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1). 
-* `filters`: a string value to indicate which filter to be plotted. The length of filters is limited to one if the parameter `circos` is False. Default is the first filter.
+* `filters`: Index or string value to indicate which filter to be plotted. The length of filters is limited to one if the parameter `circos` is False. Default is the first filter.
 * `circos`: a logical value to indicate if return a circos plot. If TRUE, it can 
 return a circos plot with multiple group ids for display and comparison. Default is FALSE.
 

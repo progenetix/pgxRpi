@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hangjia Zhao" />
 
-<meta name="date" content="2021-09-22" />
+<meta name="date" content="2021-12-09" />
 
 <title>Introduction_2_loadfrequency</title>
 
@@ -141,7 +141,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">Introduction_2_loadfrequency</h1>
 <h4 class="author">Hangjia Zhao</h4>
-<h4 class="date">2021-09-22</h4>
+<h4 class="date">2021-12-09</h4>
 
 
 
@@ -179,7 +179,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>freq_pgxseg<span class="sc">$</span>meta</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          code                            label sample_count</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  NCIT:C4038             Lung Carcinoid Tumor          141</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 icdom-85003 Infiltrating duct carcinoma, NOS        12662</span></span></code></pre></div>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 icdom-85003 Infiltrating duct carcinoma, NOS        12662</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3       total                                         12803</span></span></code></pre></div>
 <p>The <code>data</code> slot contains a list of the CNV frequency matrices named by the corresponding filters. The matrix with the name ‘total’ is the the CNV frequency matrix where matrices from all filters are concatenated.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(freq_pgxseg<span class="sc">$</span>data)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;NCIT:C4038&quot;  &quot;icdom-85003&quot; &quot;total&quot;</span></span></code></pre></div>
@@ -219,7 +220,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 NCIT:C3493    Lung Squamous Cell Carcinoma         1938</span></span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 NCIT:C3771        Lobular Breast Carcinoma          295</span></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 NCIT:C4017         Ductal Breast Carcinoma         9723</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8 NCIT:C4001   Inflammatory Breast Carcinoma           27</span></span></code></pre></div>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8 NCIT:C4001   Inflammatory Breast Carcinoma           27</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9      total                                        17668</span></span></code></pre></div>
 <p>The <code>data</code> slot contains a list of the nine CNV frequency matrices. One of these eight matrices looks like this</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>freq_pgxmatrix<span class="sc">$</span>data[[<span class="st">&#39;NCIT:C3059&#39;</span>]][,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">3104</span><span class="sc">:</span><span class="dv">3106</span>)]</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      filters X1.0.1000000.DUP X1.1000000.2000000.DUP X1.2000000.3000000.DUP</span></span>
@@ -281,7 +283,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </li>
 <li><code>chrom</code>: a vector with chromosomes to be plotted. If NULL, return the plot by genome. If specified the frequencies are plotted with one panel for each chromosome. Default is NULL.</li>
 <li><code>layout</code>: number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1).</li>
-<li><code>filters</code>: a string value to indicate which filter to be plotted. The length of filters is limited to one if the parameter <code>circos</code> is False. Default is the first filter.</li>
+<li><code>filters</code>: Index or string value to indicate which filter to be plotted. The length of filters is limited to one if the parameter <code>circos</code> is False. Default is the first filter.</li>
 <li><code>circos</code>: a logical value to indicate if return a circos plot. If TRUE, it can return a circos plot with multiple group ids for display and comparison. Default is FALSE.</li>
 </ul>
 <div id="cnv-frequency-plot-by-genome-grch38" class="section level3">
@@ -373,15 +375,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>This function returns the number of samples for every filter in Progenetix database by using <code>count</code> method in <code>collations</code> service.</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pgxCount</span>(<span class="at">filters =</span> code)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Trying url: https://progenetix.org/services/collations?filters=NCIT:C3059,NCIT:C3716,NCIT:C4917,NCIT:C3512,NCIT:C3493,NCIT:C3771,NCIT:C4017,NCIT:C4001&amp;method=counts&amp;output=text \n&quot;</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           V1                              V2    V3   V4</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 NCIT:C3059                          Glioma  8690  883</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 NCIT:C3716 Primitive Neuroectodermal Tumor  2213  178</span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 NCIT:C4917       Lung Small Cell Carcinoma   558  557</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 NCIT:C3512             Lung Adenocarcinoma  4619 4505</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 NCIT:C3493    Lung Squamous Cell Carcinoma  1918 1918</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 NCIT:C3771        Lobular Breast Carcinoma   904  294</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 NCIT:C4017         Ductal Breast Carcinoma 10422 9761</span></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8 NCIT:C4001   Inflammatory Breast Carcinoma    27   27</span></span></code></pre></div>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           V1                              V2    V3   V4   V5</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 NCIT:C3059                          Glioma  8690  883 NCIT</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 NCIT:C3493    Lung Squamous Cell Carcinoma  1918 1918 NCIT</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 NCIT:C3512             Lung Adenocarcinoma  4619 4505 NCIT</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 NCIT:C3716 Primitive Neuroectodermal Tumor  2213  178 NCIT</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 NCIT:C3771        Lobular Breast Carcinoma   904  294 NCIT</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 NCIT:C4001   Inflammatory Breast Carcinoma    27   27 NCIT</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 NCIT:C4017         Ductal Breast Carcinoma 10422 9761 NCIT</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8 NCIT:C4917       Lung Small Cell Carcinoma   558  557 NCIT</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                   V6</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 National Cancer Institute Thesaurus Neoplasia Code</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 National Cancer Institute Thesaurus Neoplasia Code</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 National Cancer Institute Thesaurus Neoplasia Code</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 National Cancer Institute Thesaurus Neoplasia Code</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 National Cancer Institute Thesaurus Neoplasia Code</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 National Cancer Institute Thesaurus Neoplasia Code</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 National Cancer Institute Thesaurus Neoplasia Code</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8 National Cancer Institute Thesaurus Neoplasia Code</span></span></code></pre></div>
 <p>In the returned result, the third column is the number of all the samples of the code and its child terms. The fourth column is the number of samples for the exact code matches.</p>
 </div>
 </div>

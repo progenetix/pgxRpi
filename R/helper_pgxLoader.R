@@ -29,8 +29,16 @@ read_sample <- function(url){
 
 read_variant_pgxseg <- function(url){
     result <- read.table(url, header = T, sep="\t")
+    colnames(result)[2] <- 'chromosome'
     col <- c("start","end","log2")
     suppressWarnings(result[,col] <- sapply(result[,col], as.numeric))
+    result <- result[order(result$start),]
+    chr <- result$chromosome
+    chr[which(chr == 'X')] <- 23
+    chr[which(chr == 'Y')] <- 24
+    chr <- as.integer(chr)
+    result <- result[order(chr),]
+    result <- result[order(result$biosample_id),]
     return(result)
 }
 
@@ -95,7 +103,7 @@ pgxFreqLoader <- function(output, codematches, filters) {
     label<- gsub('.*=','',label)
     count <- meta_lst[grep("sample_count",meta_lst)]
     count <- as.numeric(gsub('.*=','',count))
-    meta <- data.frame(code = filters, label=label, sample_count=count)
+    meta <- data.frame(code = c(filters,'total'), label=c(label,''), sample_count=c(count,sum(count)))
     pg.data  <- read.table(pg.url, header=T, sep="\t", na="NA")
     colnames(pg.data)[1] <- 'filters'
     data_lst <- list()
@@ -180,6 +188,8 @@ pgxSampleLoader <- function(biosample_id,filters,codematches){
         if (dim(res)[1] == 0){
             cat("Attention: the option `codematches=TRUE` filters out all samples \n")
         }}
+    
+    colnames(res)[c(1,3)] <- c('biosample_id','callset_id')
     return(res)
 }
 
@@ -215,9 +225,32 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
             try_catch(temp <- rjson::fromJSON(file = url), .e = function(e){if_next <<- TRUE}, .w = function(w){if_next <<- TRUE})
             if (if_next){  next }
             temp <- lapply(temp$response$resultSets[[1]]$results,unlist)
-            temp <- as.data.frame(dplyr::bind_rows(temp))
-            temp <- temp[,c("id","biosampleId","callsetId","digest","info.varLength","referenceName",
-                            "start","end","variantType")]
+            temp <- lapply(temp,function(x){
+                var_meta <- x[c('position.assemblyId','variantInternalId','position.refseqId',
+                       'position.start','position.end','variantType','referenceBases','alternateBases')]
+                id_ind <-  which(names(x) =='caseLevelData.id')
+                temp_row <- c()
+                for (i in id_ind){
+                    temp_row <- rbind(temp_row,c(x[i],x[i-1],x[i-2]))}
+                var_meta <- matrix(rep(var_meta,dim(temp_row)[1]),nrow=dim(temp_row)[1],
+                                   byrow = T)
+                temp_row <- as.data.frame(cbind(temp_row,var_meta))
+                colnames(temp_row) <- c("variant_id","biosample_id","analysis_id",
+                                        "assemply","interval","chromosome","start",
+                                        "end","variant_type","reference_bases","alternate_bases")
+                return(temp_row)
+            })
+            temp <- Reduce(rbind,temp)
+            temp$chromosome  <- gsub('chr','',temp$chromosome)
+            temp$start <- as.numeric(temp$start)
+            temp$end <- as.numeric(temp$end)
+            temp <- temp[order(temp$start),]
+            chr <- temp$chromosome
+            chr[which(chr == 'X')] <- 23
+            chr[which(chr == 'Y')] <- 24
+            chr <- as.integer(chr)
+            temp <- temp[order(chr),]
+            temp <- temp[order(temp$biosample_id),]
         }
 
         if (!(exists("res"))){
@@ -248,12 +281,14 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
             if (is.null(filename)){
                 filename <- "variants.pgxseg"
             }
+
             write.table(meta, file=filename,row.names = FALSE,col.names = FALSE, quote = FALSE)
             suppressWarnings(write.table(res, append=TRUE, sep='\t',file=filename,row.names = FALSE,col.names = TRUE, quote = FALSE))
-        } else if(output == 'seg'){
+            } else if(output == 'seg'){
             if (is.null(filename)){
                 filename <- "variants.seg"
             }
+            
             write.table(res, file=filename, sep='\t',row.names = FALSE,col.names = TRUE, quote = FALSE)
         } else{
             stop("Output is null. Please specify output format")

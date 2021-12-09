@@ -10,7 +10,7 @@
 #' chromosome. Default is NULL.
 #' @param layout Number of columns and rows in plot. Only used in plot by chromosome.
 #' Default is c(1,1).
-#' @param filters String value to indicate which filter to be plotted, such as 1
+#' @param filters Index or string value to indicate which filter to be plotted, such as 1
 #' (the first filters in `data` slot of object ) or 'NCIT:C4038' (specific filter name). The length of filters
 #' is limited to one if the parameter `circos` is False. Default is 1.
 #' @param circos A logical value to indicate if return a circos plot. If TRUE, it
@@ -25,7 +25,7 @@ pgxFreqplot <- function(data,chrom=NULL,layout=c(1,1),filters=NULL,circos = FALS
         filters <- names(data$data)[1]
     }
 
-    if (all(!(filters %in% names(data$data)))){
+    if (any(!(filters %in% names(data$data))) & any(is.na(match(filters,seq(length(data$data)))))){
         stop(paste("The filter is not contained in data:", filters[!(filters %in% names(data$data))]))
     }
 
@@ -78,7 +78,10 @@ genomeFreq <- function(data,pos.unit,id){
 
     id_name <- names(data$data[id])
     meta <- data$meta[data$meta$code == id_name,]
-    op$main <- paste(id_name, ": ",meta[2], " (", meta[3], " samples)", sep="")
+    if (meta[2] == ''){
+        op$main <- paste(id_name," (", meta[3], " samples)", sep="")
+    } else{
+    op$main <- paste(id_name, ": ",meta[2], " (", meta[3], " samples)", sep="")}
 
 
     title(main=op$main,line=op$main.line,cex.main=op$cex.main)

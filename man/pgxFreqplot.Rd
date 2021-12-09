@@ -24,7 +24,7 @@ chromosome. Default is NULL.}
 \item{layout}{Number of columns and rows in plot. Only used in plot by chromosome.
 Default is c(1,1).}
 
-\item{filters}{String value to indicate which filter to be plotted, such as 1
+\item{filters}{Index or string value to indicate which filter to be plotted, such as 1
 (the first filters in \code{data} slot of object ) or 'NCIT:C4038' (specific filter name). The length of filters
 is limited to one if the parameter \code{circos} is False. Default is 1.}
 
