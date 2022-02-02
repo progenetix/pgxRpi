@@ -29,14 +29,14 @@ pgxCount <- function(
     close(id_url)
     print(paste('Trying url:',url,"\n"))
     if (is.null(info)){
-        return("No samples with the queried filter")
+        return("No samples with the queried filter \n")
     }
   
     info <- info[unlist(info[1]) %in% filters,]
     rownames(info) <- seq(1:dim(info)[1])
     
     if (dim(info)[1] < length(filters)){
-        cat("\n Attention: No results for some queried filters")
+        cat("Attention: No results for some queried filters \n")
     }
     return (info)
 }

@@ -56,7 +56,7 @@ There are two output formats
 
 ```{r}
 freq_pgxseg <- pgxLoader(type="frequency", output ='pgxseg',
-                         filters=c("NCIT:C4038","icdom-85003"), 
+                         filters=c("NCIT:C4038","pgx:icdom-85003"), 
                          codematches = TRUE)
 ```
 
@@ -163,7 +163,7 @@ return a circos plot with multiple group ids for display and comparison. Default
 ### CNV frequency plot by genome (GRCh38)
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxseg, filters='icdom-85003')
+pgxFreqplot(freq_pgxseg, filters='pgx:icdom-85003')
 ```
 
 ### CNV frequency plot by chromosomes
@@ -175,13 +175,13 @@ pgxFreqplot(freq_pgxseg, filters='NCIT:C4038',chrom=c(1,2,3), layout = c(3,1))
 ### CNV frequency circos plot 
 
 ```{r,fig.width=6, fig.height=6}
-pgxFreqplot(freq_pgxseg, filters='icdom-85003', circos = TRUE)
+pgxFreqplot(freq_pgxseg, filters='pgx:icdom-85003', circos = TRUE)
 ```
 
 The circos plot also supports multiple group comparison
 
 ```{r,fig.width=6, fig.height=6}
-pgxFreqplot(freq_pgxseg,filters= c("NCIT:C4038","icdom-85003"),circos = TRUE) 
+pgxFreqplot(freq_pgxseg,filters= c("NCIT:C4038","pgx:icdom-85003"),circos = TRUE) 
 ```
 
 # Clustering of CNV frequency data using 'pgxmatrix' matrix
