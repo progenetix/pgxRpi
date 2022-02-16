@@ -49,14 +49,20 @@ read_variant_pgxseg_meta <- function(url){
 }
 
 pgidCheck <- function(id){
-    id_prefix <- unique(sub(":.*", "", id))
-    total_url <- url(description=paste0("https://progenetix.org/services/collations?filters=",id_prefix[1],"&method=codematches&output=text"),
+    id_prefix <- id
+    idx <- grep("pgx",id_prefix)
+    if (length(idx) != 0){
+      id_prefix[idx] <- gsub(".*:","",id_prefix[idx])
+      id_prefix[idx] <- gsub("-.*","",id_prefix[idx])
+    }
+    id_prefix <- unique(sub(":.*", "", id_prefix))
+    total_url <- url(description=paste0("https://progenetix.org/services/collations?filters=",id_prefix[1],"&output=text"),
                      open='r')
     info <- read.table(total_url, header=F, sep="\t", na="NA",fill=TRUE,quote = "")
     close(total_url)
     if (length(id_prefix) > 1){
         for (i in c(2:length(id_prefix))){
-            total_url <- url(description=paste0("https://progenetix.org/services/collations?filters=",id_prefix[i],"&method=codematches&output=text"),
+            total_url <- url(description=paste0("https://progenetix.org/services/collations?filters=",id_prefix[i],"&output=text"),
                              open='r')
             temp <- read.table(total_url, header=F, na="NA",sep = '\t',fill=TRUE,quote = "")
             close(total_url)

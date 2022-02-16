@@ -116,15 +116,15 @@ The `data` slot contains a list of the nine CNV frequency matrices. One of these
 matrices looks like this
 
 ```{r}
-freq_pgxmatrix$data[['NCIT:C3059']][,c(1:4,3104:3106)]
+freq_pgxmatrix$data[['NCIT:C3059']][,c(1:4,3108:3110)]
 ```
 
-In the pgxmatrix matrix, `filters` is the same as that in the pgxseg matrix. It's followed by all “gain status” columns (3102 intervals) plus all “loss status” columns (3102 intervals).
+In the pgxmatrix matrix, `filters` is the same as that in the pgxseg matrix. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals).
 
 You can also access the total matrix for analyzing multiple frequency sets.
 
 ```{r}
-freq_pgxmatrix$data[['total']][,c(1:4,3104:3106)]
+freq_pgxmatrix$data[['total']][,c(1:4,3108:3110)]
 ```
 
 # Select ids of interests from original object of CNV frequency
@@ -215,7 +215,7 @@ Merge the frequency matrix by calculating the difference between gain frequency
 and loss frequency per interval (gain-loss)
 
 ```{r}
-diff_mat <- freq_mat[,1:3102]-freq_mat[,3103, 6204]
+diff_mat <- freq_mat[,1:3106]-freq_mat[,3107:6212]
 ```
 
 Sort the merged matrix by clustering membership 
