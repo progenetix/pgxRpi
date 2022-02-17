@@ -63,14 +63,14 @@ head(biosamples)
 The NCIt code of retrieved biosamples doesn't only contain specified filters but contains child terms. 
 
 ```{r}
-unique(biosamples$histological_diagnosis_id)
+unique(biosamples$histological_diagnosis__id)
 ```
 
 Setting `codematches` as TRUE allows this function to only return biosamples with exact match to the filter.
 
 ```{r}
 biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059",codematches = TRUE)
-unique(biosamples$histological_diagnosis_id)
+unique(biosamples$histological_diagnosis__id)
 ```
 
 You can also retrieve biosamples by biosample id used in Progenetix database
@@ -82,7 +82,7 @@ biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059",codematches = T
 The result only contains samples with the specified filter NCIT:C3059 and the specified biosample id 
 
 ```{r}
-biosamples[biosamples$histological_diagnosis_id != "NCIT:C3059",'biosample_id']
+biosamples[biosamples$histological_diagnosis__id != "NCIT:C3059",'biosample_id']
 ```
 
 # Retrieve variants by  biosampleid

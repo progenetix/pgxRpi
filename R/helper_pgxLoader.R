@@ -185,11 +185,11 @@ pgxSampleLoader <- function(biosample_id,filters,codematches){
         res <- res[-(which(duplicated(res$id))),]}
 
     if (codematches){
-        idx <- res$histological_diagnosis_id %in% filters | res$sampled_tissue_id %in% filters | res$icdo_morphology_id %in% filters |
-            res$icdo_topography_id %in% filters | res$external_references_id_PMID %in% filters | res$id %in% biosample_id | 
-            res$external_references_id_geo.GSM %in% filters | res$external_references_id_geo.GSE %in% filters | 
-            res$external_references_id_geo.GPL %in% filters | res$external_references_id_cellosaurus %in% filters | 
-            res$external_references_id_arrayexpress %in% filters
+        idx <- res$histological_diagnosis__id %in% filters | res$sampled_tissue__id %in% filters | res$icdo_morphology__id %in% filters |
+            res$icdo_topography__id %in% filters | res$external_references__id_PMID %in% filters | res$id %in% biosample_id | 
+            res$external_references__id_geo.GSM %in% filters | res$external_references__id_geo.GSE %in% filters | 
+            res$external_references__id_geo.GPL %in% filters | res$external_references__id_cellosaurus %in% filters | 
+            res$external_references__id_arrayexpress %in% filters
         res <- res[idx,]
         if (dim(res)[1] == 0){
             cat("Attention: the option `codematches=TRUE` filters out all samples \n")
