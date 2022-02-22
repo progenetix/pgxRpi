@@ -32,17 +32,19 @@ The parameters of this function:
 "variant" or "frequency". 
 * `output` A string specifying output file format. Available options are NULL, 
 'pgxseg' or 'seg' when the parameter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
-when the paramter `type` is "frequency".
+when the parameter `type` is "frequency".
 * `filters` A single or a comma-concatenated list of identifiers for cancer type,
-literature, and cohorts such as c("NCIT:C7376","icdom-98353","PMID:22824167", "pgxcohort-TCGAcancers").
+literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers").
 Only used if the parameter `type` is "biosample" or "frequency".
 * `codematches` A logical value determining whether to exclude samples 
-from child terms of specified group id. If FALSE, retrieved samples include child 
-terms of specified group id. Only used when `group_id` is specified. Default is FALSE.
+from child terms of specified filters. If FALSE, retrieved samples include child 
+terms of specified filters. Only used when `filters` is specified. Default is FALSE.
+* `limit` An integer value to specify the number of returned profiles. Only used when the parameter `type` is "variant" and `output` is "pgxmatrix".
+* `skip` An Integer value to specify the number of skipped profiles. Only used when the parameter `type` is "variant" and `output` is "pgxmatrix".
 * `biosample_id` A single or a comma-concatenated list of identifiers used in Progenetix 
 database for identifying biosamples. 
 * `save_file` A logical value determining whether to save the variant data as file 
-instead of direct return. Only used when the paramter `type` is "variant". Default is FALSE.
+instead of direct return. Only used when the parameter `type` is "variant". Default is FALSE.
 * `filename` A string specifying the path and name of the file to be saved. 
 Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
 
@@ -67,22 +69,21 @@ The `meta` slot of this object looks like this
 ```{r}
 freq_pgxseg$meta
 ```
-
-The `data` slot contains a list of the CNV frequency matrices named by the corresponding 
-filters. The matrix with the name 'total' is the the CNV frequency matrix where matrices from all 
-filters are concatenated.
+The `data` slot contains a list of the CNV frequency data frames named by the corresponding 
+filters. The data frame with the name 'total' is the concatenated data frames from all 
+filters.
 
 ```{r}
 names(freq_pgxseg$data)
 ```
 
-You can access the pgxseg matrix of one filter from this list.  
+You can access the data frame with "pgxseg" format of one filter from this list.  
 
 ```{r}
 head(freq_pgxseg$data[['NCIT:C4038']])
 ```
 
-In the pgxseg matrix, 
+In the pgxseg format, 
 
 * `filters`: identifiers for grouping. 
 * `reference_name`, `start` and `end` specify interval location in chromosome.
@@ -112,16 +113,16 @@ The `meta` slot of this object looks like this
 freq_pgxmatrix$meta
 ```
 
-The `data` slot contains a list of the nine CNV frequency matrices. One of these eight
-matrices looks like this
+The `data` slot contains a list of the nine CNV frequency data frames. One of these nine
+data frames looks like this
 
 ```{r}
 freq_pgxmatrix$data[['NCIT:C3059']][,c(1:4,3108:3110)]
 ```
 
-In the pgxmatrix matrix, `filters` is the same as that in the pgxseg matrix. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals).
+In the data frame with "pgxmatrix" format, `filters` is the same as that in the "pgxseg" format. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). Note: it is different from CNV status matrix introduced in Introduction_1. Value in this matrix is calculated across samples while the value in CNV status matrix is overlapped coverage in individual samples.
 
-You can also access the total matrix for analyzing multiple frequency sets.
+You can also access the total data frame for analyzing multiple frequency sets.
 
 ```{r}
 freq_pgxmatrix$data[['total']][,c(1:4,3108:3110)]
@@ -137,14 +138,14 @@ with selected filters.
 The parameters of this function:
 
 * `data`: CNV frequency data returned by `pgxLoader` function. 
-* `filters`: identifiers of interests such as c("NCIT:C7376","icdom-98353").
+* `filters`: identifiers of interests such as c("NCIT:C7376","pgx:icdom-98353").
 
 ```{r}
 freq_sel <- pgxFreqselect(data=freq_pgxmatrix, 
                           filters = c("NCIT:C4917","NCIT:C3512","NCIT:C3493"))
 freq_sel$data$total[,c(1:5)]
 ```
-# Visualization of CNV frequency data using 'pgxseg' matrix
+# Visualization of CNV frequency data using 'pgxseg' format
 
 ## `pgxFeqplot` function
 
@@ -184,7 +185,7 @@ The circos plot also supports multiple group comparison
 pgxFreqplot(freq_pgxseg,filters= c("NCIT:C4038","pgx:icdom-85003"),circos = TRUE) 
 ```
 
-# Clustering of CNV frequency data using 'pgxmatrix' matrix
+# Clustering of CNV frequency data using 'pgxmatrix' format
 
 ## Hierarchical clustering
 
@@ -266,7 +267,7 @@ pheatmap(as.matrix(diff_mat), scale = "none",cluster_cols = FALSE, cluster_rows 
 
 The parameter of this function:
 
-* `filters`: A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","icdom-98353")
+* `filters`: A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","pgx:icdom-98353")
 
 This function returns the number of samples for every filter in Progenetix database 
 by using `count` method in `collations` service.

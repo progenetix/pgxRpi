@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hangjia Zhao" />
 
-<meta name="date" content="2021-12-09" />
+<meta name="date" content="2022-02-22" />
 
 <title>Introduction_1_loadvariants</title>
 
@@ -141,7 +141,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">Introduction_1_loadvariants</h1>
 <h4 class="author">Hangjia Zhao</h4>
-<h4 class="date">2021-12-09</h4>
+<h4 class="date">2022-02-22</h4>
 
 
 
@@ -155,8 +155,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul>
 <li><code>type</code> A string specifying output data type. Available options are “biosample”, “variant” or “frequency”.</li>
 <li><code>output</code> A string specifying output file format. Available options are NULL, ‘pgxseg’ or ‘seg’ when the parameter <code>type</code> is “variant”; ‘pgxseg’ or ‘pgxmatrix’ when the parameter <code>type</code> is “frequency”.</li>
-<li><code>filters</code> A single or a comma-concatenated list of identifiers for cancer type, literature, and cohorts such as c(“NCIT:C7376”,“icdom-98353”,“<a href="PMID:22824167" class="uri">PMID:22824167</a>”, “pgxcohort-TCGAcancers”). Only used if the parameter <code>type</code> is “biosample” or “frequency”.</li>
+<li><code>filters</code> A single or a comma-concatenated list of identifiers for cancer type, literature, and cohorts such as c(“NCIT:C7376”,“pgx:icdom-98353”,“<a href="PMID:22824167" class="uri">PMID:22824167</a>”, “pgx:cohort-TCGAcancers”). Only used if the parameter <code>type</code> is “biosample” or “frequency”.</li>
 <li><code>codematches</code> A logical value determining whether to exclude samples from child terms of specified filters. If FALSE, retrieved samples include child terms of specified filters. Only used when <code>filters</code> is specified. Default is FALSE.</li>
+<li><code>limit</code> An integer value to specify the number of returned profiles. Only used when the parameter <code>type</code> is “variant” and <code>output</code> is “pgxmatrix”.</li>
+<li><code>skip</code> An Integer value to specify the number of skipped profiles. Only used when the parameter <code>type</code> is “variant” and <code>output</code> is “pgxmatrix”.</li>
 <li><code>biosample_id</code> A single or a comma-concatenated list of identifiers used in Progenetix database for identifying biosamples.</li>
 <li><code>save_file</code> A logical value determining whether to save the variant data as file instead of direct return. Only used when the parameter <code>type</code> is “variant”. Default is FALSE.</li>
 <li><code>filename</code> A string specifying the path and name of the file to be saved. Only used if the parameter <code>save_file</code> is TRUE. Default is “variants.seg/pgxseg” in current work directory.</li>
@@ -172,122 +174,121 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The data contains many columns representing different aspects of biosample information</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(biosamples)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     biosample_id   individual_id     callset_id description tnm stage grade</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva5zv pgxind-kftx266l pgxcs-kftvlijb              NA    NA    NA</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva5zw pgxind-kftx266n pgxcs-kftvlijs              NA    NA    NA</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftva5zy pgxind-kftx266p pgxcs-kftvlika              NA    NA    NA</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxbs-kftva5zz pgxind-kftx266r pgxcs-kftvlikr              NA    NA    NA</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva601 pgxind-kftx266t pgxcs-kftvlil9              NA    NA    NA</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva603 pgxind-kftx266v pgxcs-kftvlilq              NA    NA    NA</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   age_iso death followup_months followup_time        geoprov_label</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    P74Y    NA              NA            NA Yamaguchi-shi, Japan</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    P70Y    NA              NA            NA Yamaguchi-shi, Japan</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    P66Y    NA              NA            NA Yamaguchi-shi, Japan</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    P66Y    NA              NA            NA Yamaguchi-shi, Japan</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    P48Y    NA              NA            NA Yamaguchi-shi, Japan</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    P37Y    NA              NA            NA Yamaguchi-shi, Japan</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   geoprov_precision  geoprov_city geoprov_country geoprov_iso_alpha3</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1              city Yamaguchi-shi           Japan                JPN</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2              city Yamaguchi-shi           Japan                JPN</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3              city Yamaguchi-shi           Japan                JPN</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4              city Yamaguchi-shi           Japan                JPN</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5              city Yamaguchi-shi           Japan                JPN</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6              city Yamaguchi-shi           Japan                JPN</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   geoprov_lat geoprov_long cnv_fraction cnv_del_fraction cnv_dup_fraction</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1       34.19       131.47        0.213            0.176            0.037</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2       34.19       131.47        0.142            0.107            0.035</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3       34.19       131.47        0.172            0.013            0.159</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4       34.19       131.47        0.152            0.067            0.084</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5       34.19       131.47        0.235            0.126            0.109</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6       34.19       131.47        0.143            0.085            0.058</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   cell_line                  legacy_ids sampled_tissue_id sampled_tissue_label</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1           PGX_AM_BS_9788624_GB-har-01    UBERON:0001869  cerebral hemisphere</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2           PGX_AM_BS_9788624_GB-har-02    UBERON:0001869  cerebral hemisphere</span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3           PGX_AM_BS_9788624_GB-har-03    UBERON:0001869  cerebral hemisphere</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4           PGX_AM_BS_9788624_GB-har-04    UBERON:0001869  cerebral hemisphere</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5           PGX_AM_BS_9788624_GB-har-05    UBERON:0001869  cerebral hemisphere</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6           PGX_AM_BS_9788624_GB-har-06    UBERON:0001869  cerebral hemisphere</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   histological_diagnosis_id histological_diagnosis_label icdo_morphology_id</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                NCIT:C3058                 Glioblastoma        icdom-94403</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                NCIT:C3058                 Glioblastoma        icdom-94403</span></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                NCIT:C3058                 Glioblastoma        icdom-94403</span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                NCIT:C3058                 Glioblastoma        icdom-94403</span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                NCIT:C3058                 Glioblastoma        icdom-94403</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                NCIT:C3058                 Glioblastoma        icdom-94403</span></span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   icdo_morphology_label icdo_topography_id icdo_topography_label</span></span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1          Glioblastoma        icdot-C71.0              cerebrum</span></span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2          Glioblastoma        icdot-C71.0              cerebrum</span></span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3          Glioblastoma        icdot-C71.0              cerebrum</span></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4          Glioblastoma        icdot-C71.0              cerebrum</span></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5          Glioblastoma        icdot-C71.0              cerebrum</span></span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6          Glioblastoma        icdot-C71.0              cerebrum</span></span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references_id_PMID external_references_label_PMID</span></span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                PMID:9788624                             NA</span></span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                PMID:9788624                             NA</span></span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                PMID:9788624                             NA</span></span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                PMID:9788624                             NA</span></span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                PMID:9788624                             NA</span></span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                PMID:9788624                             NA</span></span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references_id_geo.GSM external_references_label_geo.GSM</span></span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                                               NA</span></span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                                               NA</span></span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                                               NA</span></span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                                               NA</span></span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                                               NA</span></span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                                               NA</span></span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references_id_geo.GSE external_references_label_geo.GSE</span></span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                                               NA</span></span>
-<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                                               NA</span></span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                                               NA</span></span>
-<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                                               NA</span></span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                                               NA</span></span>
-<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                                               NA</span></span>
-<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references_id_geo.GPL external_references_label_geo.GPL</span></span>
-<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                                               NA</span></span>
-<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                                               NA</span></span>
-<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                                               NA</span></span>
-<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                                               NA</span></span>
-<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                                               NA</span></span>
-<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                                               NA</span></span>
-<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references_id_cellosaurus external_references_label_cellosaurus</span></span>
-<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                                                       NA</span></span>
-<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                                                       NA</span></span>
-<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                                                       NA</span></span>
-<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                                                       NA</span></span>
-<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                                                       NA</span></span>
-<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                                                       NA</span></span>
-<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references_id_arrayexpress external_references_label_arrayexpress</span></span>
-<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                                                         NA</span></span>
-<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                                                         NA</span></span>
-<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                                                         NA</span></span>
-<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                                                         NA</span></span>
-<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                                                         NA</span></span>
-<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                                                         NA</span></span>
-<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   followup_state_id followup_state_label data_use_conditions_id</span></span>
-<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1       EFO:0030039   no followup status            DUO:0000004</span></span>
-<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2       EFO:0030039   no followup status            DUO:0000004</span></span>
-<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3       EFO:0030039   no followup status            DUO:0000004</span></span>
-<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4       EFO:0030039   no followup status            DUO:0000004</span></span>
-<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5       EFO:0030039   no followup status            DUO:0000004</span></span>
-<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6       EFO:0030039   no followup status            DUO:0000004</span></span>
-<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   data_use_conditions_label</span></span>
-<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1            no restriction</span></span>
-<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            no restriction</span></span>
-<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3            no restriction</span></span>
-<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            no restriction</span></span>
-<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5            no restriction</span></span>
-<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6            no restriction</span></span></code></pre></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva5zv pgxind-kftx266l pgxcs-kftvlijb          NA  NA    NA    NA</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva5zw pgxind-kftx266n pgxcs-kftvlijs          NA  NA    NA    NA</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftva5zy pgxind-kftx266p pgxcs-kftvlika          NA  NA    NA    NA</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxbs-kftva5zz pgxind-kftx266r pgxcs-kftvlikr          NA  NA    NA    NA</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva601 pgxind-kftx266t pgxcs-kftvlil9          NA  NA    NA    NA</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva603 pgxind-kftx266v pgxcs-kftvlilq          NA  NA    NA    NA</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   age_iso death followup_months followup_time recurrence recurrence_time</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    P74Y    NA              NA            NA         NA              NA</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    P70Y    NA              NA            NA         NA              NA</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    P66Y    NA              NA            NA         NA              NA</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    P66Y    NA              NA            NA         NA              NA</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    P48Y    NA              NA            NA         NA              NA</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    P37Y    NA              NA            NA         NA              NA</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          geoprov_label geoprov_precision  geoprov_city geoprov_country</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 Yamaguchi-shi, Japan              city Yamaguchi-shi           Japan</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Yamaguchi-shi, Japan              city Yamaguchi-shi           Japan</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 Yamaguchi-shi, Japan              city Yamaguchi-shi           Japan</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 Yamaguchi-shi, Japan              city Yamaguchi-shi           Japan</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 Yamaguchi-shi, Japan              city Yamaguchi-shi           Japan</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 Yamaguchi-shi, Japan              city Yamaguchi-shi           Japan</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   geoprov_iso_alpha3 geoprov_lat geoprov_long cnv_fraction cnv_del_fraction</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                JPN       34.19       131.47        0.213            0.176</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                JPN       34.19       131.47        0.142            0.107</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                JPN       34.19       131.47        0.172            0.013</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                JPN       34.19       131.47        0.152            0.067</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                JPN       34.19       131.47        0.235            0.126</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                JPN       34.19       131.47        0.143            0.085</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   cnv_dup_fraction cell_line                  legacy_ids sampled_tissue__id</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1            0.037        NA PGX_AM_BS_9788624_GB-har-01     UBERON:0001869</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            0.035        NA PGX_AM_BS_9788624_GB-har-02     UBERON:0001869</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3            0.159        NA PGX_AM_BS_9788624_GB-har-03     UBERON:0001869</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            0.084        NA PGX_AM_BS_9788624_GB-har-04     UBERON:0001869</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5            0.109        NA PGX_AM_BS_9788624_GB-har-05     UBERON:0001869</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6            0.058        NA PGX_AM_BS_9788624_GB-har-06     UBERON:0001869</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   sampled_tissue__label histological_diagnosis__id</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   histological_diagnosis__label icdo_morphology__id icdo_morphology__label</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   icdo_topography__id icdo_topography__label external_references__id_PMID</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_PMID external_references__id_geo.GSM</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                              NA                                </span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                              NA                                </span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                              NA                                </span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                              NA                                </span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                              NA                                </span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                              NA                                </span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_geo.GSM external_references__id_geo.GSE</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                 NA                                </span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                 NA                                </span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                 NA                                </span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                 NA                                </span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                 NA                                </span></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                 NA                                </span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_geo.GSE external_references__id_geo.GPL</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                 NA                              NA</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                 NA                              NA</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                 NA                              NA</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                 NA                              NA</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                 NA                              NA</span></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                 NA                              NA</span></span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_geo.GPL external_references__id_cellosaurus</span></span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                 NA                                    </span></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                 NA                                    </span></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                 NA                                    </span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                 NA                                    </span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                 NA                                    </span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                 NA                                    </span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_cellosaurus external_references__id_arrayexpress</span></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                     NA                                   NA</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                     NA                                   NA</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                     NA                                   NA</span></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                     NA                                   NA</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                     NA                                   NA</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                     NA                                   NA</span></span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_arrayexpress followup_state__id</span></span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                      NA        EFO:0030039</span></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                      NA        EFO:0030039</span></span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                      NA        EFO:0030039</span></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                      NA        EFO:0030039</span></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                      NA        EFO:0030039</span></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                      NA        EFO:0030039</span></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   followup_state__label data_use_conditions__id data_use_conditions__label</span></span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    no followup status             DUO:0000004             no restriction</span></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    no followup status             DUO:0000004             no restriction</span></span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    no followup status             DUO:0000004             no restriction</span></span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    no followup status             DUO:0000004             no restriction</span></span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    no followup status             DUO:0000004             no restriction</span></span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    no followup status             DUO:0000004             no restriction</span></span></code></pre></div>
 <p>The NCIt code of retrieved biosamples doesn’t only contain specified filters but contains child terms.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(biosamples<span class="sc">$</span>histological_diagnosis_id)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [1] &quot;NCIT:C3058&quot;   &quot;NCIT:C60781&quot;  &quot;NCIT:C3288&quot;   &quot;NCIT:C3796&quot;   &quot;NCIT:C4822&quot;  </span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [6] &quot;NCIT:C4322&quot;   &quot;NCIT:C4321&quot;   &quot;NCIT:C3903&quot;   &quot;NCIT:C4047&quot;   &quot;NCIT:C4320&quot;  </span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [11] &quot;NCIT:C4324&quot;   &quot;NCIT:C4323&quot;   &quot;NCIT:C3017&quot;   &quot;NCIT:C3059&quot;   &quot;NCIT:C4049&quot;  </span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [16] &quot;NCIT:C4326&quot;   &quot;NCIT:C3697&quot;   &quot;&quot;             &quot;NCIT:C9477&quot;   &quot;NCIT:C6959&quot;  </span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [21] &quot;NCIT:C7173&quot;   &quot;NCIT:C4050&quot;   &quot;NCIT:C132067&quot; &quot;NCIT:C129327&quot; &quot;NCIT:C94764&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(biosamples<span class="sc">$</span>histological_diagnosis__id)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [1] &quot;NCIT:C3058&quot;  &quot;NCIT:C60781&quot; &quot;NCIT:C3288&quot;  &quot;NCIT:C3796&quot;  &quot;NCIT:C4822&quot; </span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [6] &quot;NCIT:C4322&quot;  &quot;NCIT:C4321&quot;  &quot;NCIT:C3903&quot;  &quot;NCIT:C4047&quot;  &quot;NCIT:C4320&quot; </span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [11] &quot;NCIT:C4324&quot;  &quot;NCIT:C4323&quot;  &quot;NCIT:C3017&quot;  &quot;NCIT:C3059&quot;  &quot;NCIT:C4049&quot; </span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [16] &quot;NCIT:C4326&quot;  &quot;NCIT:C3697&quot;</span></span></code></pre></div>
 <p>Setting <code>codematches</code> as TRUE allows this function to only return biosamples with exact match to the filter.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>biosamples <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;biosample&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3059&quot;</span>,<span class="at">codematches =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  accessing biosample information from Progenetix</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(biosamples<span class="sc">$</span>histological_diagnosis_id)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(biosamples<span class="sc">$</span>histological_diagnosis__id)</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;NCIT:C3059&quot;</span></span></code></pre></div>
 <p>You can also retrieve biosamples by biosample id used in Progenetix database</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>biosamples <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;biosample&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3059&quot;</span>,<span class="at">codematches =</span> <span class="cn">TRUE</span>,</span>
@@ -295,79 +296,122 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  accessing biosample information from Progenetix</span></span></code></pre></div>
 <p>The result only contains samples with the specified filter NCIT:C3059 and the specified biosample id</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>biosamples[biosamples<span class="sc">$</span>histological_diagnosis_id <span class="sc">!=</span> <span class="st">&quot;NCIT:C3059&quot;</span>,<span class="st">&#39;biosample_id&#39;</span>]</span>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>biosamples[biosamples<span class="sc">$</span>histological_diagnosis__id <span class="sc">!=</span> <span class="st">&quot;NCIT:C3059&quot;</span>,<span class="st">&#39;biosample_id&#39;</span>]</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;pgxbs-kftva5zv&quot; &quot;pgxbs-kftva5zw&quot;</span></span></code></pre></div>
 </div>
-<div id="retrieve-variants-by-biosampleid" class="section level1">
-<h1>Retrieve variants by biosampleid</h1>
+<div id="retrive-cnv-status-of-biosamples-from-specific-groups-of-interests" class="section level1">
+<h1>Retrive CNV status of biosamples from specific groups of interests</h1>
+<p>Relevant parameters of <code>pgxLoader</code> function: type, output, filters, limit, skip, codematches</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cnv.status <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">output=</span><span class="st">&quot;pgxmatrix&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3059&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  accessing CNV coverage profiles from Progenetix </span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  </span><span class="al">WARNING</span><span class="co">: Only analyses 1 - 2000 (from 8036) will be included pagination skip and limit</span></span></code></pre></div>
+<p>By default, it will return the first 2000 profiles, because loading too many samples will cause time-out problem.</p>
+<p>The data looks like this</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(cnv.status))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 2000 6215</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>cnv.status[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">6213</span><span class="sc">:</span><span class="dv">6215</span>)]</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      analysis_id   biosample_id   group_id X1.0.400000.DUP</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxcs-kftvlijb pgxbs-kftva5zv NCIT:C3058               0</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxcs-kftvlijs pgxbs-kftva5zw NCIT:C3058               0</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxcs-kftvlika pgxbs-kftva5zy NCIT:C3058               0</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   X1.400000.1400000.DUP Y.54400000.55400000.DEL Y.55400000.56400000.DEL</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                     0                       0                       0</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                     0                       0                       0</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                     0                       0                       0</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Y.56400000.57227415.DEL</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                       0</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                       0</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                       0</span></span></code></pre></div>
+<p>In this dataframe, <code>analysis_id</code> is the identifier for individual analysis, <code>biosample_id</code> is the identifier for individual biosample. One biosample_id may correspond to multiple analysis_id. <code>group_id</code> equals the meaning of <code>filters</code>. It’s followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column <code>X1.400000.1400000.DUP</code> is 1.0 in one row, it means that in the corresponding analysis one or more duplication events occur in the entire (100%) bin located in chromosome 1: 400000-1400000.</p>
+<p>If you want to retrive the next 1000 profiles in addition to the first 2000 profiles, you can query like this</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cnv.status<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">output=</span><span class="st">&quot;pgxmatrix&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3059&quot;</span>,<span class="at">skip=</span><span class="dv">2</span>, <span class="at">limit=</span><span class="dv">1000</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  accessing CNV coverage profiles from Progenetix </span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  </span><span class="al">WARNING</span><span class="co">: Only analyses 2001 - 3000 (from 8036) will be included pagination skip and limit</span></span></code></pre></div>
+<p>Setting <code>codematches = True</code> can exclude profiles with group_id belonging to child terms of the input filters.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>cnv.status <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">output=</span><span class="st">&quot;pgxmatrix&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3059&quot;</span>,<span class="at">codematches =</span> T)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  accessing CNV coverage profiles from Progenetix </span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  </span><span class="al">WARNING</span><span class="co">: Only analyses 1 - 2000 (from 8036) will be included pagination skip and limit</span></span></code></pre></div>
+<p>Only 46 from the 2000 profiles are left.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(cnv.status)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1]   46 6215</span></span></code></pre></div>
+</div>
+<div id="retrieve-segment-variants-by-biosampleid" class="section level1">
+<h1>Retrieve segment variants by biosampleid</h1>
 <p>Relevant parameters of <code>pgxLoader</code> function: type, output, biosample_id, save_file, filename</p>
+<p>Because of the time-out problem, the segment variant data can only be accessed by individual biosample id instead of filters.</p>
 <div id="get-biosamples-id-from-previously-retrieved-biosample-information" class="section level2">
 <h2>Get biosamples id from previously retrieved biosample information</h2>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>biosample_id <span class="ot">&lt;-</span> biosamples<span class="sc">$</span>biosample_id[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)]</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>biosample_id <span class="ot">&lt;-</span> biosamples<span class="sc">$</span>biosample_id[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)]</span></code></pre></div>
 <p>There are three output formats.</p>
 </div>
 <div id="the-first-output-format-by-default" class="section level2">
 <h2>The first output format (by default)</h2>
 <p>This format contains variant id and associated biosample id as well as analysis id. The variant is represented as ‘DUP’ (duplication) or ‘DEL’ (deletion) in specific chromosome locations. A few variants are point mutations represented by columns <code>reference_bases</code> and <code>alternate_bases</code>.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>variant_1 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_1)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                          variant_id   biosample_id    analysis_id assemply</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 470 pgxvar-5bab576a727983b2e00b9476 pgxbs-kftva5zv pgxcs-kftvlijb   GRCh38</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 710 pgxvar-5bab576a727983b2e00b9477 pgxbs-kftva5zv pgxcs-kftvlijb   GRCh38</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 629 pgxvar-5bab576a727983b2e00b9478 pgxbs-kftva5zv pgxcs-kftvlijb   GRCh38</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 736 pgxvar-5bab576a727983b2e00b947c pgxbs-kftva5zv pgxcs-kftvlijb   GRCh38</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 245 pgxvar-5bab576a727983b2e00b947a pgxbs-kftva5zv pgxcs-kftvlijb   GRCh38</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97  pgxvar-5bab576a727983b2e00b947b pgxbs-kftva5zv pgxcs-kftvlijb   GRCh38</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                      interval chromosome    start       end variant_type</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 470          2:0-47599999:DUP          2        0  47599999          DUP</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 710          7:0-59099999:DUP          7        0  59099999          DUP</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 629          9:0-51799999:DEL          9        0  51799999          DEL</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 736 10:71300000-135374737:DEL         10 71300000 135374737          DEL</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 245         11:0-30999999:DEL         11        0  30999999          DEL</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97  14:15600000-106368585:DEL         14 15600000 106368585          DEL</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     reference_bases alternate_bases</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 470                                </span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 710                                </span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 629                                </span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 736                                </span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 245                                </span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 97</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>variant_1 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_1)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                         variant_id   biosample_id    analysis_id assemply</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9  pgxvar-5bab584a727983b2e012b371 pgxbs-kftvhh1u pgxcs-kftvwk0l   GRCh38</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  pgxvar-5c06952772798368d52dc73a pgxbs-kftvhw56 pgxcs-kftw18cg   GRCh38</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  pgxvar-5c86631609d374f2dc416ebc pgxbs-kftvizjh pgxcs-kftwdb35   GRCh38</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  pgxvar-5c8665d509d374f2dc4d1d9d pgxbs-kftvj6kw pgxcs-kftwfhig   GRCh38</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10 pgxvar-5c86670f09d374f2dc526ebf pgxbs-kftvj9rj pgxcs-kftwggts   GRCh38</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6  pgxvar-5c866a3f09d374f2dc5de2db pgxbs-kftvjiqk pgxcs-kftwj61b   GRCh38</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                    interval chromosome    start      end variant_type</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9      9:36292-10720994:DUP          9    36292 10720994          DUP</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1   2:73920500-73920691:DEL          2 73920500 73920691          DEL</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  13:83238040-83492046:DEL         13 83238040 83492046          DEL</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5   8:88844539-89018103:DEL          8 88844539 89018103          DEL</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10  6:31392318-31483699:DEL          6 31392318 31483699          DEL</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6  17:74613605-74614925:DUP         17 74613605 74614925          DUP</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    reference_bases alternate_bases</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9                                 </span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                 </span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                 </span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                 </span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10                                </span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6</span></span></code></pre></div>
 </div>
 <div id="the-second-output-format-output-pgxseg" class="section level2">
 <h2>The second output format (<code>output</code> = “pgxseg”)</h2>
 <p>This format is ‘.pgxseg’ file format. It contains segment mean values (in <code>log2</code> column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)).</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>variant_2 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id,<span class="at">output =</span> <span class="st">&quot;pgxseg&quot;</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_2)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     biosample_id chromosome    start       end  log2 variant_type</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva5zv          2        0  47599999  0.58          DUP</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva5zv          7        0  59099999  0.58          DUP</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftva5zv          9        0  51799999 -1.00          DEL</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 pgxbs-kftva5zv         10 71300000 135374737 -1.00          DEL</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva5zv         11        0  30999999 -1.00          DEL</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva5zv         14 15600000 106368585 -1.00          DEL</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   reference_bases alternate_bases</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1               .               .</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2               .               .</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3               .               .</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7               .               .</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5               .               .</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6               .               .</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>variant_2 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id,<span class="at">output =</span> <span class="st">&quot;pgxseg&quot;</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_2)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     biosample_id chromosome     start       end   log2 variant_type</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftvhio3          6 146001610 160011327 -0.996          DEL</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftvhkxt         16  57084824  57385075 -0.242          DEL</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftvhqno         17  18647546  20171849 -0.493          DEL</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxbs-kftvj20n         13 113207292 113243334 -0.479          DEL</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftvj4ba         10  43117425  43121656  0.640          DUP</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftvjjl4          8  40361486  40363555 -1.287          DEL</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   reference_bases alternate_bases</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1               .               .</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2               .               .</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3               .               .</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4               .               .</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5               .               .</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6               .               .</span></span></code></pre></div>
 </div>
 <div id="the-third-output-format-output-seg" class="section level2">
 <h2>The third output format (<code>output</code> = “seg”)</h2>
 <p>This format is similar to the general ‘.seg’ file format and compatible with IGV tool for visualization. The only difference between this file format and the general ‘.seg’ file format is the fifth column. It represents variant type in this format while in the general ‘.seg’ file format, it represents number of probes or bins covered by the segment. In addition, the point mutation variants are excluded in this file format.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>variant_3 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id,<span class="at">output =</span> <span class="st">&quot;seg&quot;</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_3)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     biosample_id chromosome    start       end variant_type  log2</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva5zv          2        0  47599999          DUP  0.58</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva5zv          7        0  59099999          DUP  0.58</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftva5zv          9        0  51799999          DEL -1.00</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 pgxbs-kftva5zv         10 71300000 135374737          DEL -1.00</span></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva5zv         11        0  30999999          DEL -1.00</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva5zv         14 15600000 106368585          DEL -1.00</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>variant_3 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id,<span class="at">output =</span> <span class="st">&quot;seg&quot;</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_3)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     biosample_id chromosome     start       end variant_type   log2</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftvhlfr          5  80921902  80921943          DEL -3.916</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftvhpzr         22  46411482  48427664          DEL -1.349</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxbs-kftvj2p1          3 128662407 128719907          DEL -0.209</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftvj31b          6 115057997 115086810          DEL -2.443</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 pgxbs-kftvkixp          3 162500864 162602984          DEL -2.059</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9 pgxbs-kftvko65         20  14408468  14547161          DUP  0.546</span></span></code></pre></div>
 </div>
 </div>
 <div id="export-variants-data-for-visualization" class="section level1">
@@ -376,30 +420,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="upload-pgxseg-file-to-progenetix-website" class="section level2">
 <h2>Upload ‘pgxseg’ file to Progenetix website</h2>
 <p>The following command creates a ‘.pgxseg’ file with the name “variants.pgxseg” in “~/Downloads/” folder.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&#39;variant&#39;</span>, <span class="at">output=</span><span class="st">&#39;pgxseg&#39;</span>, <span class="at">biosample_id=</span>biosample_id, <span class="at">save_file=</span><span class="cn">TRUE</span>, </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">filename=</span><span class="st">&quot;~/Downloads/variants.pgxseg&quot;</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix </span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The file is saved</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&#39;variant&#39;</span>, <span class="at">output=</span><span class="st">&#39;pgxseg&#39;</span>, <span class="at">biosample_id=</span>biosample_id, <span class="at">save_file=</span><span class="cn">TRUE</span>, </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">filename=</span><span class="st">&quot;~/Downloads/variants.pgxseg&quot;</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix </span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The file is saved</span></span></code></pre></div>
 <p>You can upload this ‘.pgxseg’ file to <a href="https://progenetix.org/service-collection/uploader">this link</a> for visualization.</p>
 </div>
 <div id="upload-.seg-file-to-igv" class="section level2">
 <h2>Upload ‘.seg’ file to IGV</h2>
 <p>The following command creates a special ‘.seg’ file with the name “variants.seg” in “~/Downloads/” folder.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&#39;variant&#39;</span>, <span class="at">output=</span><span class="st">&#39;seg&#39;</span>, <span class="at">biosample_id=</span>biosample_id, <span class="at">save_file=</span><span class="cn">TRUE</span>, </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">filename=</span><span class="st">&quot;~/Downloads/variants.seg&quot;</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix </span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The file is saved</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&#39;variant&#39;</span>, <span class="at">output=</span><span class="st">&#39;seg&#39;</span>, <span class="at">biosample_id=</span>biosample_id, <span class="at">save_file=</span><span class="cn">TRUE</span>, </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">filename=</span><span class="st">&quot;~/Downloads/variants.seg&quot;</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; accessing variant information from Progenetix </span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The file is saved</span></span></code></pre></div>
 <p>You can upload this ‘.seg’ file to <a href="https://software.broadinstitute.org/software/igv/">IGV tool</a> for visualization.</p>
 </div>
 </div>
 <div id="session-info" class="section level1">
 <h1>Session Info</h1>
-<pre><code>#&gt; R version 4.1.0 (2021-05-18)
+<pre><code>#&gt; R version 4.1.2 (2021-11-01)
 #&gt; Platform: x86_64-apple-darwin17.0 (64-bit)
 #&gt; Running under: macOS Big Sur 10.16
 #&gt; 
 #&gt; Matrix products: default
-#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.dylib
+#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
 #&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
 #&gt; 
 #&gt; locale:
@@ -412,10 +456,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 #&gt; [1] pgxRpi_0.0.0.9000
 #&gt; 
 #&gt; loaded via a namespace (and not attached):
-#&gt;  [1] compiler_4.1.0    rjson_0.2.20      magrittr_2.0.1    tools_4.1.0      
-#&gt;  [5] htmltools_0.5.1.1 yaml_2.2.1        stringi_1.6.2     rmarkdown_2.9    
-#&gt;  [9] knitr_1.33        stringr_1.4.0     xfun_0.24         digest_0.6.27    
-#&gt; [13] attempt_0.3.1     rlang_0.4.11      evaluate_0.14</code></pre>
+#&gt;  [1] compiler_4.1.2  rjson_0.2.21    magrittr_2.0.1  fastmap_1.1.0  
+#&gt;  [5] tools_4.1.2     htmltools_0.5.2 yaml_2.2.1      stringi_1.7.5  
+#&gt;  [9] rmarkdown_2.11  knitr_1.36      stringr_1.4.0   xfun_0.28      
+#&gt; [13] digest_0.6.28   attempt_0.3.1   rlang_0.4.12    evaluate_0.14</code></pre>
 </div>
 
 

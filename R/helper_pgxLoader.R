@@ -74,6 +74,8 @@ pgidCheck <- function(id){
 }
 
 pgxFreqLoader <- function(output, codematches, filters) {
+    # check filters again
+   stop_if(.x=length(filters) < 1, msg="\n at least one valid filter has to be provided \n")
     # check output format
     stop_if(.x=!(output %in% c('pgxseg','pgxmatrix')),msg="\n Output is invalid. Only support 'pgxseg' or 'pgxmatrix' \n")
     # check if filters exists
@@ -88,9 +90,6 @@ pgxFreqLoader <- function(output, codematches, filters) {
 
     pg.url <- paste0("http://www.progenetix.org/services/intervalFrequencies/?output=",output)
 
-
-    ## check filters again
-    stop_if(.x=length(filters) < 1, msg="\n at least one valid filter has to be provided \n")
 
     if (length(filters)>1){
         filter <- transform_id(filters)
@@ -185,14 +184,15 @@ pgxSampleLoader <- function(biosample_id,filters,codematches){
         res <- res[-(which(duplicated(res$id))),]}
 
     if (codematches){
-        idx <- res$histological_diagnosis_id %in% filters | res$sampled_tissue_id %in% filters | res$icdo_morphology_id %in% filters |
-            res$icdo_topography_id %in% filters | res$external_references_id_PMID %in% filters | res$id %in% biosample_id | 
-            res$external_references_id_geo.GSM %in% filters | res$external_references_id_geo.GSE %in% filters | 
-            res$external_references_id_geo.GPL %in% filters | res$external_references_id_cellosaurus %in% filters | 
-            res$external_references_id_arrayexpress %in% filters
+        idx <- res$histological_diagnosis__id %in% filters | res$sampled_tissue__id %in% filters | res$icdo_morphology__id %in% filters |
+        res$icdo_topography__id %in% filters | res$external_references__id_PMID %in% filters | res$id %in% biosample_id | 
+        res$external_references__id_geo.GSM %in% filters | res$external_references__id_geo.GSE %in% filters | 
+        res$external_references__id_geo.GPL %in% filters | res$external_references__id_cellosaurus %in% filters | 
+        res$external_references__id_arrayexpress %in% filters
+        
         res <- res[idx,]
         if (dim(res)[1] == 0){
-            cat("Attention: the option `codematches=TRUE` filters out all samples \n")
+            cat("Warning: the option `codematches=TRUE` filters out all samples \n")
         }}
     
     colnames(res)[c(1,3)] <- c('biosample_id','callset_id')
@@ -303,4 +303,39 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
     }
 
     return(res)
+}
+
+
+pgxcallsetLoader <- function(filters,limit,skip,codematches){
+  # check filters 
+  stop_if(.x=length(filters) < 1, msg="\n at least one valid filter has to be provided \n")
+  
+  idcheck <- pgidCheck(filters)
+  if (!all(idcheck)){
+    cat(" No results for id", filters[!idcheck], "in progenetix database.\n","\n Only query id:", filters[idcheck],'\n')
+    filters <- filters[idcheck]
+  }
+  # start query
+  cat("\n accessing", "CNV coverage profiles","from Progenetix \n")
+  pg.url <- "http://www.progenetix.org/beacon/callsets/?output=pgxmatrix"
+  
+  filter <- transform_id(filters)
+  pg.url  <- paste(pg.url,'&filters=',filter,sep="")
+  
+  pg.url  <- ifelse(is.null(limit), pg.url, paste0(pg.url,"&limit=",limit))
+  pg.url  <- ifelse(is.null(skip), pg.url, paste0(pg.url,"&skip=",skip))
+  
+  meta <- readLines(pg.url,n=7)
+  meta <-  gsub("#meta=>\"","",meta[7])
+  meta <-  gsub("\"","",meta)
+  cat(paste("\n", meta, "\n"))
+  pg.data  <- read.table(pg.url, header=T, sep="\t", na="NA")
+  
+  if (codematches){
+    pg.data <- pg.data[pg.data$group_id %in% filters,]
+    if (dim(pg.data)[1] == 0){
+      cat("\n Warning: the option `codematches=TRUE` filters out all samples \n")
+    }}
+  
+  return(pg.data)
 }

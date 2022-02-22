@@ -34,11 +34,13 @@ The parameters of this function:
 'pgxseg' or 'seg' when the parameter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
 when the parameter `type` is "frequency".
 * `filters` A single or a comma-concatenated list of identifiers for cancer type,
-literature, and cohorts such as c("NCIT:C7376","icdom-98353","PMID:22824167", "pgxcohort-TCGAcancers").
+literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers").
 Only used if the parameter `type` is "biosample" or "frequency".
 * `codematches` A logical value determining whether to exclude samples 
 from child terms of specified filters. If FALSE, retrieved samples include child 
 terms of specified filters. Only used when `filters` is specified. Default is FALSE.
+* `limit` An integer value to specify the number of returned profiles. Only used when the parameter `type` is "variant" and `output` is "pgxmatrix".
+* `skip` An Integer value to specify the number of skipped profiles. Only used when the parameter `type` is "variant" and `output` is "pgxmatrix".
 * `biosample_id` A single or a comma-concatenated list of identifiers used in Progenetix 
 database for identifying biosamples. 
 * `save_file` A logical value determining whether to save the variant data as file 
@@ -63,14 +65,14 @@ head(biosamples)
 The NCIt code of retrieved biosamples doesn't only contain specified filters but contains child terms. 
 
 ```{r}
-unique(biosamples$histological_diagnosis_id)
+unique(biosamples$histological_diagnosis__id)
 ```
 
 Setting `codematches` as TRUE allows this function to only return biosamples with exact match to the filter.
 
 ```{r}
 biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059",codematches = TRUE)
-unique(biosamples$histological_diagnosis_id)
+unique(biosamples$histological_diagnosis__id)
 ```
 
 You can also retrieve biosamples by biosample id used in Progenetix database
@@ -79,15 +81,58 @@ You can also retrieve biosamples by biosample id used in Progenetix database
 biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059",codematches = TRUE,
                         biosample_id = c("pgxbs-kftva5zv","pgxbs-kftva5zw"))
 ```
+
 The result only contains samples with the specified filter NCIT:C3059 and the specified biosample id 
 
 ```{r}
-biosamples[biosamples$histological_diagnosis_id != "NCIT:C3059",'biosample_id']
+biosamples[biosamples$histological_diagnosis__id != "NCIT:C3059",'biosample_id']
 ```
 
-# Retrieve variants by  biosampleid
+# Retrive CNV status of biosamples from specific groups of interests
+
+Relevant parameters of `pgxLoader` function: type, output, filters, limit, skip, codematches
+
+```{r}
+cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C3059")
+```
+
+By default, it will return the first 2000 profiles, because loading too many samples will cause
+time-out problem.
+
+The data looks like this
+
+```{r}
+print(dim(cnv.status))
+cnv.status[c(1:3), c(1:5,6213:6215)]
+```
+
+In this dataframe, `analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for
+individual biosample. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `X1.400000.1400000.DUP` is 1.0 in one row, it means that in the corresponding analysis one or more duplication events occur in the entire (100%) bin located in chromosome 1: 400000-1400000.
+
+If you want to retrive the next 1000 profiles in addition to the first 2000 profiles, you can query like this
+
+```{r}
+cnv.status.2 <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C3059",skip=2, limit=1000)
+```
+
+Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
+
+```{r}
+cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C3059",codematches = T)
+```
+
+Only 46 from the 2000 profiles are left.
+
+```{r}
+dim(cnv.status)
+```
+
+# Retrieve segment variants by biosampleid
 
 Relevant parameters of `pgxLoader` function: type, output, biosample_id, save_file, filename
+
+Because of the time-out problem, the segment variant data can only be accessed by 
+individual biosample id instead of filters.
 
 ## Get biosamples id from previously retrieved biosample information
 

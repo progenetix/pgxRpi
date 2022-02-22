@@ -9,6 +9,8 @@ pgxLoader(
   output = NULL,
   filters = NULL,
   codematches = FALSE,
+  limit = NULL,
+  skip = NULL,
   biosample_id = NULL,
   save_file = FALSE,
   filename = NULL
@@ -18,19 +20,26 @@ pgxLoader(
 \item{type}{A string specifying output data type. Available options are "biosample",
 "variant" or "frequency".}
 
-\item{output}{A string specifying output file format. Available options are NULL,
-'pgxseg' or 'seg' when the parameter \code{type} is "variant"; 'pgxseg' or 'pgxmatrix'
-when the parameter \code{type} is "frequency".}
+\item{output}{A string specifying output file format. Available options are NULL, "pgxmatrix",
+"pgxseg" or "seg" when the parameter \code{type} is "variant"; When the parameter \code{type} is "frequency",
+available options are "pgxseg" or "pgxmatrix" .}
 
 \item{filters}{A single or a comma-concatenated list of identifiers for cancer type,
-literature, and cohorts such as c("NCIT:C7376","icdom-98353","PMID:22824167", "pgxcohort-TCGAcancers")}
+literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers")}
 
 \item{codematches}{A logical value determining whether to exclude samples
-from child terms of specified group id. If FALSE, retrieved samples include child
-terms of specified group id. Default is FALSE.}
+from child terms of specified filters. If FALSE, retrieved samples include child
+terms of specified filters. Default is FALSE.}
+
+\item{limit}{Integer to specify the number of returned profiles. Only used when
+the parameter \code{type} is "variant" and \code{output} is "pgxmatrix".}
+
+\item{skip}{Integer to specify the number of skipped profiles. If skip = 2, limit=500,
+the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Only used when the
+parameter \code{type} is "variant" and \code{output} is "pgxmatrix".}
 
 \item{biosample_id}{A single or a comma-concatenated list of identifiers used
-in Progenetix database for identifying biosamples}
+in Progenetix database for identifying biosamples.}
 
 \item{save_file}{A logical value determining whether to save the variant data as file
 instead of direct return. Only used when the parameter \code{type} is "variant". Default is FALSE.}
