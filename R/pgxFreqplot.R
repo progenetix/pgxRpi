@@ -20,7 +20,7 @@
 #' @export
 
 
-pgxFreqplot <- function(data,chrom=NULL,layout=c(1,1),filters=NULL,circos = FALSE){
+pgxFreqplot <- function(data,chrom=NULL,layout=c(1,1),filters=NULL,circos = FALSE,...){
     if (is.null(filters)){
         filters <- names(data$data)[1]
     }
@@ -40,15 +40,15 @@ pgxFreqplot <- function(data,chrom=NULL,layout=c(1,1),filters=NULL,circos = FALS
     pos.unit="bp"
     type <- ifelse(is.null(chrom),"genome","bychrom")
     switch(type,
-            genome = genomeFreq(data,pos.unit,filters),
-            bychrom = chromosomeFreq(data,pos.unit,chrom,layout,filters))
+            genome = genomeFreq(data,pos.unit,filters,...),
+            bychrom = chromosomeFreq(data,pos.unit,chrom,layout,filters,...))
 }
 
-genomeFreq <- function(data,pos.unit,id){
+genomeFreq <- function(data,pos.unit,id,...){
     data_pgxseg <- data$data[[id]]
     nr <- 1
     nc <- 1
-    op <- getFreqPlotParameters(type="genome",nc=nc,nr=nr)
+    op <- getFreqPlotParameters(type="genome",nc=nc,nr=nr,...)
     data_pgxseg[,2] <- gsub("X", "23", data_pgxseg[,2])
     data_pgxseg[,2] <- gsub("Y", "24", data_pgxseg[,2])
     op$xlim <- getGlobal.xlim(op=op,pos.unit=pos.unit,chrom=as.numeric(unique(data_pgxseg[,2])))
@@ -97,7 +97,7 @@ genomeFreq <- function(data,pos.unit,id){
     addArmlines(as.numeric(data_pgxseg[,2]),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
 }
 
-chromosomeFreq <- function(data,pos.unit,chrom,layout,id){
+chromosomeFreq <- function(data,pos.unit,chrom,layout,id,...){
     data_pgxseg <- data$data[[id]]
     nProbe <- nrow(data_pgxseg)
     nChrom <- length(chrom)
@@ -107,7 +107,7 @@ chromosomeFreq <- function(data,pos.unit,chrom,layout,id){
     nc <- layout[2]
 
     #Get plot parameters:
-    op <- getFreqPlotParameters(type="bychrom",nc=nc,nr=nr,chrom=chrom)
+    op <- getFreqPlotParameters(type="bychrom",nc=nc,nr=nr,chrom=chrom,...)
 
     #Margins for entire plot in window:
     if(all(op$title=="")){

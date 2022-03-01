@@ -12,7 +12,7 @@
 ###Required by: 
 ### plotFreq (genomeFreq and chromosomeFreq)
 
-getFreqPlotParameters <- function(type,nc,nr,chrom=NULL){
+getFreqPlotParameters <- function(type,nc,nr,chrom=NULL,...){
     
     #Apply a scaling factor according to number of columns and rows in plot:
     #seems to work ok:
@@ -72,6 +72,8 @@ getFreqPlotParameters <- function(type,nc,nr,chrom=NULL){
     
     
     #Set/modify parameters more depending on user input:
+    #Check for user modifications
+    op <- modifyList(op,list(...))
     
     #Set assembly to refer to stored data instead of character string:
     op$assembly <- get(op$assembly)
