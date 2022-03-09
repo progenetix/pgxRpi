@@ -27,7 +27,6 @@ pgxCount <- function(
                   open='r')
     info <- read.table(id_url, header=F, sep="\t", na="NA")
     close(id_url)
-    print(paste('Trying url:',url,"\n"))
     if (is.null(info)){
         return("No samples with the queried filter \n")
     }
@@ -38,6 +37,9 @@ pgxCount <- function(
     if (dim(info)[1] < length(filters)){
         cat("Attention: No results for some queried filters \n")
     }
+    
+    info <- info[,c(1,2,3,4)]
+    colnames(info) <- c('filters','label','total','exact_match')
     return (info)
 }
 

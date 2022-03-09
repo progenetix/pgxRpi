@@ -20,8 +20,8 @@ pgxLoader(
 \item{type}{A string specifying output data type. Available options are "biosample",
 "variant" or "frequency".}
 
-\item{output}{A string specifying output file format. Available options are NULL, "pgxmatrix",
-"pgxseg" or "seg" when the parameter \code{type} is "variant"; When the parameter \code{type} is "frequency",
+\item{output}{A string specifying output file format. When the parameter \code{type} is "variant",
+available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter \code{type} is "frequency",
 available options are "pgxseg" or "pgxmatrix" .}
 
 \item{filters}{A single or a comma-concatenated list of identifiers for cancer type,
@@ -31,18 +31,16 @@ literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167"
 from child terms of specified filters. If FALSE, retrieved samples include child
 terms of specified filters. Default is FALSE.}
 
-\item{limit}{Integer to specify the number of returned profiles. Only used when
-the parameter \code{type} is "variant" and \code{output} is "pgxmatrix".}
+\item{limit}{Integer to specify the number of returned samples/profiles.}
 
-\item{skip}{Integer to specify the number of skipped profiles. If skip = 2, limit=500,
-the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Only used when the
-parameter \code{type} is "variant" and \code{output} is "pgxmatrix".}
+\item{skip}{Integer to specify the number of skipped samples/profiles. If skip = 2, limit=500,
+the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned.}
 
 \item{biosample_id}{A single or a comma-concatenated list of identifiers used
 in Progenetix database for identifying biosamples.}
 
 \item{save_file}{A logical value determining whether to save the variant data as file
-instead of direct return. Only used when the parameter \code{type} is "variant". Default is FALSE.}
+instead of direct return. Only used when the parameter \code{type} is "variant" and \code{output} is "pgxseg" or "seg". Default is FALSE.}
 
 \item{filename}{A string specifying the path and name of the file to be saved.
 Only used if the parameter \code{save_file} is TRUE. Default is "variants.seg/pgxseg"

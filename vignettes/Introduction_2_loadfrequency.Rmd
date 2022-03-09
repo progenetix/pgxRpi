@@ -30,21 +30,21 @@ The parameters of this function:
 
 * `type` A string specifying output data type. Available options are "biosample", 
 "variant" or "frequency". 
-* `output` A string specifying output file format. Available options are NULL, 
-'pgxseg' or 'seg' when the parameter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
-when the parameter `type` is "frequency".
+* `output` A string specifying output file format. When the parameter `type` is "variant",
+available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency",
+available options are "pgxseg" or "pgxmatrix" .
 * `filters` A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers").
 Only used if the parameter `type` is "biosample" or "frequency".
 * `codematches` A logical value determining whether to exclude samples 
 from child terms of specified filters. If FALSE, retrieved samples include child 
 terms of specified filters. Only used when `filters` is specified. Default is FALSE.
-* `limit` An integer value to specify the number of returned profiles. Only used when the parameter `type` is "variant" and `output` is "pgxmatrix".
-* `skip` An Integer value to specify the number of skipped profiles. Only used when the parameter `type` is "variant" and `output` is "pgxmatrix".
 * `biosample_id` A single or a comma-concatenated list of identifiers used in Progenetix 
 database for identifying biosamples. 
+* `limit` Integer to specify the number of returned samples/profiles. 
+* `skip` Integer to specify the number of skipped samples/profiles. 
 * `save_file` A logical value determining whether to save the variant data as file 
-instead of direct return. Only used when the parameter `type` is "variant". Default is FALSE.
+instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
 * `filename` A string specifying the path and name of the file to be saved. 
 Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
 
@@ -69,6 +69,7 @@ The `meta` slot of this object looks like this
 ```{r}
 freq_pgxseg$meta
 ```
+
 The `data` slot contains a list of the CNV frequency data frames named by the corresponding 
 filters. The data frame with the name 'total' is the concatenated data frames from all 
 filters.
@@ -145,6 +146,7 @@ freq_sel <- pgxFreqselect(data=freq_pgxmatrix,
                           filters = c("NCIT:C4917","NCIT:C3512","NCIT:C3493"))
 freq_sel$data$total[,c(1:5)]
 ```
+
 # Visualization of CNV frequency data using 'pgxseg' format
 
 ## `pgxFeqplot` function
@@ -260,24 +262,6 @@ rownames(annotation_row) <- rownames(diff_mat)
 pheatmap(as.matrix(diff_mat), scale = "none",cluster_cols = FALSE, cluster_rows = FALSE,width = 8,height = 10,cellwidth=0.1,breaks=myBreaks,show_colnames=FALSE ,
          annotation_row = annotation_row,annotation_col = annotation_col,annotation_legend=TRUE)
 ```
-
-# Other functions
-
-## `pgxCount` function
-
-The parameter of this function:
-
-* `filters`: A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","pgx:icdom-98353")
-
-This function returns the number of samples for every filter in Progenetix database 
-by using `count` method in `collations` service.
-
-```{r}
-pgxCount(filters = code)
-```
-
-In the returned result, the third column is the number of all the samples of the code and its child terms. 
-The fourth column is the number of samples for the exact code matches.
 
 # Session Info
 

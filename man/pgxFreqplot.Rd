@@ -9,7 +9,8 @@ pgxFreqplot(
   chrom = NULL,
   layout = c(1, 1),
   filters = NULL,
-  circos = FALSE
+  circos = FALSE,
+  ...
 )
 }
 \arguments{

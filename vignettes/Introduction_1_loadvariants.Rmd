@@ -30,39 +30,58 @@ The parameters of this function:
 
 * `type` A string specifying output data type. Available options are "biosample", 
 "variant" or "frequency". 
-* `output` A string specifying output file format. Available options are NULL, 
-'pgxseg' or 'seg' when the parameter `type` is "variant"; 'pgxseg' or 'pgxmatrix' 
-when the parameter `type` is "frequency".
+* `output` A string specifying output file format. When the parameter `type` is "variant",
+available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency",
+available options are "pgxseg" or "pgxmatrix" .
 * `filters` A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers").
 Only used if the parameter `type` is "biosample" or "frequency".
 * `codematches` A logical value determining whether to exclude samples 
 from child terms of specified filters. If FALSE, retrieved samples include child 
 terms of specified filters. Only used when `filters` is specified. Default is FALSE.
-* `limit` An integer value to specify the number of returned profiles. Only used when the parameter `type` is "variant" and `output` is "pgxmatrix".
-* `skip` An Integer value to specify the number of skipped profiles. Only used when the parameter `type` is "variant" and `output` is "pgxmatrix".
 * `biosample_id` A single or a comma-concatenated list of identifiers used in Progenetix 
 database for identifying biosamples. 
+* `limit` Integer to specify the number of returned samples/profiles. 
+* `skip` Integer to specify the number of skipped samples/profiles. If skip = 2, limit=500, 
+the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
 * `save_file` A logical value determining whether to save the variant data as file 
-instead of direct return. Only used when the parameter `type` is "variant". Default is FALSE.
+instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
 * `filename` A string specifying the path and name of the file to be saved. 
 Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
 
-# Retrieve biosamples from specific groups of interests
+# Retrieve meatdata of samples from specific groups of interests
 
-Relevant parameters of `pgxLoader` function: type, filters, codematches, biosample_id
+Relevant parameters of `pgxLoader` function: type, filters, codematches, biosample_id, skip, limit
 
 ```{r}
 biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059")
 ```
 
-The data contains many columns representing different aspects of biosample information
+The data contains many columns representing different aspects of sample information. 
+By default, it returns the first 2000 samples (skip=0,limit=2000), because loading too many samples will cause time-out problem.
 
 ```{r}
+cat(paste("Data dimention:",paste(dim(biosamples),collapse = ' * ')))
+
 head(biosamples)
 ```
 
-The NCIt code of retrieved biosamples doesn't only contain specified filters but contains child terms. 
+This group contains more than 2000 samples. If you want to retreive the next 1000 samples 
+in addition to the first 2000 profiles, you can query like this
+
+```{r}
+biosamples_2 <- pgxLoader(type="biosample", filters = "NCIT:C3059",skip=2, limit = 1000)
+
+dim(biosamples_2)
+```
+
+The number of samples in specific group can be queried by  `pgxCount` function.
+
+```{r}
+pgxCount(filters = "NCIT:C3059")
+```
+
+The NCIt code of retrieved samples doesn't only contain specified filters but contains child terms. 
 
 ```{r}
 unique(biosamples$histological_diagnosis__id)
@@ -72,6 +91,7 @@ Setting `codematches` as TRUE allows this function to only return biosamples wit
 
 ```{r}
 biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059",codematches = TRUE)
+
 unique(biosamples$histological_diagnosis__id)
 ```
 
@@ -88,16 +108,18 @@ The result only contains samples with the specified filter NCIT:C3059 and the sp
 biosamples[biosamples$histological_diagnosis__id != "NCIT:C3059",'biosample_id']
 ```
 
-# Retrive CNV status of biosamples from specific groups of interests
+# Retrive CNV coverage of biosamples from specific groups of interests
 
-Relevant parameters of `pgxLoader` function: type, output, filters, limit, skip, codematches
+## Across genomic bins 
+
+Relevant parameters of `pgxLoader` function: type, output, filters, codematches, skip,limit
 
 ```{r}
 cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C3059")
 ```
 
-By default, it will return the first 2000 profiles, because loading too many samples will cause
-time-out problem.
+By default, it returns the first 2000 profiles, because loading too many profiles will cause
+time-out problem. It is noted that the number of analysis profiles does not necessarily equal the number of samples.
 
 The data looks like this
 
@@ -109,22 +131,73 @@ cnv.status[c(1:3), c(1:5,6213:6215)]
 In this dataframe, `analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for
 individual biosample. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `X1.400000.1400000.DUP` is 1.0 in one row, it means that in the corresponding analysis one or more duplication events occur in the entire (100%) bin located in chromosome 1: 400000-1400000.
 
-If you want to retrive the next 1000 profiles in addition to the first 2000 profiles, you can query like this
+Like query for biosample metadata, if you want to access the next 1000 profiles in addition to the first 2000 analysis profiles, you can query like this
 
 ```{r}
-cnv.status.2 <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C3059",skip=2, limit=1000)
+cnv.status.2 <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C3059",
+                          skip=2, limit=1000)
 ```
 
 Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
 
 ```{r}
-cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C3059",codematches = T)
+cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C3059",
+                        codematches = T)
 ```
 
 Only 46 from the 2000 profiles are left.
 
 ```{r}
 dim(cnv.status)
+```
+
+## Across chromosomes or the whole genome 
+
+Relevant parameters of `pgxLoader` function: type, output, filters, codematches, skip, limit
+
+```{r}
+cnv_covergae <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948")
+```
+
+It includes CNV coverage across chromosome arms, whole chromosomes, or whole genome.
+
+```{r}
+names(cnv_covergae)
+```
+
+By default, it also returns the first 2000 profiles. You can use parameters `skip` and `limit` to query additional profiles if the 
+group contains more than 2000 profiles.
+
+The data of CNV coverage across chromosomal arms looks like this
+
+```{r}
+dim(cnv_covergae$chrom_arm_coverage)
+```
+
+The row names are id of biosamples from the group NCIT:C2948. There are 96 columns. 
+The first 48 columns are duplication coverage across chromosomal arms, followed by deletion coverage.
+The data of CNV coverage across whole chromosomes is similar, with the only difference in columns.
+
+```{r}
+head(cnv_covergae$chrom_arm_coverage)[,c(1:4, 49:52)]
+```
+
+The data of CNV coverage across genome (hg38) looks like this
+
+```{r}
+head(cnv_covergae$whole_genome_coverage)
+```
+
+The first column is the total called coverage, followed by duplication coverage and deletion coverage.
+
+Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
+21 samples are excluded from the original 47 samples in this case.
+
+```{r}
+cnv_covergae_2 <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948",
+                            codematches = T)
+
+cat(paste('original data dimention:', paste(dim(cnv_covergae$chrom_arm_coverage),collapse = '*'),'\ncurrent data dimention:', paste(dim(cnv_covergae_2$chrom_arm_coverage),collapse = '*')))
 ```
 
 # Retrieve segment variants by biosampleid
