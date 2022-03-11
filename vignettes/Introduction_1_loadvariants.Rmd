@@ -105,7 +105,7 @@ biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059",codematches = T
 The result only contains samples with the specified filter NCIT:C3059 and the specified biosample id 
 
 ```{r}
-biosamples[biosamples$histological_diagnosis__id != "NCIT:C3059",'biosample_id']
+unique(biosamples[biosamples$histological_diagnosis__id != "NCIT:C3059",'biosample_id'])
 ```
 
 # Retrive CNV coverage of biosamples from specific groups of interests
