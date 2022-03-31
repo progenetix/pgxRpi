@@ -220,8 +220,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
             if (if_next){  next }
             temp <- lapply(temp$response$resultSets[[1]]$results,unlist)
             temp <- lapply(temp,function(x){
-                var_meta <- x[c('position.assemblyId','variantInternalId','position.refseqId',
-                       'position.start','position.end','variantType','referenceBases','alternateBases')]
+                var_meta <- x[c('variation.location.sequenceId','variation.variantInternalId','variation.relativeCopyClass','variation.updated')]
                 id_ind <-  which(names(x) =='caseLevelData.id')
                 temp_row <- c()
                 for (i in id_ind){
@@ -230,21 +229,28 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
                                    byrow = T)
                 temp_row <- as.data.frame(cbind(temp_row,var_meta))
                 colnames(temp_row) <- c("variant_id","biosample_id","analysis_id",
-                                        "assemply","interval","chromosome","start",
-                                        "end","variant_type","reference_bases","alternate_bases")
+                                        "reference_genome","variant","variant_status","updated_time")
                 return(temp_row)
             })
             temp <- Reduce(rbind,temp)
-            temp$chromosome  <- gsub('chr','',temp$chromosome)
-            temp$start <- as.numeric(temp$start)
-            temp$end <- as.numeric(temp$end)
+            # change interval order 
+            location <- strsplit(temp$variant,split = ':')
+            chr <-  sapply(location, function(x){x[1]})
+            chr[chr == 'X'] <- 23
+            chr[chr == 'Y'] <- 24
+            chr <- as.numeric(chr)
+            start <- sapply(location, function(x){x[2]})
+            end <- as.numeric(gsub('.*-','',start))
+            start <- as.numeric(gsub('-.*','',start))
+            temp$chr <- chr
+            temp$start <- start
+            temp$end <- end
             temp <- temp[order(temp$start),]
-            chr <- temp$chromosome
-            chr[which(chr == 'X')] <- 23
-            chr[which(chr == 'Y')] <- 24
-            chr <- as.integer(chr)
-            temp <- temp[order(chr),]
+            temp <- temp[order(temp$chr),]
             temp <- temp[order(temp$biosample_id),]
+            temp$chr[temp$chr == 23] <- 'X'
+            temp$chr[temp$chr == 24] <- 'Y'
+            temp <- temp[,c(1,2,3,5,8,9,10,4,6,7)]
         }
 
         if (!(exists("res"))){
@@ -272,7 +278,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
     
     # quality check
     res <- res[res$biosample_id %in% biosample_id,]
-    
+    rownames(res) <- seq(nrow(res))
     if (save_file){
         if (output=='pgxseg'){
             if (is.null(filename)){

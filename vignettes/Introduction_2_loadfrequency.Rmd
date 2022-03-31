@@ -246,20 +246,19 @@ library("RColorBrewer")
 library('pheatmap')
 rownames(diff_mat) <- paste(meta[,1], paste0("(",meta[,3],")"),meta[,2])
 
-col <- colorRampPalette(brewer.pal(10, "RdYlBu"))(256)
-col_2 <- brewer.pal(n = 8, name = 'Dark2')
 parlength <- 100
 myBreaks <- c(seq(min(diff_mat), 0, length.out=ceiling(parlength/2) + 1), 
               seq(max(diff_mat)/parlength, max(diff_mat), length.out=floor(parlength/2)))
 
 annotation_row <- data.frame(cluster=factor(cut))
-annotation_col <- data.frame(chr  = factor(substring(colnames(diff_mat),1,
-                                                    last=regexpr("\\.", colnames(diff_mat))-1),
-                                          levels = c(gsub('^','X',seq(1,22)), 'X','Y')))
+annotation_col <- data.frame(chr=factor(substring(colnames(diff_mat),1,
+                                                  last=regexpr("\\.", colnames(diff_mat))-1),
+                                        levels = c(gsub('^','X',seq(1,22)), 'X','Y')))
 rownames(annotation_col) <- colnames(diff_mat)
 rownames(annotation_row) <- rownames(diff_mat)
 
-pheatmap(as.matrix(diff_mat), scale = "none",cluster_cols = FALSE, cluster_rows = FALSE,width = 8,height = 10,cellwidth=0.1,breaks=myBreaks,show_colnames=FALSE ,
+pheatmap(as.matrix(diff_mat), scale = "none",cluster_cols = FALSE, cluster_rows = FALSE,
+         width = 8,height = 10,cellwidth=0.1,breaks=myBreaks,show_colnames=FALSE ,
          annotation_row = annotation_row,annotation_col = annotation_col,annotation_legend=TRUE)
 ```
 

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hangjia Zhao" />
 
-<meta name="date" content="2022-03-25" />
+<meta name="date" content="2022-03-31" />
 
 <title>Introduction_1_loadvariants</title>
 
@@ -141,7 +141,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">Introduction_1_loadvariants</h1>
 <h4 class="author">Hangjia Zhao</h4>
-<h4 class="date">2022-03-25</h4>
+<h4 class="date">2022-03-31</h4>
 
 
 
@@ -168,7 +168,128 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="retrieve-meatdata-of-samples-from-specific-groups-of-interests" class="section level1">
 <h1>Retrieve meatdata of samples from specific groups of interests</h1>
 <p>Relevant parameters of <code>pgxLoader</code> function: type, filters, codematches, biosample_id, skip, limit</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>biosamples <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;biosample&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3059&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>biosamples <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;biosample&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3059&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(biosamples)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     biosample_id   individual_id     callset_id pgx_legacy_sample_id</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva5zv pgxind-kftx266l pgxcs-kftvlijb                     </span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva5zw pgxind-kftx266n pgxcs-kftvlijs                     </span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftva5zy pgxind-kftx266p pgxcs-kftvlika                     </span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxbs-kftva5zz pgxind-kftx266r pgxcs-kftvlikr                     </span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva601 pgxind-kftx266t pgxcs-kftvlil9                     </span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva603 pgxind-kftx266v pgxcs-kftvlilq                     </span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                    legacy_ids  description tnm stage grade age_iso death</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 PGX_AM_BS_9788624_GB-har-01 glioblastoma  NA                        NA</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 PGX_AM_BS_9788624_GB-har-02 glioblastoma  NA                        NA</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 PGX_AM_BS_9788624_GB-har-03 glioblastoma  NA                        NA</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 PGX_AM_BS_9788624_GB-har-04 glioblastoma  NA                        NA</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 PGX_AM_BS_9788624_GB-har-05 glioblastoma  NA                        NA</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 PGX_AM_BS_9788624_GB-har-06 glioblastoma  NA                        NA</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   followup_months followup_time recurrence recurrence_time        geoprov_label</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1              NA                       NA              NA Yamaguchi-shi, Japan</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2              NA                       NA              NA Yamaguchi-shi, Japan</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3              NA                       NA              NA Yamaguchi-shi, Japan</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4              NA                       NA              NA Yamaguchi-shi, Japan</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5              NA                       NA              NA Yamaguchi-shi, Japan</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6              NA                       NA              NA Yamaguchi-shi, Japan</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   geoprov_precision  geoprov_city geoprov_country geoprov_iso_alpha3</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1              city Yamaguchi-shi           Japan                JPN</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2              city Yamaguchi-shi           Japan                JPN</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3              city Yamaguchi-shi           Japan                JPN</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4              city Yamaguchi-shi           Japan                JPN</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5              city Yamaguchi-shi           Japan                JPN</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6              city Yamaguchi-shi           Japan                JPN</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   geoprov_lat geoprov_long cnv_fraction cnv_del_fraction cnv_dup_fraction</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1       34.19       131.47        0.213            0.176            0.037</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2       34.19       131.47        0.142            0.107            0.035</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3       34.19       131.47        0.172            0.013            0.159</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4       34.19       131.47        0.152            0.067            0.084</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5       34.19       131.47        0.235            0.126            0.109</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6       34.19       131.47        0.143            0.085            0.058</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   cell_line experiment_id series_id platform_id sampled_tissue__id</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                                   UBERON:0001869</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                                   UBERON:0001869</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                                   UBERON:0001869</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                                   UBERON:0001869</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                                   UBERON:0001869</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                                   UBERON:0001869</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   sampled_tissue__label histological_diagnosis__id</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6   cerebral hemisphere                 NCIT:C3058</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   histological_diagnosis__label icdo_morphology__id icdo_morphology__label</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                  Glioblastoma     pgx:icdom-94403           Glioblastoma</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   icdo_topography__id icdo_topography__label external_references__id_PMID</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6     pgx:icdot-C71.0               cerebrum                 PMID:9788624</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_PMID external_references__id_geo.GSM</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                              NA                                </span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                              NA                                </span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                              NA                                </span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                              NA                                </span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                              NA                                </span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                              NA                                </span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_geo.GSM external_references__id_geo.GSE</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                 NA                                </span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                 NA                                </span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                 NA                                </span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                 NA                                </span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                 NA                                </span></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                 NA                                </span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_geo.GSE external_references__id_geo.GPL</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                 NA                                </span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                 NA                                </span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                 NA                                </span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                 NA                                </span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                 NA                                </span></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                 NA                                </span></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_geo.GPL external_references__id_cellosaurus</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                 NA                                    </span></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                 NA                                    </span></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                 NA                                    </span></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                 NA                                    </span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                 NA                                    </span></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                 NA                                    </span></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_cellosaurus external_references__id_arrayexpress</span></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                     NA                                     </span></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                     NA                                     </span></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                     NA                                     </span></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                     NA                                     </span></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                     NA                                     </span></span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                     NA                                     </span></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_arrayexpress external_references__id_cbioportal</span></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                      NA                                   </span></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                      NA                                   </span></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                      NA                                   </span></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                      NA                                   </span></span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                      NA                                   </span></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                      NA                                   </span></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_references__label_cbioportal followup_state__id</span></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                                              EFO:0030039</span></span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                                              EFO:0030039</span></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                                              EFO:0030039</span></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                                              EFO:0030039</span></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                                              EFO:0030039</span></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                                              EFO:0030039</span></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   followup_state__label data_use_conditions__id data_use_conditions__label</span></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    no followup status             DUO:0000004             no restriction</span></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    no followup status             DUO:0000004             no restriction</span></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    no followup status             DUO:0000004             no restriction</span></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    no followup status             DUO:0000004             no restriction</span></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    no followup status             DUO:0000004             no restriction</span></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    no followup status             DUO:0000004             no restriction</span></span></code></pre></div>
 <p>The data contains many columns representing different aspects of sample information. By default, it returns all related samples (limit=0). You can access a subset of them via the parameter <code>limit</code> and <code>skip</code>. For example, if you want to access the first 1000 samples , you can set <code>limit</code> = 1000, <code>skip</code> = 0.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>biosamples_2 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;biosample&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3059&quot;</span>,<span class="at">skip=</span><span class="dv">0</span>, <span class="at">limit =</span> <span class="dv">1000</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -289,50 +410,50 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="the-first-output-format-by-default" class="section level2">
 <h2>The first output format (by default)</h2>
-<p>This format contains variant id and associated biosample id as well as analysis id. The variant is represented as ‘DUP’ (duplication) or ‘DEL’ (deletion) in specific chromosome locations. A few variants are point mutations represented by columns <code>reference_bases</code> and <code>alternate_bases</code>.</p>
+<p>This format contains variant id and associated biosample id as well as analysis id. The variant is represented as ‘DUP’ (duplication) or ‘DEL’ (deletion) in specific chromosome locations.</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>variant_1 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id)</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_1)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                          variant_id   biosample_id    analysis_id assemply</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 51  pgxvar-5bab576a727983b2e00b9477 pgxbs-kftva5zv pgxcs-kftvlijb     &lt;NA&gt;</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 286 pgxvar-5bab576a727983b2e00b947e pgxbs-kftva5zv pgxcs-kftvlijb     &lt;NA&gt;</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 307 pgxvar-5bab576a727983b2e00b947b pgxbs-kftva5zv pgxcs-kftvlijb     &lt;NA&gt;</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 328 pgxvar-5bab576a727983b2e00b9479 pgxbs-kftva5zv pgxcs-kftvlijb     &lt;NA&gt;</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 356 pgxvar-5bab576a727983b2e00b9476 pgxbs-kftva5zv pgxcs-kftvlijb     &lt;NA&gt;</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 413 pgxvar-5bab576a727983b2e00b947d pgxbs-kftva5zv pgxcs-kftvlijb     &lt;NA&gt;</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                      interval chromosome start end variant_type reference_bases</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 51           7:0-59099999:DUP       &lt;NA&gt;    NA  NA          DUP            &lt;NA&gt;</span></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 286         18:0-76117153:DEL       &lt;NA&gt;    NA  NA          DEL            &lt;NA&gt;</span></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 307 14:15600000-106368585:DEL       &lt;NA&gt;    NA  NA          DEL            &lt;NA&gt;</span></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 328         X:0-154913754:DEL       &lt;NA&gt;    NA  NA          DEL            &lt;NA&gt;</span></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 356          2:0-47599999:DUP       &lt;NA&gt;    NA  NA          DUP            &lt;NA&gt;</span></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 413  22:11800000-49691432:DEL       &lt;NA&gt;    NA  NA          DEL            &lt;NA&gt;</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     alternate_bases</span></span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 51             &lt;NA&gt;</span></span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 286            &lt;NA&gt;</span></span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 307            &lt;NA&gt;</span></span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 328            &lt;NA&gt;</span></span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 356            &lt;NA&gt;</span></span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 413            &lt;NA&gt;</span></span></code></pre></div>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                        variant_id   biosample_id    analysis_id</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxvar-5bab576a727983b2e00b9476 pgxbs-kftva5zv pgxcs-kftvlijb</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxvar-5bab576a727983b2e00b9477 pgxbs-kftva5zv pgxcs-kftvlijb</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxvar-5bab576a727983b2e00b9478 pgxbs-kftva5zv pgxcs-kftvlijb</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxvar-5bab576a727983b2e00b947c pgxbs-kftva5zv pgxcs-kftvlijb</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxvar-5bab576a727983b2e00b947a pgxbs-kftva5zv pgxcs-kftvlijb</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxvar-5bab576a727983b2e00b947b pgxbs-kftva5zv pgxcs-kftvlijb</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     variant chr    start       end    reference_genome</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1          2:0-47599999:DUP   2        0  47599999 refseq:NC_000002.12</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2          7:0-59099999:DUP   7        0  59099999 refseq:NC_000007.14</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3          9:0-51799999:DEL   9        0  51799999 refseq:NC_000009.12</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 10:71300000-135374737:DEL  10 71300000 135374737 refseq:NC_000010.11</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5         11:0-30999999:DEL  11        0  30999999 refseq:NC_000011.10</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 14:15600000-106368585:DEL  14 15600000 106368585  refseq:NC_000014.9</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   variant_status               updated_time</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 low-level gain 2022-03-29T14:36:48.637433</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 low-level gain 2022-03-29T14:36:48.637842</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3   partial loss 2022-03-29T14:36:48.638289</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4   partial loss 2022-03-29T14:36:48.640366</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5   partial loss 2022-03-29T14:36:48.639375</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6   partial loss 2022-03-29T14:36:48.639864</span></span></code></pre></div>
 </div>
 <div id="the-second-output-format-output-pgxseg" class="section level2">
 <h2>The second output format (<code>output</code> = “pgxseg”)</h2>
-<p>This format is ‘.pgxseg’ file format. It contains segment mean values (in <code>log2</code> column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)).</p>
+<p>This format is ‘.pgxseg’ file format. It contains segment mean values (in <code>log2</code> column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)). A few variants are point mutations represented by columns <code>reference_bases</code> and <code>alternate_bases</code>.</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>variant_2 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id,<span class="at">output =</span> <span class="st">&quot;pgxseg&quot;</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_2)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     biosample_id chromosome    start       end  log2 variant_type</span></span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva5zv          2        0  47599999  0.58          DUP</span></span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva5zv          7        0  59099999  0.58          DUP</span></span>
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftva5zv          9        0  51799999 -1.00          DEL</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 pgxbs-kftva5zv         10 71300000 135374737 -1.00          DEL</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxbs-kftva5zv         10 71300000 135374737 -1.00          DEL</span></span>
 <span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva5zv         11        0  30999999 -1.00          DEL</span></span>
 <span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva5zv         14 15600000 106368585 -1.00          DEL</span></span>
 <span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   reference_bases alternate_bases</span></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1               .               .</span></span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2               .               .</span></span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3               .               .</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7               .               .</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5               .               .</span></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6               .               .</span></span></code></pre></div>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1            None            None</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            None            None</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3            None            None</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            None            None</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5            None            None</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6            None            None</span></span></code></pre></div>
 </div>
 <div id="the-third-output-format-output-seg" class="section level2">
 <h2>The third output format (<code>output</code> = “seg”)</h2>
@@ -343,7 +464,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva5zv          2        0  47599999          DUP  0.58</span></span>
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva5zv          7        0  59099999          DUP  0.58</span></span>
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftva5zv          9        0  51799999          DEL -1.00</span></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 pgxbs-kftva5zv         10 71300000 135374737          DEL -1.00</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxbs-kftva5zv         10 71300000 135374737          DEL -1.00</span></span>
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva5zv         11        0  30999999          DEL -1.00</span></span>
 <span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva5zv         14 15600000 106368585          DEL -1.00</span></span></code></pre></div>
 </div>
@@ -370,12 +491,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="session-info" class="section level1">
 <h1>Session Info</h1>
-<pre><code>#&gt; R version 4.1.2 (2021-11-01)
+<pre><code>#&gt; R version 4.1.0 (2021-05-18)
 #&gt; Platform: x86_64-apple-darwin17.0 (64-bit)
 #&gt; Running under: macOS Big Sur 10.16
 #&gt; 
 #&gt; Matrix products: default
-#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.dylib
 #&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
 #&gt; 
 #&gt; locale:
@@ -388,10 +509,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 #&gt; [1] pgxRpi_0.0.0.9000
 #&gt; 
 #&gt; loaded via a namespace (and not attached):
-#&gt;  [1] compiler_4.1.2  rjson_0.2.21    magrittr_2.0.1  fastmap_1.1.0  
-#&gt;  [5] tools_4.1.2     htmltools_0.5.2 yaml_2.2.1      stringi_1.7.5  
-#&gt;  [9] rmarkdown_2.11  knitr_1.36      stringr_1.4.0   xfun_0.28      
-#&gt; [13] digest_0.6.28   attempt_0.3.1   rlang_0.4.12    evaluate_0.14</code></pre>
+#&gt;  [1] compiler_4.1.0    rjson_0.2.20      magrittr_2.0.1    tools_4.1.0      
+#&gt;  [5] htmltools_0.5.1.1 yaml_2.2.1        stringi_1.6.2     rmarkdown_2.9    
+#&gt;  [9] knitr_1.33        stringr_1.4.0     xfun_0.24         digest_0.6.27    
+#&gt; [13] attempt_0.3.1     rlang_0.4.11      evaluate_0.14</code></pre>
 </div>
 
 

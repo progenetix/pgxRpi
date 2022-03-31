@@ -55,6 +55,8 @@ Relevant parameters of `pgxLoader` function: type, filters, codematches, biosamp
 
 ```{r}
 biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3059")
+
+head(biosamples)
 ```
 
 The data contains many columns representing different aspects of sample information. 
@@ -210,7 +212,7 @@ There are three output formats.
 
 ## The first output format (by default)
 
- This format contains variant id and associated biosample id as well as analysis id. The variant is represented as 'DUP' (duplication) or 'DEL' (deletion) in specific chromosome locations. A few variants are point mutations represented by columns `reference_bases` and `alternate_bases`.
+ This format contains variant id and associated biosample id as well as analysis id. The variant is represented as 'DUP' (duplication) or 'DEL' (deletion) in specific chromosome locations. 
 
 ```{r}
 variant_1 <- pgxLoader(type="variant", biosample_id = biosample_id)
@@ -219,7 +221,7 @@ head(variant_1)
 
 ## The second output format (`output` = "pgxseg")
 
-This format is '.pgxseg' file format. It contains segment mean values (in `log2` column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)). 
+This format is '.pgxseg' file format. It contains segment mean values (in `log2` column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)). A few variants are point mutations represented by columns `reference_bases` and `alternate_bases`.
 
 ```{r}
 variant_2 <- pgxLoader(type="variant", biosample_id = biosample_id,output = "pgxseg")
