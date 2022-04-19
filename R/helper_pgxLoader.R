@@ -122,8 +122,8 @@ pgxSampleLoader <- function(biosample_id,filters,codematches,skip,limit){
     if (!(is.null(filters))){
         for (i in c(1:length(filters))) {
             if_next <- FALSE
-            url <- paste0("http://progenetix.org/cgi/bycon/beaconServer/biosamples.py?filters=",
-                              filters[i],"&output=table")
+            url <- paste0("http://progenetix.org/beacon/biosamples/?filters=",
+                              filters[i],"&output=datatable")
             url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
             url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
             if (!(exists('res_1'))){
@@ -149,8 +149,8 @@ pgxSampleLoader <- function(biosample_id,filters,codematches,skip,limit){
                 j<-len
             }
             filter <- transform_id(biosample_id[c(((i-1)*50+1):j)])
-            url <- paste0("http://progenetix.org/cgi/bycon/beaconServer/biosamples.py?biosampleIds=",
-                              filter,"&output=table")
+            url <- paste0("http://progenetix.org/beacon/biosamples/?biosampleIds=",
+                              filter,"&output=datatable")
             if (!(exists('res_2'))){
                 try_catch(res_2 <- read_sample(url),.e= function(e){
                     if_next <<- TRUE})
@@ -204,7 +204,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
             j<-len
         }
         filter <- transform_id(biosample_id[c(((i-1)*50+1):j)])
-        url <- paste0("http://progenetix.org/cgi/bycon/beaconServer/variants.py?biosampleIds=",
+        url <- paste0("http://progenetix.org/beacon/variants/?biosampleIds=",
                       filter)
         if (!(is.null(output))){
             if (output == 'seg' | output == 'pgxseg'){

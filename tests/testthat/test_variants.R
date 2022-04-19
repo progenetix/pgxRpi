@@ -2,7 +2,7 @@ context("Retrieve variants")
 
 #url_e1 <- "http://progenetix.org/cgi/bycon/beaconServer/variants.py?biosampleIds=1"
 #url_e2 <- "https://progenetix.org/cgi/bycon/beaconServer/variants.py?biosampleIds=pgxbs-kftvh98e"
-url <- "http://progenetix.org/cgi/bycon/beaconServer/variants.py?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
+url <- "http://progenetix.org/beacon/variants/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
 
 test_that("retrieve variants with JSON",{
         cat(paste("\n trying:",url,"\n"))
