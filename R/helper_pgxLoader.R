@@ -219,8 +219,12 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
             try_catch(temp <- rjson::fromJSON(file = url), .e = function(e){if_next <<- TRUE}, .w = function(w){if_next <<- TRUE})
             if (if_next){  next }
             temp <- lapply(temp$response$resultSets[[1]]$results,unlist)
+            if (length(temp) == 0){
+              cat("No variants retrieved")
+              return(NULL)
+            }
             temp <- lapply(temp,function(x){
-                var_meta <- x[c('variation.location.sequenceId','variation.variantInternalId','variation.relativeCopyClass','variation.updated')]
+                var_meta <- x[c('variation.location.sequence_id','variation.variantInternalId','variation.relative_copy_class','variation.updated')]
                 id_ind <-  which(names(x) =='caseLevelData.id')
                 temp_row <- c()
                 for (i in id_ind){
