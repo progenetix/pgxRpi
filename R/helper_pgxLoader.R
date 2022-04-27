@@ -317,7 +317,7 @@ pgxcallsetLoader <- function(filters,limit,skip,codematches){
     filters <- filters[idcheck]
   }
   # start query
-  pg.url <- "http://www.progenetix.org/beacon/callsets/?output=pgxmatrix"
+  pg.url <- "http://www.progenetix.org/beacon/analyses/?output=pgxmatrix"
   
   filter <- transform_id(filters)
   pg.url  <- paste(pg.url,'&filters=',filter,sep="")
@@ -328,7 +328,7 @@ pgxcallsetLoader <- function(filters,limit,skip,codematches){
   meta <- readLines(pg.url,n=7)
   meta <-  gsub("#meta=>\"","",meta[7])
   meta <-  gsub("\"","",meta)
-  if (length(grep('WARNING',meta)) == 1){
+  if (length(grep('WARNING',meta)) == 1 & limit != 0){
     cat(paste("\n", meta, "\n"))
   }
   pg.data  <- read.table(pg.url, header=T, sep="\t", na="NA")
@@ -336,7 +336,7 @@ pgxcallsetLoader <- function(filters,limit,skip,codematches){
   if (codematches){
     pg.data <- pg.data[pg.data$group_id %in% filters,]
     if (dim(pg.data)[1] == 0){
-      cat("\n Warning: the option `codematches=TRUE` filters out all samples \n")
+      cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")
     }}
   
   return(pg.data)
@@ -347,23 +347,14 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
   stop_if(.x=length(filters) < 1, msg="\n One valid filter has to be provided \n")
   stop_if(.x=length(filters) > 1, msg="\n This query only supports one filter \n")
   if (codematches){
-    biosample_id <- pgxSampleLoader(biosample_id = NULL,filters = filters,codematches = T,skip=NULL,limit=NULL)
+    biosample_id <- pgxSampleLoader(biosample_id = NULL,filters = filters,codematches = T,skip=NULL,limit=0)
     biosample_id <- biosample_id$biosample_id
-    count <- pgxCount(filters)[,3]
-    if (count > 2000){ 
-      count <- floor(count/2000)
-      for (i in seq(count)){
-        temp_biosample_id <- pgxSampleLoader(biosample_id = NULL,filters = filters,codematches = T,skip=i,limit=NULL)
-        temp_biosample_id <-  temp_biosample_id$biosample_id
-        biosample_id <- c(biosample_id, temp_biosample_id)
-      }
-    }
     
     if (length(biosample_id) == 0){
       return()
     }}
   
-  url <- paste0('https://progenetix.org/beacon/callsets/?filters=',filters)
+  url <- paste0('https://progenetix.org/beacon/analyses/?output=cnvstats&filters=',filters)
   url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
   url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
   data <- rjson::fromJSON(file = url)
@@ -373,6 +364,7 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
   
   if (codematches){
     sel_sample_idx <- sample %in% biosample_id 
+    if (sum(sel_sample_idx) == 0){cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")}
   } else{
     sel_sample_idx <- seq(length(sample))
   }

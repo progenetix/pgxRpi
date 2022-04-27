@@ -30,7 +30,7 @@ pgxLoader <- function(
     output  = NULL, 
     filters= NULL,
     codematches = FALSE, 
-    limit=NULL,
+    limit=0,
     skip=NULL,
     biosample_id = NULL,
     save_file=FALSE,
@@ -72,9 +72,6 @@ pgxLoader <- function(
       }
     }
   
-  if (type == "biosample" & is.null(limit)){
-    limit=0
-  }
   
     switch(type,
            biosample = pgxSampleLoader(biosample_id = biosample_id, filters = filters,codematches = codematches,skip=skip,limit=limit),

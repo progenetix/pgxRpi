@@ -114,8 +114,9 @@ Relevant parameters of `pgxLoader` function: type, output, filters, codematches,
 cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C3059")
 ```
 
-By default, it returns the first 2000 profiles, because loading too many profiles will cause
-time-out problem. It is noted that the number of analysis profiles does not necessarily equal the number of samples.
+By default, it returns all available profiles (limit=0), so the query may spend 1-2 minutes 
+when the number of retrieved samples is large. It is noted that the number of analysis 
+profiles does not necessarily equal the number of samples.
 
 The data looks like this
 
@@ -127,13 +128,6 @@ cnv.status[c(1:3), c(1:5,6213:6215)]
 In this dataframe, `analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for
 individual biosample. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `X1.400000.1400000.DUP` is 1.0 in one row, it means that in the corresponding analysis one or more duplication events occur in the entire (100%) bin located in chromosome 1: 400000-1400000.
 
-If you want to access the next 1000 profiles in addition to the first 2000 analysis profiles, you can query like this
-
-```{r}
-cnv.status.2 <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C3059",
-                          skip=2, limit=1000)
-```
-
 Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
 
 ```{r}
@@ -141,7 +135,7 @@ cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C305
                         codematches = T)
 ```
 
-Only 46 from the 2000 profiles are left.
+Only 421 profiles are left.
 
 ```{r}
 dim(cnv.status)
@@ -161,21 +155,15 @@ It includes CNV coverage across chromosome arms, whole chromosomes, or whole gen
 names(cnv_covergae)
 ```
 
-By default, it also returns the first 2000 profiles. You can use parameters `skip` and `limit` to query additional profiles if the group contains more than 2000 profiles.
-
 The data of CNV coverage across chromosomal arms looks like this
 
 ```{r}
-dim(cnv_covergae$chrom_arm_coverage)
+head(cnv_covergae$chrom_arm_coverage)[,c(1:4, 49:52)]
 ```
 
 The row names are id of biosamples from the group NCIT:C2948. There are 96 columns. 
 The first 48 columns are duplication coverage across chromosomal arms, followed by deletion coverage.
 The data of CNV coverage across whole chromosomes is similar, with the only difference in columns.
-
-```{r}
-head(cnv_covergae$chrom_arm_coverage)[,c(1:4, 49:52)]
-```
 
 The data of CNV coverage across genome (hg38) looks like this
 
@@ -186,13 +174,14 @@ head(cnv_covergae$whole_genome_coverage)
 The first column is the total called coverage, followed by duplication coverage and deletion coverage.
 
 Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
-21 samples are excluded from the original 47 samples in this case.
+26 samples are excluded from the original 47 samples in this case.
 
 ```{r}
 cnv_covergae_2 <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948",
                             codematches = T)
 
-cat(paste('original data dimention:', paste(dim(cnv_covergae$chrom_arm_coverage),collapse = '*'),'\ncurrent data dimention:', paste(dim(cnv_covergae_2$chrom_arm_coverage),collapse = '*')))
+print(dim(cnv_covergae$chrom_arm_coverage))
+print(dim(cnv_covergae_2$chrom_arm_coverage))
 ```
 
 # Retrieve segment variants by biosampleid
