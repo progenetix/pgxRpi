@@ -1,9 +1,5 @@
 #' @import attempt
 
-check_internet <- function(){
-    stop_if_not(.x = curl::has_internet(), msg = "Please check your internet connexion")
-}
-
 transform_id <- function(id){
     if (length(id) > 1) {
         filter <- id[1]
@@ -15,16 +11,74 @@ transform_id <- function(id){
     return(filter)
 }
 
-read_sample <- function(url){
-    header <- read.table(url, nrow=1,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,quote="",header=F)
-    data <- read.table(url, skip=1,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,quote="",header=F)
-    header <- gsub('___','_',header)
-    colnames(data) <- header
-    data <- data[grepl('pgxbs',data$biosample_id),]
-    suppressWarnings(data$death <- as.numeric(data$death))
-    suppressWarnings(data$followup_months <- as.numeric(data$followup_months))
-    return(data.frame(data))
+null_to_na <- function(x){
+  x <- try_catch(x,.e=function(e){NA})
+  if (length(x) == 0){
+    return(NA)
+  } 
+  return(x)
 }
+
+# pick longer external arrayexpress & cbioportal & legacy ids
+pick_longer_id <- function(x){
+  return(x[which.max(nchar(x))])
+}
+
+
+read_sample <- function(url){
+  res.json <- rjson::fromJSON(file = url)
+  
+  res.list <- res.json$response$resultSets[[1]]$results
+  total.df <- list()
+  for ( i in seq(length(res.list))){
+    res <- res.list[[i]]
+    # extract external reference id
+    external_info <- unlist(lapply(res$externalReferences,function(x){x$id}))
+    cellosaurus_id <- external_info[grep('cellosaurus',external_info)]
+    pmid <- external_info[grep('PMID',external_info,ignore.case = T)]
+    arrayexpress_id <- pick_longer_id(external_info[grep('arrayexpress',external_info)])
+    cbioportal_id <- pick_longer_id(external_info[grep('cbioportal',external_info)])
+
+    # create data table for one sample
+    try_catch(total.df[[i]] <- data.frame(biosample_id=res$id,
+                                          individual_id=null_to_na(res$individualId),
+                                          callset_ids=null_to_na(res$info$callsetIds),
+                                          pgx_legacy_sample_id=pick_longer_id(null_to_na(res$info$legacyIds)),
+                                          cellline_id=null_to_na(res$info$cellLine),
+                                          histological_diagnosis_id=null_to_na(res$histologicalDiagnosis$id),
+                                          histological_diagnosis_label=null_to_na(res$histologicalDiagnosis$label),
+                                          icdo_morphology_id=null_to_na(res$icdoMorphology$id),
+                                          icdo_morphology_label=null_to_na(res$icdoMorphology$label),
+                                          icdo_topography_id=null_to_na(res$icdoTopography$id),
+                                          icdo_topography_label=null_to_na(res$icdoTopography$label),
+                                          sampled_tissue_id=null_to_na(res$sampledTissue$id),
+                                          sampled_tissue_label=null_to_na(res$sampledTissue$label),
+                                          biosample_status_id=null_to_na(res$biosampleStatus$id),
+                                          biosample_status_label=null_to_na(res$biosampleStatus$label),
+                                          pathological_stage_id=null_to_na(res$pathologicalStage$id),
+                                          pathological_stage_label=null_to_na(res$pathologicalStage$label),
+                                          experiment_id=null_to_na(res$analysisInfo$experimentId),
+                                          series_id=null_to_na(res$analysisInfo$seriesId),
+                                          platform_id=null_to_na(res$analysisInfo$platformId),
+                                          external_cellosaurus_id=null_to_na(cellosaurus_id),
+                                          external_PMID=null_to_na(pmid),
+                                          external_arrayexpress_id=null_to_na(arrayexpress_id),
+                                          external_cbioportal_id=null_to_na(cellosaurus_id),
+                                          followup_state=null_to_na(res$followupState$label),
+                                          geoprov_country=null_to_na(res$provenance$geoLocation$properties$country),
+                                          geoprov_city=null_to_na(res$provenance$geoLocation$properties$city), 
+                                          geoprov_iso_alpha3=null_to_na(res$provenance$geoLocation$properties$ISO3166alpha3),
+                                          geoprov_lat=null_to_na(res$provenance$geoLocation$properties$latitude), 
+                                          geoprov_long=null_to_na(res$provenance$geoLocation$properties$longitude),
+                                          data_use_condition=null_to_na(res$dataUseConditions$id), 
+                                          update_time=null_to_na(res$updated)),.e=function(e){
+                                            cat(i,'\n')
+                                          })
+  }
+  total.df <- Reduce(rbind, total.df)
+  return(total.df)
+}
+
 
 read_variant_pgxseg <- function(url){
     result <- read.table(url, header = T, sep="\t")
@@ -48,97 +102,118 @@ read_variant_pgxseg_meta <- function(url){
 }
 
 pgidCheck <- function(id){
-    id_prefix <- id
-    idx <- grep("pgx",id_prefix)
-    if (length(idx) != 0){
-      id_prefix[idx] <- gsub(".*:","",id_prefix[idx])
-      id_prefix[idx] <- gsub("-.*","",id_prefix[idx])
-    }
-    id_prefix <- unique(sub(":.*", "", id_prefix))
-    total_url <- url(description=paste0("https://progenetix.org/services/collations?filters=",id_prefix[1],"&output=text"),
-                     open='r')
-    info <- read.table(total_url, header=F, sep="\t", na="NA",fill=TRUE,quote = "")
-    close(total_url)
-    if (length(id_prefix) > 1){
-        for (i in c(2:length(id_prefix))){
-            total_url <- url(description=paste0("https://progenetix.org/services/collations?filters=",id_prefix[i],"&output=text"),
-                             open='r')
-            temp <- read.table(total_url, header=F, na="NA",sep = '\t',fill=TRUE,quote = "")
-            close(total_url)
-            info <- rbind(info, temp)
-        }
-    }
+  
+  res.id <- c()
+ 
+  ncit.idx <- grep('NCIT',id)
+  icdom.idx <- grep('icdom',id)
+  icdot.idx <- grep('icdot',id)
+  uberon.idx <- grep('UBERON',id)
+  
+  remain.id <- id
+  if (length(ncit.idx) > 0){
+    url <- "https://progenetix.org/services/collations?filters=NCIT"
+    res <- rjson::fromJSON(file = url)
+    res.id <- c(res.id,unlist(lapply(res$response$results, function(x){x$id})))
+    remain.id <- remain.id [!remain.id%in% id[ncit.idx]]
+  }
+  
+  if (length(icdom.idx) > 0){
+    url <- "https://progenetix.org/services/collations?filters=icdom"
+    res <- rjson::fromJSON(file = url)
+    res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
+    remain.id <- remain.id [!remain.id%in% id[icdom.idx]]
+  }
 
-    return(id %in% unlist(info[1]))
+  if (length(icdot.idx) > 0){
+    url <- "https://progenetix.org/services/collations?filters=icdot"
+    res <- rjson::fromJSON(file = url)
+    res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
+    remain.id <- remain.id [!remain.id%in% id[icdot.idx]]
+  }
+
+  if (length(uberon.idx) > 0){
+    url <- "https://progenetix.org/services/collations?filters=UBERON"
+    res <- rjson::fromJSON(file = url)
+    res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
+    remain.id <- remain.id [!remain.id%in% id[uberon.idx]]
+  }
+
+  if (length(remain.id) > 0){
+    url <- paste0("https://progenetix.org/services/collations?filters=",transform_id(remain.id))
+    res <- rjson::fromJSON(file = url)
+    res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
+  }
+  
+  return(id %in% res.id)
 }
 
 pgxFreqLoader <- function(output, codematches, filters) {
     # check filters again
-   stop_if(.x=length(filters) < 1, msg="\n At least one valid filter has to be provided \n")
+  stop_if(.x=length(filters) < 1, msg="\n At least one valid filter has to be provided \n")
     # check output format
-    stop_if(.x=!(output %in% c('pgxseg','pgxmatrix')),msg="\n Output is invalid. Only support 'pgxseg' or 'pgxmatrix' \n")
+  stop_if(.x=!(output %in% c('pgxseg','pgxmatrix')),msg="\n Output is invalid. Only support 'pgxseg' or 'pgxmatrix' \n")
     # check if filters exists
-    idcheck <- pgidCheck(filters)
-
-    if (!all(idcheck)){
-        cat(" No results for id", filters[!idcheck], "in progenetix database.\n","\n Only query id:", filters[idcheck],'\n')
-        filters <- filters[idcheck]
+  idcheck <- pgidCheck(filters)
+  if (!all(idcheck)){
+    cat("WARNING: No results for filters", filters[!idcheck], "in progenetix database.\n")
+    filters <- filters[idcheck]
     }
     # start query
-    pg.url <- paste0("http://www.progenetix.org/services/intervalFrequencies/?output=",output)
-
-
-    if (length(filters)>1){
-        filter <- transform_id(filters)
-        pg.url  <- paste(pg.url,'&filters=',filter,sep="")
-        } else{
-        pg.url  <- paste(pg.url, '&', 'id', '=', filters,sep="")
+  pg.url <- paste0("http://www.progenetix.org/services/intervalFrequencies/?output=",output)
+  
+  filter <- transform_id(filters)
+  pg.url  <- paste0(pg.url,'&filters=',filter)
+  
+  if (codematches){
+    pg.url  <- paste0(pg.url, '&method=codematches')
+  }
+  
+  meta <- readLines(pg.url)[c(1:(length(filters)+1))]
+  meta_lst <- unlist(strsplit(meta,split = ';'))
+  label <- meta_lst[grep("label",meta_lst)]
+  label<- gsub('.*=','',label)
+  count <- meta_lst[grep("sample_count",meta_lst)]
+  count <- as.numeric(gsub('.*=','',count))
+  meta <- data.frame(code = c(filters,'total'), label=c(label,''), sample_count=c(count,sum(count)))
+  pg.data  <- read.table(pg.url, header=T, sep="\t", na="NA")
+  colnames(pg.data)[1] <- 'filters'
+  data_lst <- list()
+  for (i in filters){
+    data_lst[[i]] <- pg.data[pg.data$filters == i,]
     }
-
-    if (codematches){
-        pg.url  <- paste0(pg.url, '&method=codematches')
-    }
-
-    meta <- readLines(pg.url)[c(1:(length(filters)+1))]
-    meta_lst <- unlist(strsplit(meta,split = ';'))
-    label <- meta_lst[grep("label",meta_lst)]
-    label<- gsub('.*=','',label)
-    count <- meta_lst[grep("sample_count",meta_lst)]
-    count <- as.numeric(gsub('.*=','',count))
-    meta <- data.frame(code = c(filters,'total'), label=c(label,''), sample_count=c(count,sum(count)))
-    pg.data  <- read.table(pg.url, header=T, sep="\t", na="NA")
-    colnames(pg.data)[1] <- 'filters'
-    data_lst <- list()
-    for (i in filters){
-        data_lst[[i]] <- pg.data[pg.data$filters == i,]
-    }
-    data_lst[['total']] <- pg.data
-    result <- list(meta = meta, data = data_lst)
-
-    return(result)
+  data_lst[['total']] <- pg.data
+  result <- list(meta = meta, data = data_lst)
+  
+  return(result)
 }
 
-pgxSampleLoader <- function(biosample_id,filters,codematches,skip,limit){
+pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,limit){
     if (!(is.null(filters))){
-        for (i in c(1:length(filters))) {
-            if_next <- FALSE
-            url <- paste0("http://progenetix.org/beacon/biosamples/?filters=",
-                              filters[i],"&output=datatable")
-            url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
-            url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
-            if (!(exists('res_1'))){
-                try_catch(res_1 <- read_sample(url),.e= function(e){
-                    cat(paste("No samples with the filter", filters[i],"\n"))
-                    if_next <<- TRUE})
-                if (if_next){ next }
-            }else {
-                try_catch(temp <- read_sample(url),.e= function(e){
-                    cat(paste("No samples with the filter", filters[i],"\n"))
-                    if_next <<- TRUE
-                    })
-                if (if_next){ next }
-                res_1 <- rbind(res_1, temp)}
-            }}
+      # check if filters exists
+      idcheck <- pgidCheck(filters)
+      if (!all(idcheck)){
+        cat("WARNING: No results for filters", filters[!idcheck], "in progenetix database.\n")
+        filters <- filters[idcheck]
+      }
+      for (i in c(1:length(filters))) {
+        if_next <- FALSE
+        url <- paste0("http://progenetix.org/beacon/biosamples/?filters=",filters[i])
+        url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
+        url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
+        if (!(exists('res_1'))){
+          try_catch(res_1 <- read_sample(url),.e= function(e){
+          cat(paste("No samples with the filter", filters[i],"\n"))
+            if_next <<- TRUE})
+          if (if_next){ next }
+          }else {
+            try_catch(temp <- read_sample(url),.e= function(e){
+              cat(paste("No samples with the filter", filters[i],"\n"))
+              if_next <<- TRUE})
+            if (if_next){ next }
+            res_1 <- rbind(res_1, temp)}
+      }}
+  
     if (!(is.null(biosample_id))){
         len <- length(biosample_id)
         count <- ceiling(len/50)
@@ -149,8 +224,7 @@ pgxSampleLoader <- function(biosample_id,filters,codematches,skip,limit){
                 j<-len
             }
             filter <- transform_id(biosample_id[c(((i-1)*50+1):j)])
-            url <- paste0("http://progenetix.org/beacon/biosamples/?biosampleIds=",
-                              filter,"&output=datatable")
+            url <- paste0("http://progenetix.org/beacon/biosamples/?biosampleIds=",filter)
             if (!(exists('res_2'))){
                 try_catch(res_2 <- read_sample(url),.e= function(e){
                     if_next <<- TRUE})
@@ -161,31 +235,57 @@ pgxSampleLoader <- function(biosample_id,filters,codematches,skip,limit){
                     })
                 if (if_next){ next }
                 res_2 <- rbind(res_2, temp)}
-            }}
-    stop_if(.x= !(exists('res_1') | exists('res_2')) , msg='No samples retrieved')
+        }}
+  
+  if (!(is.null(individual_id))){
+    len <- length(individual_id)
+    count <- ceiling(len/50)
+    for (i in c(1:count)){
+      if_next <- FALSE
+      j = i*50
+      if (j > len){
+        j<-len
+      }
+      filter <- transform_id(individual_id[c(((i-1)*50+1):j)])
+      url <- paste0("http://progenetix.org/beacon/biosamples/?individualIds=",filter)
+      if (!(exists('res_3'))){
+        try_catch(res_3 <- read_sample(url),.e= function(e){
+          if_next <<- TRUE})
+        if (if_next){ next }
+      }else {
+        try_catch(temp <- read_sample(url),.e= function(e){
+          if_next <<- TRUE
+        })
+        if (if_next){ next }
+        res_3 <- rbind(res_3, temp)}
+    }}
+    stop_if(.x= !(exists('res_1') | exists('res_2')| exists('res_3')) , msg='No samples retrieved')
 
-    if (exists('res_1') & exists('res_2')){
-        res <- rbind(res_1, res_2)
-    } else if (exists('res_1')){
-        res <- res_1
-    } else{
-        res <- res_2
+    res <- c()
+    if (exists('res_1')){
+      res <- res_1 
+    } 
+    
+    if (exists('res_2')){
+      res <- rbind(res, res_2)
     }
 
+    if (exists('res_3')){
+      res <- rbind(res, res_3)
+    }
 
     if (codematches){
-        idx <- res$histological_diagnosis_id %in% filters | res$sampled_tissue_id %in% filters | res$icdo_morphology_id %in% filters |
-        res$icdo_topography_id %in% filters | res$external_references__id_PMID %in% filters | res$biosample_id %in% biosample_id |
-        res$external_references__id_geo.GSM %in% filters | res$external_references__id_geo.GSE %in% filters | 
-        res$external_references__id_geo.GPL %in% filters | res$external_references__id_cellosaurus %in% filters | 
-        res$external_references__id_arrayexpress %in% filters | res$external_references__id_cbioportal %in% filters
+      
+        idx <- res$biosample_id %in% biosample_id | res$individual_id %in% individual_id | 
+          res$histological_diagnosis_id %in% filters | res$sampled_tissue_id %in% filters | 
+          res$icdo_morphology_id %in% filters | res$icdo_topography_id %in% filters 
         
         res <- res[idx,]
         if (dim(res)[1] == 0){
             cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")
         }}
     
-    colnames(res)[c(1,3)] <- c('biosample_id','callset_id')
+    res <- res[!duplicated(res),]
     return(res)
 }
 
@@ -224,7 +324,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
               return(NULL)
             }
             temp <- lapply(temp,function(x){
-                var_meta <- x[c('variation.location.sequence_id','variation.variantInternalId','variation.relative_copy_class','variation.updated')]
+                var_meta <- x[c('variation.location.sequence_id','variantInternalId','variation.relative_copy_class','variation.updated')]
                 id_ind <-  which(names(x) =='caseLevelData.id')
                 temp_row <- c()
                 for (i in id_ind){
@@ -310,18 +410,10 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
 pgxcallsetLoader <- function(filters,limit,skip,codematches){
   # check filters 
   stop_if(.x=length(filters) < 1, msg="\n at least one valid filter has to be provided \n")
-  
-  idcheck <- pgidCheck(filters)
-  if (!all(idcheck)){
-    cat(" No results for id", filters[!idcheck], "in progenetix database.\n","\n Only query id:", filters[idcheck],'\n')
-    filters <- filters[idcheck]
-  }
+  stop_if(.x=length(filters) > 1, msg="\n This query only supports one filter \n")
+
   # start query
-  pg.url <- "http://www.progenetix.org/beacon/analyses/?output=pgxmatrix"
-  
-  filter <- transform_id(filters)
-  pg.url  <- paste(pg.url,'&filters=',filter,sep="")
-  
+  pg.url  <- paste0("http://www.progenetix.org/beacon/analyses/?output=pgxmatrix",'&filters=',filters)
   pg.url  <- ifelse(is.null(limit), pg.url, paste0(pg.url,"&limit=",limit))
   pg.url  <- ifelse(is.null(skip), pg.url, paste0(pg.url,"&skip=",skip))
   
@@ -347,7 +439,7 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
   stop_if(.x=length(filters) < 1, msg="\n One valid filter has to be provided \n")
   stop_if(.x=length(filters) > 1, msg="\n This query only supports one filter \n")
   if (codematches){
-    biosample_id <- pgxSampleLoader(biosample_id = NULL,filters = filters,codematches = T,skip=NULL,limit=0)
+    biosample_id <- pgxSampleLoader(biosample_id = NULL,individual_id = NULL,filters = filters,codematches = T,skip=NULL,limit=0)
     biosample_id <- biosample_id$biosample_id
     
     if (length(biosample_id) == 0){
@@ -421,3 +513,80 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
   result$whole_genome_coverage <- total_frac
   return(result)
 }
+
+pgxIndivLoader <- function(individual_id,filters,codematches, skip,limit){
+  if (!(is.null(filters))){
+    # check if filters exists
+    idcheck <- pgidCheck(filters)
+    if (!all(idcheck)){
+      cat("WARNING: No results for filters", filters[!idcheck], "in progenetix database.\n")
+      filters <- filters[idcheck]
+    }
+    # start query
+    for (i in c(1:length(filters))) {
+      if_next <- FALSE
+      url <- paste0("http://progenetix.org/beacon/individuals/?filters=",
+                    filters[i],"&output=datatable")
+      url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
+      url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
+      if (!(exists('res_1'))){
+        try_catch(res_1 <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
+          cat(paste("No samples with the filter", filters[i],"\n"))
+          if_next <<- TRUE})
+        if (if_next){ next }
+      }else {
+        try_catch(temp <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
+          cat(paste("No samples with the filter", filters[i],"\n"))
+          if_next <<- TRUE
+        })
+        if (if_next){ next }
+        res_1 <- rbind(res_1, temp)}
+    }}
+  
+  if (!(is.null(individual_id))){
+    len <- length(individual_id)
+    count <- ceiling(len/50)
+    for (i in c(1:count)){
+      if_next <- FALSE
+      j = i*50
+      if (j > len){
+        j<-len
+      }
+      filter <- transform_id(individual_id[c(((i-1)*50+1):j)])
+      url <- paste0("http://progenetix.org/beacon/individuals/?individualIds=",
+                    filter,"&output=datatable")
+      if (!(exists('res_2'))){
+        try_catch(res_2 <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
+          if_next <<- TRUE})
+        if (if_next){ next }
+      }else {
+        try_catch(temp <-read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
+          if_next <<- TRUE
+        })
+        if (if_next){ next }
+        res_2 <- rbind(res_2, temp)}
+    }}
+  
+  stop_if(.x= !(exists('res_1') | exists('res_2')) , msg='No samples retrieved')
+  
+  res <- c()
+  if (exists('res_1')){
+    res <- res_1 
+  } 
+  
+  if (exists('res_2')){
+    res <- rbind(res, res_2)
+  }
+  
+  
+  if (codematches){
+    idx <- res$histological_diagnosis_id %in% filters | res$individual_id %in% individual_id
+    res <- res[idx,]
+    if (dim(res)[1] == 0){
+      cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")
+    }}
+  
+  res <- res[!duplicated(res$individual_id),]
+  return(res)
+}
+

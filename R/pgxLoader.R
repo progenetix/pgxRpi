@@ -2,7 +2,7 @@
 #'
 #' This function loads various data from `Progenetix` database.   
 #'
-#' @param type A string specifying output data type. Available options are "biosample", 
+#' @param type A string specifying output data type. Available options are "biosample", "individual",
 #' "variant" or "frequency". 
 #' @param output A string specifying output file format. When the parameter `type` is "variant",
 #' available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency",
@@ -10,13 +10,16 @@
 #' @param filters A single or a comma-concatenated list of identifiers for cancer type,
 #' literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers")
 #' @param codematches A logical value determining whether to exclude samples 
-#' from child terms of specified filters. If FALSE, retrieved samples include child 
-#' terms of specified filters. Default is FALSE.
+#' from child concepts of specified filters that belong to cancer type/tissue encoding system. 
+#' If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
+#' Default is FALSE.
+#' @param limit Integer to specify the number of returned samples/profiles for each filter.  
+#' @param skip Integer to specify the number of skipped samples/profiles for each filter. E.g. if skip = 2, limit=500, 
+#' the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
 #' @param biosample_id  A single or a comma-concatenated list of identifiers used 
 #' in Progenetix database for identifying biosamples. 
-#' @param limit Integer to specify the number of returned samples/profiles. 
-#' @param skip Integer to specify the number of skipped samples/profiles. If skip = 2, limit=500, 
-#' the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
+#' @param individual_id  A single or a comma-concatenated list of identifiers used 
+#' in Progenetix database for identifying individuals. 
 #' @param save_file A logical value determining whether to save the variant data as file 
 #' instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
 #' @param filename A string specifying the path and name of the file to be saved. 
@@ -33,11 +36,12 @@ pgxLoader <- function(
     limit=0,
     skip=NULL,
     biosample_id = NULL,
+    individual_id=NULL,
     save_file=FALSE,
     filename=NULL){
     
-    if (!(any(type %in% c("biosample", "variant","frequency")))){
-        stop("The parameter 'type' is invalid (available: \"biosample\", \"variant\", or \"frequency\")")
+    if (!(any(type %in% c("biosample", "variant","frequency","individual")))){
+        stop("The parameter 'type' is invalid (available: \"biosample\", \"individual\", \"variant\", or \"frequency\")")
     }
     
 
@@ -59,6 +63,9 @@ pgxLoader <- function(
       if (!is.null(biosample_id)){
         cat("\n WARNING: The parameter 'biosample_id' is not used in this query. Only 'filters' are accepted. \n")
       }
+      if (!is.null(individual_id)){
+        cat("\n WARNING: The parameter 'individual_id' is not used in this query. Only 'filters' is accepted. \n")
+      }
     }
       
 
@@ -70,11 +77,15 @@ pgxLoader <- function(
       if (!is.null(filters)){
         cat("\n WARNING: The parameter 'filters' is not used in this query. Only 'biosample_id' is accepted. \n")
       }
+      if (!is.null(individual_id)){
+        cat("\n WARNING: The parameter 'individual_id' is not used in this query. Only 'biosample_id' is accepted. \n")
+      }
     }
   
   
     switch(type,
-           biosample = pgxSampleLoader(biosample_id = biosample_id, filters = filters,codematches = codematches,skip=skip,limit=limit),
+           biosample = pgxSampleLoader(biosample_id = biosample_id, individual_id=individual_id,filters = filters,codematches=codematches,skip=skip,limit=limit),
+           individual=pgxIndivLoader(individual_id=individual_id,filters=filters,codematches=codematches, skip=skip,limit=limit),
            variant= pgxVariantLoader(biosample_id = biosample_id,output=output,save_file=save_file, filename = filename),
            frequency =pgxFreqLoader(output = output, codematches = codematches, filters=filters),
            callset=pgxcallsetLoader(filters = filters,limit=limit, skip=skip,codematches = codematches),

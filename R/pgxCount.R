@@ -13,33 +13,19 @@ pgxCount <- function(
     if (is.null(filters)){
         stop("Please input filter")
     }
-    if (length(filters) > 1){
-        temp <- filters[1]
-        for (i in c(2:length(filters))){
-            temp <- paste(temp, filters[i], sep=",")
-        }
-        id_name <- temp
-    } else{
-        id_name <- filters
-    }
-    url <- paste0("https://progenetix.org/services/collations?filters=",id_name,"&method=counts&output=text")
-    id_url <- url(description=url,
-                  open='r')
-    info <- read.table(id_url, header=F, sep="\t", na="NA")
-    close(id_url)
-    if (is.null(info)){
+    
+    filter=transform_id(filters)
+    url <- paste0("https://progenetix.org/services/collations?filters=",filter)
+    info <- rjson::fromJSON(file = url)
+    res <- lapply(info$response$results, function(x){
+      data.frame(filters=x$id,label=x$label,total_count=x$count,exact_match_count=x$codeMatches)
+      })
+    
+    res <- Reduce(rbind,res)
+    if (length(res) == 0){
         return("No samples with the queried filter \n")
     }
   
-    info <- info[unlist(info[1]) %in% filters,]
-    rownames(info) <- seq(1:dim(info)[1])
-    
-    if (dim(info)[1] < length(filters)){
-        cat("Attention: No results for some queried filters \n")
-    }
-    
-    info <- info[,c(1,2,3,4)]
-    colnames(info) <- c('filters','label','total','exact_match')
-    return (info)
+    return (res)
 }
 
