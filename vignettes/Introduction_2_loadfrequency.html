@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hangjia Zhao" />
 
-<meta name="date" content="2022-04-27" />
+<meta name="date" content="2022-10-12" />
 
 <title>Introduction_2_loadfrequency</title>
 
@@ -141,7 +141,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">Introduction_2_loadfrequency</h1>
 <h4 class="author">Hangjia Zhao</h4>
-<h4 class="date">2022-04-27</h4>
+<h4 class="date">2022-10-12</h4>
 
 
 
@@ -153,13 +153,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>This function loads various data from <code>Progenetix</code> database.</p>
 <p>The parameters of this function:</p>
 <ul>
-<li><code>type</code> A string specifying output data type. Available options are “biosample”, “variant” or “frequency”.</li>
+<li><code>type</code> A string specifying output data type. Available options are “biosample”, “individual”, “variant” or “frequency”.</li>
 <li><code>output</code> A string specifying output file format. When the parameter <code>type</code> is “variant”, available options are NULL, “pgxseg” ,“pgxmatrix”, “coverage” or “seg” ; When the parameter <code>type</code> is “frequency”, available options are “pgxseg” or “pgxmatrix” .</li>
-<li><code>filters</code> A single or a comma-concatenated list of identifiers for cancer type, literature, and cohorts such as c(“NCIT:C7376”,“pgx:icdom-98353”,“<a href="PMID:22824167" class="uri">PMID:22824167</a>”, “pgx:cohort-TCGAcancers”). Only used if the parameter <code>type</code> is “biosample” or “frequency”.</li>
-<li><code>codematches</code> A logical value determining whether to exclude samples from child terms of specified filters. If FALSE, retrieved samples include child terms of specified filters. Only used when <code>filters</code> is specified. Default is FALSE.</li>
+<li><code>filters</code> A single or a comma-concatenated list of identifiers for cancer type, literature, and cohorts such as c(“NCIT:C7376”,“pgx:icdom-98353”,“<a href="PMID:22824167" class="uri">PMID:22824167</a>”, “pgx:cohort-TCGAcancers”).</li>
+<li><code>codematches</code> A logical value determining whether to exclude samples from child concepts of specified filters that belong to cancer type/tissue encoding system. If TRUE, retrieved samples only keep samples exactly encoded by specified filters. Default is FALSE.</li>
+<li><code>limit</code> Integer to specify the number of returned samples/profiles for each filter.<br />
+</li>
+<li><code>skip</code> Integer to specify the number of skipped samples/profiles for each filter. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned.</li>
 <li><code>biosample_id</code> A single or a comma-concatenated list of identifiers used in Progenetix database for identifying biosamples.</li>
-<li><code>limit</code> Integer to specify the number of returned samples/profiles.</li>
-<li><code>skip</code> Integer to specify the number of skipped samples/profiles.</li>
+<li><code>individual_id</code> A single or a comma-concatenated list of identifiers used in Progenetix database for identifying individuals.</li>
 <li><code>save_file</code> A logical value determining whether to save the variant data as file instead of direct return. Only used when the parameter <code>type</code> is “variant” and <code>output</code> is “pgxseg” or “seg”. Default is FALSE.</li>
 <li><code>filename</code> A string specifying the path and name of the file to be saved. Only used if the parameter <code>save_file</code> is TRUE. Default is “variants.seg/pgxseg” in current work directory.</li>
 </ul>
@@ -363,12 +365,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="session-info" class="section level1">
 <h1>Session Info</h1>
-<pre><code>#&gt; R version 4.1.0 (2021-05-18)
+<pre><code>#&gt; R version 4.1.2 (2021-11-01)
 #&gt; Platform: x86_64-apple-darwin17.0 (64-bit)
 #&gt; Running under: macOS Big Sur 10.16
 #&gt; 
 #&gt; Matrix products: default
-#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.dylib
+#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
 #&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
 #&gt; 
 #&gt; locale:
@@ -381,15 +383,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 #&gt; [1] pheatmap_1.0.12    RColorBrewer_1.1-2 pgxRpi_0.0.0.9000 
 #&gt; 
 #&gt; loaded via a namespace (and not attached):
-#&gt;  [1] circlize_0.4.13     attempt_0.3.1       digest_0.6.27      
-#&gt;  [4] R6_2.5.0            grid_4.1.0          lifecycle_1.0.0    
-#&gt;  [7] gtable_0.3.0        magrittr_2.0.1      scales_1.1.1       
-#&gt; [10] evaluate_0.14       highr_0.9           rlang_0.4.11       
-#&gt; [13] stringi_1.6.2       GlobalOptions_0.1.2 farver_2.1.0       
-#&gt; [16] rmarkdown_2.9       tools_4.1.0         stringr_1.4.0      
-#&gt; [19] munsell_0.5.0       xfun_0.24           yaml_2.2.1         
-#&gt; [22] compiler_4.1.0      colorspace_2.0-1    shape_1.4.6        
-#&gt; [25] htmltools_0.5.1.1   knitr_1.33</code></pre>
+#&gt;  [1] rstudioapi_0.13     knitr_1.36          magrittr_2.0.1     
+#&gt;  [4] munsell_0.5.0       colorspace_2.0-2    rjson_0.2.21       
+#&gt;  [7] R6_2.5.1            rlang_1.0.6         fastmap_1.1.0      
+#&gt; [10] stringr_1.4.0       highr_0.9           tools_4.1.2        
+#&gt; [13] grid_4.1.2          gtable_0.3.0        circlize_0.4.13    
+#&gt; [16] xfun_0.28           cli_3.4.1           jquerylib_0.1.4    
+#&gt; [19] htmltools_0.5.2     yaml_2.2.1          digest_0.6.28      
+#&gt; [22] attempt_0.3.1       lifecycle_1.0.1     farver_2.1.0       
+#&gt; [25] sass_0.4.2          GlobalOptions_0.1.2 shape_1.4.6        
+#&gt; [28] cachem_1.0.6        evaluate_0.14       rmarkdown_2.11     
+#&gt; [31] stringi_1.7.5       compiler_4.1.2      bslib_0.4.0        
+#&gt; [34] scales_1.1.1        jsonlite_1.7.2</code></pre>
 </div>
 
 

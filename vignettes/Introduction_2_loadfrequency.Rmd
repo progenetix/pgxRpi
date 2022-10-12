@@ -28,21 +28,23 @@ This function loads various data from `Progenetix` database.
 
 The parameters of this function:
 
-* `type` A string specifying output data type. Available options are "biosample", 
+* `type` A string specifying output data type. Available options are "biosample", "individual",
 "variant" or "frequency". 
 * `output` A string specifying output file format. When the parameter `type` is "variant",
-available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency",
-available options are "pgxseg" or "pgxmatrix" .
+available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxseg" or "pgxmatrix" .
 * `filters` A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers").
-Only used if the parameter `type` is "biosample" or "frequency".
 * `codematches` A logical value determining whether to exclude samples 
-from child terms of specified filters. If FALSE, retrieved samples include child 
-terms of specified filters. Only used when `filters` is specified. Default is FALSE.
+from child concepts of specified filters that belong to cancer type/tissue encoding system. 
+If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
+Default is FALSE. 
+* `limit` Integer to specify the number of returned samples/profiles for each filter.  
+* `skip` Integer to specify the number of skipped samples/profiles for each filter. 
+E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
 * `biosample_id` A single or a comma-concatenated list of identifiers used in Progenetix 
 database for identifying biosamples. 
-* `limit` Integer to specify the number of returned samples/profiles. 
-* `skip` Integer to specify the number of skipped samples/profiles. 
+* `individual_id` A single or a comma-concatenated list of identifiers used in Progenetix 
+database for identifying individuals. 
 * `save_file` A logical value determining whether to save the variant data as file 
 instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
 * `filename` A string specifying the path and name of the file to be saved. 
