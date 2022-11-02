@@ -19,9 +19,13 @@ Imports:
 	rjson,
 	dplyr,
   	attempt,
-  	curl
+  	curl,
+  	lubridate,
+  	survival,
+  	survminer,
+  	ggplot2
 Depends: 
-    R (>= 2.10)
+    R (>= 3.10)
 Suggests: 
     rmarkdown,
     knitr,

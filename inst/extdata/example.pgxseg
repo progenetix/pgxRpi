@@ -1,0 +1,376 @@
+#meta=>biosample_count=44
+#sample=>id=GIST-gun-079;biosample_id=GIST-gun-079;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P68Y;followup_state_id=EFO:0030041;followup_time=P11M
+#sample=>id=GIST-gun-080;biosample_id=GIST-gun-080;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P66Y;followup_state_id=EFO:0030041;followup_time=P59M
+#sample=>id=GIST-gun-081;biosample_id=GIST-gun-081;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P74Y;followup_state_id=EFO:0030041;followup_time=P13M
+#sample=>id=GIST-gun-082;biosample_id=GIST-gun-082;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P39Y;followup_state_id=EFO:0030041;followup_time=P109M
+#sample=>id=GIST-gun-083;biosample_id=GIST-gun-083;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P82Y;followup_state_id=EFO:0030041;followup_time=P47M
+#sample=>id=GIST-gun-084;biosample_id=GIST-gun-084;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P72Y;followup_state_id=EFO:0030041;followup_time=P62M
+#sample=>id=GIST-gun-085;biosample_id=GIST-gun-085;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P62Y;followup_state_id=EFO:0030041;followup_time=P58M
+#sample=>id=GIST-gun-086;biosample_id=GIST-gun-086;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P72Y;followup_state_id=EFO:0030041
+#sample=>id=GIST-gun-087;biosample_id=GIST-gun-087;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P64Y;followup_state_id=EFO:0030041;followup_time=P67M
+#sample=>id=GIST-gun-088;biosample_id=GIST-gun-088;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P82Y;followup_state_id=EFO:0030039
+#sample=>id=GIST-gun-089;biosample_id=GIST-gun-089;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P58Y;followup_state_id=EFO:0030041;followup_time=P72M
+#sample=>id=GIST-gun-090;biosample_id=GIST-gun-090;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P64Y;followup_state_id=EFO:0030049;followup_time=P20M
+#sample=>id=GIST-gun-091;biosample_id=GIST-gun-091;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P68Y;followup_state_id=EFO:0030041;followup_time=P21M
+#sample=>id=GIST-gun-092;biosample_id=GIST-gun-092;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P64Y;followup_state_id=EFO:0030041;followup_time=P39M
+#sample=>id=GIST-gun-093;biosample_id=GIST-gun-093;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P63Y;followup_state_id=EFO:0030041;followup_time=P21M
+#sample=>id=GIST-gun-094;biosample_id=GIST-gun-094;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P63Y;followup_state_id=EFO:0030041;followup_time=P34M
+#sample=>id=GIST-gun-095;biosample_id=GIST-gun-095;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P72Y;followup_state_id=EFO:0030041;followup_time=P14M
+#sample=>id=GIST-gun-096;biosample_id=GIST-gun-096;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P54Y;followup_state_id=EFO:0030041;followup_time=P66M
+#sample=>id=GIST-gun-097;biosample_id=GIST-gun-097;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P77Y;followup_state_id=EFO:0030049;followup_time=P15M
+#sample=>id=GIST-gun-098;biosample_id=GIST-gun-098;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P66Y;followup_state_id=EFO:0030041;followup_time=P14M
+#sample=>id=GIST-gun-099;biosample_id=GIST-gun-099;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P65Y;followup_state_id=EFO:0030041;followup_time=P42M
+#sample=>id=GIST-gun-100;biosample_id=GIST-gun-100;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P64Y;followup_state_id=EFO:0030039
+#sample=>id=GIST-gun-101;biosample_id=GIST-gun-101;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P62Y;followup_state_id=EFO:0030039
+#sample=>id=GIST-gun-102;biosample_id=GIST-gun-102;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P68Y;followup_state_id=EFO:0030041;followup_time=P50M
+#sample=>id=GIST-gun-103;biosample_id=GIST-gun-103;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P59Y;followup_state_id=EFO:0030041;followup_time=P32M
+#sample=>id=GIST-gun-104;biosample_id=GIST-gun-104;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P64Y;followup_state_id=EFO:0030041;followup_time=P102M
+#sample=>id=GIST-gun-105;biosample_id=GIST-gun-105;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P55Y;followup_state_id=EFO:0030041;followup_time=P16M
+#sample=>id=GIST-gun-106;biosample_id=GIST-gun-106;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C16.9;icdo_topography_id=pgx:icdot-C16.9;group_label=stomach;icdo_topography_label=stomach;sampled_tissue_id=UBERON:0000945;sampled_tissue_label=UBERON:0000945;stage=High;age_iso=P59Y;followup_state_id=EFO:0030041;followup_time=P12M
+#sample=>id=ThyrFollCarc-22;biosample_id=ThyrFollCarc-22;histological_diagnosis_id=NCIT:C65200;histological_diagnosis_label=NCIT:C65200;icdo_morphology_id=pgx:icdom-83353;icdo_morphology_label=Follicular carcinoma;group_id=pgx:icdot-C73.9;icdo_topography_id=pgx:icdot-C73.9;group_label=thyroid gland;icdo_topography_label=thyroid gland;sampled_tissue_id=UBERON:0002046;sampled_tissue_label=UBERON:0002046;age_iso=P70Y;followup_state_id=EFO:0030039
+#sample=>id=ThyrFollCarc-23;biosample_id=ThyrFollCarc-23;histological_diagnosis_id=NCIT:C65200;histological_diagnosis_label=NCIT:C65200;icdo_morphology_id=pgx:icdom-83353;icdo_morphology_label=Follicular carcinoma;group_id=pgx:icdot-C73.9;icdo_topography_id=pgx:icdot-C73.9;group_label=thyroid gland;icdo_topography_label=thyroid gland;sampled_tissue_id=UBERON:0002046;sampled_tissue_label=UBERON:0002046;age_iso=P33Y;followup_state_id=EFO:0030039
+#sample=>id=ThyrFollCarc-24;biosample_id=ThyrFollCarc-24;histological_diagnosis_id=NCIT:C65200;histological_diagnosis_label=NCIT:C65200;icdo_morphology_id=pgx:icdom-83353;icdo_morphology_label=Follicular carcinoma;group_id=pgx:icdot-C73.9;icdo_topography_id=pgx:icdot-C73.9;group_label=thyroid gland;icdo_topography_label=thyroid gland;sampled_tissue_id=UBERON:0002046;sampled_tissue_label=UBERON:0002046;age_iso=P39Y;followup_state_id=EFO:0030039
+#sample=>id=ThyrFollCarc-27;biosample_id=ThyrFollCarc-27;histological_diagnosis_id=NCIT:C65200;histological_diagnosis_label=NCIT:C65200;icdo_morphology_id=pgx:icdom-83353;icdo_morphology_label=Follicular carcinoma;group_id=pgx:icdot-C73.9;icdo_topography_id=pgx:icdot-C73.9;group_label=thyroid gland;icdo_topography_label=thyroid gland;sampled_tissue_id=UBERON:0002046;sampled_tissue_label=UBERON:0002046;age_iso=P68Y;followup_state_id=EFO:0030039
+#sample=>id=ThyrFollCarc-28;biosample_id=ThyrFollCarc-28;histological_diagnosis_id=NCIT:C65200;histological_diagnosis_label=NCIT:C65200;icdo_morphology_id=pgx:icdom-83353;icdo_morphology_label=Follicular carcinoma;group_id=pgx:icdot-C73.9;icdo_topography_id=pgx:icdot-C73.9;group_label=thyroid gland;icdo_topography_label=thyroid gland;sampled_tissue_id=UBERON:0002046;sampled_tissue_label=UBERON:0002046;age_iso=P41Y;followup_state_id=EFO:0030039
+#sample=>id=ThyrFollCarc-30;biosample_id=ThyrFollCarc-30;histological_diagnosis_id=NCIT:C65200;histological_diagnosis_label=NCIT:C65200;icdo_morphology_id=pgx:icdom-83353;icdo_morphology_label=Follicular carcinoma;group_id=pgx:icdot-C73.9;icdo_topography_id=pgx:icdot-C73.9;group_label=thyroid gland;icdo_topography_label=thyroid gland;sampled_tissue_id=UBERON:0002046;sampled_tissue_label=UBERON:0002046;age_iso=P81Y;followup_state_id=EFO:0030039
+#sample=>id=PAcSqCa-aul-1;biosample_id=PAcSqCa-aul-1;histological_diagnosis_id=NCIT:C40359;histological_diagnosis_label=NCIT:C40359;icdo_morphology_id=pgx:icdom-80753;icdo_morphology_label=Squamous cell carcinoma, acantholytic;group_id=pgx:icdot-C50.9;icdo_topography_id=pgx:icdot-C50.9;group_label=breast;icdo_topography_label=breast;sampled_tissue_id=UBERON:0000310;sampled_tissue_label=UBERON:0000310;age_iso=P48Y;followup_state_id=EFO:0030049;followup_time=P4M
+#sample=>id=PAcSqCa-aul-2;biosample_id=PAcSqCa-aul-2;histological_diagnosis_id=NCIT:C40359;histological_diagnosis_label=NCIT:C40359;icdo_morphology_id=pgx:icdom-80753;icdo_morphology_label=Squamous cell carcinoma, acantholytic;group_id=pgx:icdot-C50.9;icdo_topography_id=pgx:icdot-C50.9;group_label=breast;icdo_topography_label=breast;sampled_tissue_id=UBERON:0000310;sampled_tissue_label=UBERON:0000310;age_iso=P55Y;followup_state_id=EFO:0030041;followup_time=P25M
+#sample=>id=GIST-2003-18;biosample_id=GIST-2003-18;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C49.9;icdo_topography_id=pgx:icdot-C49.9;group_label=connective and soft tissue, NOS;icdo_topography_label=connective and soft tissue, NOS;sampled_tissue_id=UBERON:0002384;sampled_tissue_label=UBERON:0002384;age_iso=P65Y;followup_state_id=EFO:0030041;followup_time=P4M
+#sample=>id=GIST-2003-19;biosample_id=GIST-2003-19;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C49.9;icdo_topography_id=pgx:icdot-C49.9;group_label=connective and soft tissue, NOS;icdo_topography_label=connective and soft tissue, NOS;sampled_tissue_id=UBERON:0002384;sampled_tissue_label=UBERON:0002384;age_iso=P57Y;followup_state_id=EFO:0030041;followup_time=P29M
+#sample=>id=GIST-2003-23;biosample_id=GIST-2003-23;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C49.9;icdo_topography_id=pgx:icdot-C49.9;group_label=connective and soft tissue, NOS;icdo_topography_label=connective and soft tissue, NOS;sampled_tissue_id=UBERON:0002384;sampled_tissue_label=UBERON:0002384;age_iso=P78Y;followup_state_id=EFO:0030041;followup_time=P1M
+#sample=>id=GIST-2003-24;biosample_id=GIST-2003-24;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C49.9;icdo_topography_id=pgx:icdot-C49.9;group_label=connective and soft tissue, NOS;icdo_topography_label=connective and soft tissue, NOS;sampled_tissue_id=UBERON:0002384;sampled_tissue_label=UBERON:0002384;age_iso=P64Y;followup_state_id=EFO:0030041;followup_time=P16M
+#sample=>id=GIST-2003-25;biosample_id=GIST-2003-25;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C49.9;icdo_topography_id=pgx:icdot-C49.9;group_label=connective and soft tissue, NOS;icdo_topography_label=connective and soft tissue, NOS;sampled_tissue_id=UBERON:0002384;sampled_tissue_label=UBERON:0002384;age_iso=P73Y;followup_state_id=EFO:0030041;followup_time=P26M
+#sample=>id=GIST-2003-29;biosample_id=GIST-2003-29;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C49.9;icdo_topography_id=pgx:icdot-C49.9;group_label=connective and soft tissue, NOS;icdo_topography_label=connective and soft tissue, NOS;sampled_tissue_id=UBERON:0002384;sampled_tissue_label=UBERON:0002384;age_iso=P43Y;followup_state_id=EFO:0030041;followup_time=P22M
+#sample=>id=GIST-2003-30;biosample_id=GIST-2003-30;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C49.9;icdo_topography_id=pgx:icdot-C49.9;group_label=connective and soft tissue, NOS;icdo_topography_label=connective and soft tissue, NOS;sampled_tissue_id=UBERON:0002384;sampled_tissue_label=UBERON:0002384;age_iso=P53Y;followup_state_id=EFO:0030041;followup_time=P24M
+#sample=>id=GIST-2003-37;biosample_id=GIST-2003-37;histological_diagnosis_id=NCIT:C27243;histological_diagnosis_label=NCIT:C27243;icdo_morphology_id=pgx:icdom-89363;icdo_morphology_label=Gastrointestinal stromal tumor, malignant;group_id=pgx:icdot-C49.9;icdo_topography_id=pgx:icdot-C49.9;group_label=connective and soft tissue, NOS;icdo_topography_label=connective and soft tissue, NOS;sampled_tissue_id=UBERON:0002384;sampled_tissue_label=UBERON:0002384;age_iso=P61Y;followup_state_id=EFO:0030041;followup_time=P23M
+biosample_id	reference_name	start	end	log2	variant_type	reference_bases	alternate_bases
+GIST-gun-079	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-080	17	25100000	83257441	0.58	DUP	None	None
+GIST-gun-080	3	0	90900000	-1	DEL	None	None
+GIST-gun-080	4	50000000	190214555	-1	DEL	None	None
+GIST-gun-080	5	48800000	181538259	-1	DEL	None	None
+GIST-gun-080	8	0	45200000	-1	DEL	None	None
+GIST-gun-080	8	45200000	145138636	-1	DEL	None	None
+GIST-gun-080	9	0	43000000	-1	DEL	None	None
+GIST-gun-080	13	17700000	114364328	-1	DEL	None	None
+GIST-gun-080	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-080	17	0	25100000	-1	DEL	None	None
+GIST-gun-080	21	12000000	46709983	-1	DEL	None	None
+GIST-gun-080	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-080	5	0	48800000	1.32	DUP	None	None
+GIST-gun-080	8	45200000	145138636	1.32	DUP	None	None
+GIST-gun-081	9	0	43000000	-1	DEL	None	None
+GIST-gun-081	9	43000000	138394717	-1	DEL	None	None
+GIST-gun-081	11	0	53400000	-1	DEL	None	None
+GIST-gun-081	12	35500000	133275309	-1	DEL	None	None
+GIST-gun-081	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-081	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-082	4	50000000	190214555	0.58	DUP	None	None
+GIST-gun-082	1	0	123400000	-1	DEL	None	None
+GIST-gun-082	2	0	93900000	-1	DEL	None	None
+GIST-gun-082	2	93900000	242193529	-1	DEL	None	None
+GIST-gun-082	4	0	50000000	-1	DEL	None	None
+GIST-gun-082	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-082	15	19000000	101991189	-1	DEL	None	None
+GIST-gun-082	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-083	1	0	123400000	-1	DEL	None	None
+GIST-gun-083	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-083	X	0	61000000	-1	DEL	None	None
+GIST-gun-083	X	61000000	156040895	-1	DEL	None	None
+GIST-gun-084	5	0	48800000	0.58	DUP	None	None
+GIST-gun-084	6	0	59800000	0.58	DUP	None	None
+GIST-gun-084	6	59800000	170805979	0.58	DUP	None	None
+GIST-gun-084	7	0	60100000	0.58	DUP	None	None
+GIST-gun-084	7	60100000	159345973	0.58	DUP	None	None
+GIST-gun-084	8	0	45200000	0.58	DUP	None	None
+GIST-gun-084	8	45200000	145138636	0.58	DUP	None	None
+GIST-gun-084	11	0	53400000	0.58	DUP	None	None
+GIST-gun-084	11	53400000	135086622	0.58	DUP	None	None
+GIST-gun-084	12	0	35500000	0.58	DUP	None	None
+GIST-gun-084	12	35500000	133275309	0.58	DUP	None	None
+GIST-gun-084	18	0	18500000	0.58	DUP	None	None
+GIST-gun-084	18	18500000	80373285	0.58	DUP	None	None
+GIST-gun-084	1	123400000	248956422	-1	DEL	None	None
+GIST-gun-084	9	0	43000000	-1	DEL	None	None
+GIST-gun-084	9	43000000	138394717	-1	DEL	None	None
+GIST-gun-084	10	0	39800000	-1	DEL	None	None
+GIST-gun-084	10	39800000	133797422	-1	DEL	None	None
+GIST-gun-084	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-084	15	19000000	101991189	-1	DEL	None	None
+GIST-gun-084	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-085	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-085	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-086	5	0	48800000	0.58	DUP	None	None
+GIST-gun-086	5	48800000	181538259	0.58	DUP	None	None
+GIST-gun-086	3	90900000	198295559	-1	DEL	None	None
+GIST-gun-086	9	0	43000000	-1	DEL	None	None
+GIST-gun-086	10	0	39800000	-1	DEL	None	None
+GIST-gun-086	10	39800000	133797422	-1	DEL	None	None
+GIST-gun-086	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-086	15	19000000	101991189	-1	DEL	None	None
+GIST-gun-086	16	36800000	90338345	-1	DEL	None	None
+GIST-gun-086	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-087	8	0	45200000	0.58	DUP	None	None
+GIST-gun-087	8	45200000	145138636	0.58	DUP	None	None
+GIST-gun-087	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-087	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-088	1	0	123400000	-1	DEL	None	None
+GIST-gun-088	4	50000000	190214555	-1	DEL	None	None
+GIST-gun-088	13	17700000	114364328	-1	DEL	None	None
+GIST-gun-088	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-089	5	0	48800000	0.58	DUP	None	None
+GIST-gun-089	5	48800000	181538259	0.58	DUP	None	None
+GIST-gun-089	8	0	45200000	0.58	DUP	None	None
+GIST-gun-089	8	45200000	145138636	0.58	DUP	None	None
+GIST-gun-089	15	19000000	101991189	0.58	DUP	None	None
+GIST-gun-089	1	0	123400000	-1	DEL	None	None
+GIST-gun-089	10	0	39800000	-1	DEL	None	None
+GIST-gun-089	10	39800000	133797422	-1	DEL	None	None
+GIST-gun-089	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-089	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-090	1	123400000	248956422	0.58	DUP	None	None
+GIST-gun-090	17	25100000	83257441	0.58	DUP	None	None
+GIST-gun-090	1	0	123400000	-1	DEL	None	None
+GIST-gun-090	9	0	43000000	-1	DEL	None	None
+GIST-gun-090	9	43000000	138394717	-1	DEL	None	None
+GIST-gun-090	13	17700000	114364328	-1	DEL	None	None
+GIST-gun-090	17	0	25100000	-1	DEL	None	None
+GIST-gun-091	1	0	123400000	-1	DEL	None	None
+GIST-gun-091	8	0	45200000	-1	DEL	None	None
+GIST-gun-091	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-091	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-092	1	123400000	248956422	0.58	DUP	None	None
+GIST-gun-092	2	93900000	242193529	0.58	DUP	None	None
+GIST-gun-092	4	0	50000000	0.58	DUP	None	None
+GIST-gun-092	4	50000000	190214555	0.58	DUP	None	None
+GIST-gun-092	17	0	25100000	0.58	DUP	None	None
+GIST-gun-092	17	25100000	83257441	0.58	DUP	None	None
+GIST-gun-092	20	28100000	64444167	0.58	DUP	None	None
+GIST-gun-092	2	93900000	242193529	-1	DEL	None	None
+GIST-gun-092	6	59800000	170805979	-1	DEL	None	None
+GIST-gun-092	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-093	2	93900000	242193529	0.58	DUP	None	None
+GIST-gun-093	2	93900000	242193529	-1	DEL	None	None
+GIST-gun-093	9	0	43000000	-1	DEL	None	None
+GIST-gun-093	9	43000000	138394717	-1	DEL	None	None
+GIST-gun-093	12	35500000	133275309	-1	DEL	None	None
+GIST-gun-093	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-093	19	26200000	58617616	-1	DEL	None	None
+GIST-gun-093	12	35500000	133275309	1.32	DUP	None	None
+GIST-gun-093	19	26200000	58617616	1.32	DUP	None	None
+GIST-gun-094	5	0	48800000	0.58	DUP	None	None
+GIST-gun-094	5	48800000	181538259	0.58	DUP	None	None
+GIST-gun-094	8	0	45200000	0.58	DUP	None	None
+GIST-gun-094	8	45200000	145138636	0.58	DUP	None	None
+GIST-gun-094	12	0	35500000	0.58	DUP	None	None
+GIST-gun-094	12	35500000	133275309	0.58	DUP	None	None
+GIST-gun-094	3	0	90900000	-1	DEL	None	None
+GIST-gun-094	3	90900000	198295559	-1	DEL	None	None
+GIST-gun-094	6	0	59800000	-1	DEL	None	None
+GIST-gun-094	6	59800000	170805979	-1	DEL	None	None
+GIST-gun-094	10	0	39800000	-1	DEL	None	None
+GIST-gun-094	10	39800000	133797422	-1	DEL	None	None
+GIST-gun-094	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-095	8	0	45200000	0.58	DUP	None	None
+GIST-gun-095	8	45200000	145138636	0.58	DUP	None	None
+GIST-gun-095	5	48800000	181538259	-1	DEL	None	None
+GIST-gun-095	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-096	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-097	9	0	43000000	-1	DEL	None	None
+GIST-gun-097	9	43000000	138394717	-1	DEL	None	None
+GIST-gun-097	10	0	39800000	-1	DEL	None	None
+GIST-gun-097	10	39800000	133797422	-1	DEL	None	None
+GIST-gun-097	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-097	15	19000000	101991189	-1	DEL	None	None
+GIST-gun-097	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-098	18	0	18500000	0.58	DUP	None	None
+GIST-gun-098	18	18500000	80373285	0.58	DUP	None	None
+GIST-gun-098	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-099	8	0	45200000	0.58	DUP	None	None
+GIST-gun-099	8	45200000	145138636	0.58	DUP	None	None
+GIST-gun-099	13	17700000	114364328	0.58	DUP	None	None
+GIST-gun-099	3	0	90900000	-1	DEL	None	None
+GIST-gun-099	3	90900000	198295559	-1	DEL	None	None
+GIST-gun-099	6	0	59800000	-1	DEL	None	None
+GIST-gun-099	6	59800000	170805979	-1	DEL	None	None
+GIST-gun-099	9	0	43000000	-1	DEL	None	None
+GIST-gun-099	9	43000000	138394717	-1	DEL	None	None
+GIST-gun-099	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-099	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-100	1	0	123400000	-1	DEL	None	None
+GIST-gun-100	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-101	8	45200000	145138636	0.58	DUP	None	None
+GIST-gun-101	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-102	4	0	50000000	0.58	DUP	None	None
+GIST-gun-102	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-102	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-103	17	25100000	83257441	0.58	DUP	None	None
+GIST-gun-103	1	0	123400000	-1	DEL	None	None
+GIST-gun-103	4	50000000	190214555	-1	DEL	None	None
+GIST-gun-103	15	19000000	101991189	-1	DEL	None	None
+GIST-gun-103	22	15000000	50818468	1.32	DUP	None	None
+GIST-gun-104	3	0	90900000	-1	DEL	None	None
+GIST-gun-104	3	90900000	198295559	-1	DEL	None	None
+GIST-gun-104	7	0	60100000	-1	DEL	None	None
+GIST-gun-104	9	0	43000000	-1	DEL	None	None
+GIST-gun-104	10	0	39800000	-1	DEL	None	None
+GIST-gun-104	10	39800000	133797422	-1	DEL	None	None
+GIST-gun-104	11	53400000	135086622	-1	DEL	None	None
+GIST-gun-104	13	17700000	114364328	-1	DEL	None	None
+GIST-gun-104	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-104	22	15000000	50818468	-1	DEL	None	None
+GIST-gun-105	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-105	17	0	25100000	-1	DEL	None	None
+GIST-gun-106	14	17200000	107043718	-1	DEL	None	None
+GIST-gun-106	21	12000000	46709983	-1	DEL	None	None
+ThyrFollCarc-22	4	27700000	140600000	0.58	DUP	None	None
+ThyrFollCarc-22	5	28900000	181538259	0.58	DUP	None	None
+ThyrFollCarc-22	7	0	159345973	0.58	DUP	None	None
+ThyrFollCarc-22	10	29300000	38000000	0.58	DUP	None	None
+ThyrFollCarc-22	11	0	22000000	0.58	DUP	None	None
+ThyrFollCarc-22	11	36400000	43400000	0.58	DUP	None	None
+ThyrFollCarc-22	11	51000000	55800000	0.58	DUP	None	None
+ThyrFollCarc-22	12	0	14600000	0.58	DUP	None	None
+ThyrFollCarc-22	12	26300000	71100000	0.58	DUP	None	None
+ThyrFollCarc-22	12	108600000	133275309	0.58	DUP	None	None
+ThyrFollCarc-22	14	50400000	78800000	0.58	DUP	None	None
+ThyrFollCarc-22	14	89300000	107043718	0.58	DUP	None	None
+ThyrFollCarc-22	16	0	90338345	0.58	DUP	None	None
+ThyrFollCarc-22	17	0	52100000	0.58	DUP	None	None
+ThyrFollCarc-22	17	64600000	83257441	0.58	DUP	None	None
+ThyrFollCarc-22	19	0	58617616	0.58	DUP	None	None
+ThyrFollCarc-22	20	0	5100000	0.58	DUP	None	None
+ThyrFollCarc-22	20	17900000	64444167	0.58	DUP	None	None
+ThyrFollCarc-22	21	0	46709983	0.58	DUP	None	None
+ThyrFollCarc-22	22	0	50818468	0.58	DUP	None	None
+ThyrFollCarc-22	1	84400000	94300000	-1	DEL	None	None
+ThyrFollCarc-22	1	223900000	236400000	-1	DEL	None	None
+ThyrFollCarc-22	3	0	32000000	-1	DEL	None	None
+ThyrFollCarc-22	3	69700000	74100000	-1	DEL	None	None
+ThyrFollCarc-22	3	111600000	113700000	-1	DEL	None	None
+ThyrFollCarc-22	3	149200000	198295559	-1	DEL	None	None
+ThyrFollCarc-22	6	0	15200000	-1	DEL	None	None
+ThyrFollCarc-22	6	58500000	105000000	-1	DEL	None	None
+ThyrFollCarc-22	6	148500000	170805979	-1	DEL	None	None
+ThyrFollCarc-22	8	65100000	145138636	-1	DEL	None	None
+ThyrFollCarc-22	9	0	19900000	-1	DEL	None	None
+ThyrFollCarc-22	18	0	18500000	-1	DEL	None	None
+ThyrFollCarc-22	18	21500000	80373285	-1	DEL	None	None
+ThyrFollCarc-22	X	0	42500000	-1	DEL	None	None
+ThyrFollCarc-22	X	68500000	156040895	-1	DEL	None	None
+ThyrFollCarc-23	17	0	83257441	0.58	DUP	None	None
+ThyrFollCarc-23	3	16300000	87100000	-1	DEL	None	None
+ThyrFollCarc-24	1	143200000	155100000	0.58	DUP	None	None
+ThyrFollCarc-24	7	0	159345973	0.58	DUP	None	None
+ThyrFollCarc-24	16	0	90338345	0.58	DUP	None	None
+ThyrFollCarc-24	18	0	80373285	0.58	DUP	None	None
+ThyrFollCarc-24	X	0	156040895	0.58	DUP	None	None
+ThyrFollCarc-24	1	243500000	248956422	-1	DEL	None	None
+ThyrFollCarc-24	2	0	12000000	-1	DEL	None	None
+ThyrFollCarc-24	3	192600000	198295559	-1	DEL	None	None
+ThyrFollCarc-24	5	150400000	160500000	-1	DEL	None	None
+ThyrFollCarc-24	6	13400000	30500000	-1	DEL	None	None
+ThyrFollCarc-24	8	19200000	29000000	-1	DEL	None	None
+ThyrFollCarc-24	8	29000000	36700000	-1	DEL	None	None
+ThyrFollCarc-24	8	116700000	126300000	-1	DEL	None	None
+ThyrFollCarc-24	9	0	9000000	-1	DEL	None	None
+ThyrFollCarc-24	10	95300000	133797422	-1	DEL	None	None
+ThyrFollCarc-24	11	110600000	112700000	-1	DEL	None	None
+ThyrFollCarc-24	11	121300000	135086622	-1	DEL	None	None
+ThyrFollCarc-24	14	89300000	107043718	-1	DEL	None	None
+ThyrFollCarc-24	17	77200000	83257441	-1	DEL	None	None
+ThyrFollCarc-24	20	30400000	39000000	-1	DEL	None	None
+ThyrFollCarc-24	20	56400000	64444167	-1	DEL	None	None
+ThyrFollCarc-24	21	30200000	46709983	-1	DEL	None	None
+ThyrFollCarc-27	1	0	120400000	0.58	DUP	None	None
+ThyrFollCarc-27	1	143200000	248956422	0.58	DUP	None	None
+ThyrFollCarc-27	3	30800000	98600000	0.58	DUP	None	None
+ThyrFollCarc-27	3	103100000	192600000	0.58	DUP	None	None
+ThyrFollCarc-27	4	11300000	169200000	0.58	DUP	None	None
+ThyrFollCarc-27	4	171000000	182300000	0.58	DUP	None	None
+ThyrFollCarc-27	5	18400000	150400000	0.58	DUP	None	None
+ThyrFollCarc-27	6	13400000	170805979	0.58	DUP	None	None
+ThyrFollCarc-27	7	0	7200000	0.58	DUP	None	None
+ThyrFollCarc-27	7	7200000	98400000	0.58	DUP	None	None
+ThyrFollCarc-27	7	107800000	159345973	0.58	DUP	None	None
+ThyrFollCarc-27	10	17300000	117300000	0.58	DUP	None	None
+ThyrFollCarc-27	11	0	22000000	0.58	DUP	None	None
+ThyrFollCarc-27	11	43400000	110600000	0.58	DUP	None	None
+ThyrFollCarc-27	12	0	133275309	0.58	DUP	None	None
+ThyrFollCarc-27	13	17700000	109600000	0.58	DUP	None	None
+ThyrFollCarc-27	14	32900000	78800000	0.58	DUP	None	None
+ThyrFollCarc-27	14	89300000	107043718	0.58	DUP	None	None
+ThyrFollCarc-27	15	27800000	33400000	0.58	DUP	None	None
+ThyrFollCarc-27	15	39800000	72400000	0.58	DUP	None	None
+ThyrFollCarc-27	16	0	57300000	0.58	DUP	None	None
+ThyrFollCarc-27	17	0	64600000	0.58	DUP	None	None
+ThyrFollCarc-27	19	0	58617616	0.58	DUP	None	None
+ThyrFollCarc-27	20	17900000	28100000	0.58	DUP	None	None
+ThyrFollCarc-27	2	0	242193529	-1	DEL	None	None
+ThyrFollCarc-27	8	0	145138636	-1	DEL	None	None
+ThyrFollCarc-27	9	0	39000000	-1	DEL	None	None
+ThyrFollCarc-27	9	45500000	138394717	-1	DEL	None	None
+ThyrFollCarc-27	18	0	80373285	-1	DEL	None	None
+ThyrFollCarc-27	22	25500000	50818468	-1	DEL	None	None
+ThyrFollCarc-28	13	0	114364328	-1	DEL	None	None
+ThyrFollCarc-30	Y	0	57227415	-1	DEL	None	None
+PAcSqCa-aul-1	1	185800000	248956422	0.58	DUP	None	None
+PAcSqCa-aul-1	2	0	93900000	0.58	DUP	None	None
+PAcSqCa-aul-1	3	90900000	198295559	0.58	DUP	None	None
+PAcSqCa-aul-1	7	0	60100000	0.58	DUP	None	None
+PAcSqCa-aul-1	8	45200000	145138636	0.58	DUP	None	None
+PAcSqCa-aul-1	18	18500000	80373285	0.58	DUP	None	None
+PAcSqCa-aul-1	19	26200000	58617616	0.58	DUP	None	None
+PAcSqCa-aul-1	20	0	64444167	0.58	DUP	None	None
+PAcSqCa-aul-1	3	0	90900000	-1	DEL	None	None
+PAcSqCa-aul-1	5	77600000	181538259	-1	DEL	None	None
+PAcSqCa-aul-1	8	0	45200000	-1	DEL	None	None
+PAcSqCa-aul-1	9	0	138394717	-1	DEL	None	None
+PAcSqCa-aul-1	13	0	114364328	-1	DEL	None	None
+PAcSqCa-aul-1	16	36800000	74100000	-1	DEL	None	None
+PAcSqCa-aul-1	17	0	25100000	-1	DEL	None	None
+PAcSqCa-aul-2	1	155100000	248956422	0.58	DUP	None	None
+PAcSqCa-aul-2	7	0	159345973	0.58	DUP	None	None
+PAcSqCa-aul-2	15	19000000	101991189	0.58	DUP	None	None
+PAcSqCa-aul-2	16	0	36800000	0.58	DUP	None	None
+PAcSqCa-aul-2	17	25100000	83257441	0.58	DUP	None	None
+PAcSqCa-aul-2	18	27500000	80373285	0.58	DUP	None	None
+PAcSqCa-aul-2	19	0	58617616	0.58	DUP	None	None
+PAcSqCa-aul-2	20	0	64444167	0.58	DUP	None	None
+PAcSqCa-aul-2	22	15000000	50818468	0.58	DUP	None	None
+PAcSqCa-aul-2	3	8100000	90900000	-1	DEL	None	None
+PAcSqCa-aul-2	5	77600000	145100000	-1	DEL	None	None
+PAcSqCa-aul-2	6	59800000	170805979	-1	DEL	None	None
+PAcSqCa-aul-2	8	0	45200000	-1	DEL	None	None
+PAcSqCa-aul-2	9	0	138394717	-1	DEL	None	None
+PAcSqCa-aul-2	11	93000000	135086622	-1	DEL	None	None
+PAcSqCa-aul-2	16	47000000	74100000	-1	DEL	None	None
+PAcSqCa-aul-2	17	0	25100000	-1	DEL	None	None
+PAcSqCa-aul-2	18	0	18500000	-1	DEL	None	None
+PAcSqCa-aul-2	11	63600000	93000000	1.32	DUP	None	None
+GIST-2003-18	14	17200000	107043718	-1	DEL	None	None
+GIST-2003-19	8	45200000	145138636	0.58	DUP	None	None
+GIST-2003-19	1	0	123400000	-1	DEL	None	None
+GIST-2003-19	15	19000000	101991189	-1	DEL	None	None
+GIST-2003-19	22	15000000	50818468	-1	DEL	None	None
+GIST-2003-23	14	17200000	107043718	-1	DEL	None	None
+GIST-2003-23	22	15000000	50818468	-1	DEL	None	None
+GIST-2003-24	8	0	45200000	0.58	DUP	None	None
+GIST-2003-24	8	45200000	145138636	0.58	DUP	None	None
+GIST-2003-24	14	17200000	107043718	-1	DEL	None	None
+GIST-2003-24	22	15000000	50818468	-1	DEL	None	None
+GIST-2003-25	1	0	123400000	-1	DEL	None	None
+GIST-2003-25	3	0	90900000	-1	DEL	None	None
+GIST-2003-25	3	90900000	198295559	-1	DEL	None	None
+GIST-2003-25	14	17200000	107043718	-1	DEL	None	None
+GIST-2003-25	21	12000000	46709983	-1	DEL	None	None
+GIST-2003-30	1	0	123400000	-1	DEL	None	None
+GIST-2003-30	3	0	90900000	-1	DEL	None	None
+GIST-2003-30	14	17200000	107043718	-1	DEL	None	None
+GIST-2003-37	8	45200000	145138636	0.58	DUP	None	None
+GIST-2003-37	3	90900000	198295559	-1	DEL	None	None
+GIST-2003-37	8	0	45200000	-1	DEL	None	None
+GIST-2003-37	13	17700000	114364328	-1	DEL	None	None
+GIST-2003-37	14	17200000	107043718	-1	DEL	None	None
+GIST-2003-37	22	15000000	50818468	-1	DEL	None	None
+

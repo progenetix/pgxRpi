@@ -14,9 +14,9 @@ pgxFreqplot(
 )
 }
 \arguments{
-\item{data}{CNV frequency data returned by \code{pgxLoader} function. The frequency matrices
-in \code{data} slot must be stored as \code{.pgxseg} format, which can be specified by \code{output}
-parameter of \code{pgxLoader} function.}
+\item{data}{frequency object returned by \code{pgxLoader} function or individual frequency matrix with '.pgxseg' format.
+In the returned object by \code{pgxLoader}, the frequency matrices in \code{data} slot must be stored as \code{.pgxseg} format,
+which can be specified by \code{output} parameter of \code{pgxLoader} function.}
 
 \item{chrom}{A vector with chromosomes to be plotted. If NULL, return the plot
 by genome. If specified the frequencies are plotted with one panel for each

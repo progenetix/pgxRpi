@@ -35,12 +35,15 @@ available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When th
 * `filters` A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers").
 * `codematches` A logical value determining whether to exclude samples 
-from child concepts of specified filters that belong to cancer type/tissue encoding system. 
+from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
 If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
-Default is FALSE. 
-* `limit` Integer to specify the number of returned samples/profiles for each filter.  
-* `skip` Integer to specify the number of skipped samples/profiles for each filter. 
+Don't use this parameter when `filters` include cancer-irrelevant identifiers such as PMID and cohort filters.
+Default is FALSE.
+* `limit` Integer to specify the number of returned samples/individuals/coverage profiles for each filter. 
+Default is 0 (return all). 
+* `skip` Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. 
 E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
+Default is NULL (no skip). 
 * `biosample_id` A single or a comma-concatenated list of identifiers used in Progenetix 
 database for identifying biosamples. 
 * `individual_id` A single or a comma-concatenated list of identifiers used in Progenetix 
@@ -157,8 +160,9 @@ This function provides CNV frequency plots by genome or chromosomes as you reque
 
 The parameters of this function:
 
-* `data`: frequency data returned by `pgxLoader` function. The frequency matrices in `data` 
-slot must be stored as `.pgxseg` format, which can be specified by `output` parameter of `pgxLoader` function.   
+* `data`: frequency object returned by `pgxLoader` function or individual frequency matrix with '.pgxseg' format. 
+In the returned object by `pgxLoader`, the frequency matrices in `data` slot must be stored as `.pgxseg` format, 
+which can be specified by `output` parameter of `pgxLoader` function.   
 * `chrom`: a vector with chromosomes to be plotted. If NULL, return the plot by genome. If specified the frequencies are plotted with one panel for each chromosome. Default is NULL.
 * `layout`: number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1). 
 * `filters`: Index or string value to indicate which filter to be plotted. The length of filters is limited to one if the parameter `circos` is False. Default is the first filter.
@@ -167,8 +171,16 @@ return a circos plot with multiple group ids for display and comparison. Default
 
 ### CNV frequency plot by genome (GRCh38)
 
+Input is an object.
+
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(freq_pgxseg, filters='pgx:icdom-85003')
+```
+
+Input is individual frequency data. 
+
+```{r, fig.width=7, fig.height=5}
+pgxFreqplot(freq_pgxseg$data[["NCIT:C4038"]])
 ```
 
 ### CNV frequency plot by chromosomes

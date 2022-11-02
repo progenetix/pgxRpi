@@ -145,42 +145,41 @@ getFreqPlotParameters <- function(type,nc,nr,chrom=NULL,...){
 ### addChromlines
 ### getGlobPos
 ### getGlobal.xlim
-### adjustSeg
 
 getArmandChromStop <- function(cyto.data, unit){
-    
-    #Sort cyto.data by chromosome number; let be represented by X=23 and Y=24:
-    chrom <- cyto.data[,1]
-    use.chrom <- gsub("chr","",chrom)  #Remove 'chr' from chrom-strings
-    use.chrom[use.chrom=="X"] <- "23"	#Replace X by 23
-    use.chrom[use.chrom=="Y"] <- "24"	#Replace Y by 24
-    num.chrom <- as.numeric(use.chrom)	#Convert to numeric chromosomes
-    
-    #Order such that chromosomes are in increasing order from 1:24:
-    ord.chrom <- order(num.chrom)
-    cyto.data <- cyto.data[ord.chrom,,drop=FALSE] 	
-    
-    #Get chromosome stopping positions:
-    chrom <- cyto.data[,1]
-    chrom.stop <- which(chrom[1:length(chrom)-1]!=chrom[2:length(chrom)])
-    chrom.stop <- c(chrom.stop,length(chrom))  #include last chromstop as well
-    
-    #Get p-arm stopping positions:
-    arm.char <- substring(cyto.data[,4],1,1)   #Retrive first character in name which identifies p and q arms
-    arm.stop <- which(arm.char[1:length(arm.char)-1]!=arm.char[2:length(arm.char)])
-    p.stop <- arm.stop[-which(arm.stop%in%chrom.stop)]  #Remove qstops
-    
-    pos.chromstop <- cyto.data[chrom.stop,3]  #Local stopping position for each chromosome
-    pos.pstop <- cyto.data[p.stop,3]		#Local stopping position for each p-arm
-    
-    #Factor used to convert positions into desired unit
-    f <- switch(unit,
-                bp = 1,
-                kbp = 10^(-3),
-                mbp = 10^(-6))
-    
-    return(list(pstop=pos.pstop*f,chromstop=pos.chromstop*f))
-    
+  
+  #Sort cyto.data by chromosome number; let be represented by X=23 and Y=24:
+  chrom <- cyto.data[,1]
+  use.chrom <- gsub("chr","",chrom)  #Remove 'chr' from chrom-strings
+  use.chrom[use.chrom=="X"] <- "23"	#Replace X by 23
+  use.chrom[use.chrom=="Y"] <- "24"	#Replace Y by 24
+  num.chrom <- as.numeric(use.chrom)	#Convert to numeric chromosomes
+  
+  #Order such that chromosomes are in increasing order from 1:24:
+  ord.chrom <- order(num.chrom)
+  cyto.data <- cyto.data[ord.chrom,,drop=FALSE] 	
+  
+  #Get chromosome stopping positions:
+  chrom <- cyto.data[,1]
+  chrom.stop <- which(chrom[1:length(chrom)-1]!=chrom[2:length(chrom)])
+  chrom.stop <- c(chrom.stop,length(chrom))  #include last chromstop as well
+  
+  #Get p-arm stopping positions:
+  arm.char <- substring(cyto.data[,4],1,1)   #Retrive first character in name which identifies p and q arms
+  arm.stop <- which(arm.char[1:length(arm.char)-1]!=arm.char[2:length(arm.char)])
+  p.stop <- arm.stop[-which(arm.stop%in%chrom.stop)]  #Remove qstops
+  
+  pos.chromstop <- cyto.data[chrom.stop,3]  #Local stopping position for each chromosome
+  pos.pstop <- cyto.data[p.stop,3]		#Local stopping position for each p-arm
+  
+  #Factor used to convert positions into desired unit
+  f <- switch(unit,
+              bp = 1,
+              kbp = 10^(-3),
+              mbp = 10^(-6))
+  
+  return(list(pstop=pos.pstop*f,chromstop=pos.chromstop*f))
+  
 }
 
 #Function to get a scaling factor such that positions may be converted from unit2 to unit1:
@@ -194,8 +193,6 @@ getArmandChromStop <- function(cyto.data, unit){
 
 ##Required by:
 ### addChromlines
-### adjustSeg
-### plotGamma
 ### chromMax
 ### getx
 ### plotIdeogram
@@ -257,10 +254,6 @@ convert.unit <- function(unit1,unit2){
 
 ##Required by:
 ### plotFreq (genomeFreq)
-### plotHeatmap (genomeHeat)
-### plotWeightedFreq
-### plotGenome
-
 
 ##Requires:
 ### getArmandChromStop
@@ -290,7 +283,6 @@ getGlobal.xlim <- function(op,pos.unit,chrom){
 ### position: vector with positions
 ### pos.unit: positon's unit
 ### cyto.data: data frame with cytoband information
-### delta: number of base pairs to add to end of each chromosome (used by plotCircle)
 
 ##Output:
 ### glob.pos: vector with global positions
@@ -303,7 +295,7 @@ getGlobal.xlim <- function(op,pos.unit,chrom){
 ##Requires:
 ### getArmandChromStop
 
-getGlobPos <- function(chromosomes, position, pos.unit, cyto.data, delta=0){
+getGlobPos <- function(chromosomes, position, pos.unit, cyto.data){
     
     #Get local stopping posistions for each p-arm and each chromosome from cytoband data 
     l <- getArmandChromStop(cyto.data=cyto.data,unit=pos.unit)
@@ -319,7 +311,6 @@ getGlobPos <- function(chromosomes, position, pos.unit, cyto.data, delta=0){
         #Replace these positions by max chrom position:
         new.pos[probe.c][out] <- chromstop[u.chrom[j]] 
     }
-    chromstop <- chromstop + delta
     glob.chromstop <- cumsum(chromstop)   #Global stopping position for each chromosome
     
     glob.pos <- new.pos + c(0,glob.chromstop[-length(glob.chromstop)])[chromosomes]  #Calculate global positions by adding global chromstop (for chrom > 1, for chrom=1 positions remain unchanged
@@ -327,9 +318,9 @@ getGlobPos <- function(chromosomes, position, pos.unit, cyto.data, delta=0){
     
 }
 
-#Returns the values to be plotted along xaxis depending on the choice of xaxis (index or pos), and the type of plot
-#If type=genome and xaxis=pos, global positions are calculated.
-#Positions are scaled according to plotunit
+# Function to return the values to be plotted along xaxis depending on the choice of xaxis (index or pos), and the type of plot
+# If type=genome and xaxis=pos, global positions are calculated.
+# Positions are scaled according to plotunit
 
 ### input:
 ### xaxis: index or pos
@@ -345,7 +336,6 @@ getGlobPos <- function(chromosomes, position, pos.unit, cyto.data, delta=0){
 
 ##Required by:
 ### adjustPos
-### plotObs
 
 ##Requires:
 ### getGlobPos
@@ -384,7 +374,6 @@ getx <- function(xaxis,type,chromosomes,pos,unit,op){
 
 ##Required by:
 ### addChromlines
-### adjustSeg
 
 separateChrom <- function(v){
     d <- diff(v)   #get difference between value (i+1) and value i in vector v
@@ -407,12 +396,6 @@ separateChrom <- function(v){
 
 ##Required by:
 ### adjustPos
-### adjustSeg
-### multipcf
-### fastPcf
-### pcf
-### winsorize
-### aspcf
 
 numericArms <- function(chrom,char.arms){
     p.arm <- which(char.arms=="p")
@@ -522,8 +505,6 @@ getArms <- function(chrom, pos, pos.unit="bp", cyto.data){
 
 ##Required by:
 ### plotFreq (genomeFreq and chromosomeFreq)
-### plotWeightedFreq (weightedGenomeFreq and weightedChromosomeFreq)
-
 
 ##Requires:
 ### getx
@@ -597,6 +578,9 @@ adjustPos <- function(position,chromosomes,pos.unit,type,op){
 ##Output:
 # a list giving the left, right, bottom and top dimensions for each of the nrow*ncol frames to be made in plot
 
+##Required by:
+### plotFreq (genomeFreq and chromosomeFreq)
+
 framedim <- function(nrow,ncol){
     cl <- 0:(ncol-1)
     cr <- 1:ncol
@@ -609,7 +593,7 @@ framedim <- function(nrow,ncol){
     bot <- rep(1/nrow,nrow)*rb
     
     return(list(left=left,right=right,bot=bot,top=top))
-}#endframedim
+}
 
 
 #Function to set default ylim and at.y for plotFreq
@@ -724,29 +708,6 @@ addToFreqPlot <- function(op,type){
     
     
 }
-
-#Function that returns the index where each chromosome starts (and the last chromosome ends)
-
-##Input:
-### v: a vector of chromosome numbers
-
-## Output:
-### cp: indeces for start of each chromosome and end of last chromosome
-
-##Required by:
-### addChromlines
-### adjustSeg
-
-separateChrom <- function(v){
-    d <- diff(v)   #get difference between value (i+1) and value i in vector v
-    cp <- which(d!=0)+1  #get changepoints
-    
-    #Add start of vector and (stop+1) of the whole vector
-    cp <- c(1,cp,(length(v)+1))
-    
-    return(cp)
-}
-
 
 #Function used to separate chromosomes by stapled lines in genome plot
 ##Input:
@@ -927,6 +888,7 @@ plotIdeogram <- function(chrom,cyto.text=FALSE,cex=0.6,cyto.data,cyto.unit="bp",
     
 }
 
+# Function for plotIdeogram
 draw.roundEdge <- function(start,stop,y0,y1,col,bow,density=NA,angle=45,lwd=1,chrom.length){
     #Y points in round edge:
     f <- rep(0,0)
@@ -973,6 +935,7 @@ draw.roundEdge <- function(start,stop,y0,y1,col,bow,density=NA,angle=45,lwd=1,ch
     
 }
 
+# Function for plotIdeogram
 drawStalk <- function(start,stop,y0,y1,col){
     size <- stop-start
     x1 <- c(start,start+size/3,stop-size/3,stop)
@@ -998,12 +961,6 @@ drawStalk <- function(start,stop,y0,y1,col){
 
 ##Required by:
 ### plotFreq (chromosomeFreq)
-### plotAllele
-### plotChrom
-### plotSample
-### plotHeatmap
-### plotWeightedFreq
-
 
 ## Requires:
 ### convert.unit

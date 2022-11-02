@@ -1,0 +1,149 @@
+---
+title: "Introduction_3_process_pgxseg"
+author: "Hangjia Zhao"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction_3_process_pgxseg}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Load library 
+
+```{r setup}
+library(pgxRpi)
+```
+
+## `pgxSegprocess` function in this package
+
+This function extracts segments, CNV frequency, and metadata from "pgxseg" files and supports survival data visualization  
+
+* `file` A string specifying the path and name of the "pgxseg" file where the data is to be read. 
+* `show_KM_plot` A logical value determining whether to return the Kaplan-Meier plot based on metadata. Default is FALSE.
+* `return_metadata` A logical value determining whether to return metadata. Default is FALSE.
+* `return_seg` A logical value determining whether to return segment data. Default is FALSE.
+* `return_frequency` A logical value determining whether to return frequency data. The frequency calculation is based on segments in segment data and group id in metadata. Default is FALSE.
+* `assembly` A string specifying which genome assembly version should be applied to CNV frequency calculation and plotting. Allowed options are "hg19", "hg38". Default is "hg38".
+* `...` Other parameters relevant to KM plot. These include `pval`,`pval.coord`,`pval.method`,`conf.int`,`linetype`, and `palette` (see ggsurvplot from survminer)
+
+# Extract segment data from local pgxseg files
+
+```{r}
+# specify the location of file
+file_name <- system.file("extdata", "example.pgxseg",package = 'pgxRpi')
+
+# extract segment data
+seg <- pgxSegprocess(file=file_name,return_seg = T)
+```
+
+The segment data looks like this
+
+```{r}
+head(seg)
+```
+
+# Extract meta data from local pgxseg files
+
+```{r}
+meta <- pgxSegprocess(file=file_name,return_metadata = T)
+```
+
+The metadata looks like this
+
+```{r}
+head(meta)
+```
+
+# Visualize survival data group by group_id in metadata from local pgxseg files
+
+The KM plot is plotted from samples with available followup state and followup time.
+
+```{r, fig.width=7, fig.height=5}
+pgxSegprocess(file=file_name,show_KM_plot = T)
+```
+
+You can specify more parameters to modify this plot (see parameter `...` in documentation)
+
+```{r, fig.width=7, fig.height=5}
+pgxSegprocess(file=file_name,show_KM_plot = T,pval=T,palette='npg')
+```
+
+# Return CNV frequency object based on segment data from local pgxseg files
+
+The CNV frequency is calculated from segments of samples with the same group_id. The group_id
+is specified in metadata stored in header comments of "pgxseg" files.
+
+```{r}
+frequency <- pgxSegprocess(file=file_name,return_frequency = T)
+```
+
+The returned object is same as the CNV frequency output of pgxLoader function (format details see the vignette [Introduction_2_loadfrequency](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_2_loadfrequency.html). It contains two slots 'meta' and 'data'.
+
+The 'meta' slot looks like this
+
+```{r}
+frequency$meta
+```
+
+The 'data' slot includes CNV frequency matrices of all groups which exist in both metadata and segment data. 
+It is noted that not all groups in metadata must exist in segment data (e.g. some samples don't have CNV calls).
+
+```{r}
+names(frequency$data)
+```
+The 'total' data is concatenated CNV matrices across all groups. The individual matrix looks like this
+
+```{r}
+head(frequency$data$`pgx:icdot-C16.9`)
+```
+
+# Visualize CNV frequency by `pgxFreqplot` function
+
+You can visualize the CNV frequency of the interesting group. 
+
+```{r, fig.width=7, fig.height=5}
+pgxFreqplot(frequency, filters="pgx:icdot-C16.9")
+```
+
+```{r, fig.width=7, fig.height=5}
+pgxFreqplot(frequency, filters="pgx:icdot-C16.9",chrom = c(1,8,14), layout = c(3,1))
+```
+
+Circos plot supports multiple group visualization
+
+```{r,fig.width=6, fig.height=6}
+pgxFreqplot(frequency, filters=c("pgx:icdot-C16.9","pgx:icdot-C73.9"),circos = T)
+```
+
+The details of `pgxFreqplot` function see the vignette [Introduction_2_loadfrequency](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_2_loadfrequency.html).
+
+# Extract multiple data from local pgxseg files
+
+If you want different types of data such as segment data and metadata, and visualize 
+the survival data at the same time, you can just set the corresponding parameters as TRUE. 
+The returned data is an object including all specified data.
+
+```{r, fig.width=7, fig.height=5}
+info <- pgxSegprocess(file=file_name,show_KM_plot = T, return_seg = T, 
+                      return_metadata = T, return_frequency = T)
+```
+
+```{r}
+names(info)
+```
+
+# Session Info
+
+```{r echo = FALSE}
+sessionInfo()
+```
+
+

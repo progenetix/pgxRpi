@@ -29,14 +29,14 @@ available options are "pgxseg" or "pgxmatrix" .}
 literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers")}
 
 \item{codematches}{A logical value determining whether to exclude samples
-from child concepts of specified filters that belong to cancer type/tissue encoding system.
-If TRUE, retrieved samples only keep samples exactly encoded by specified filters.
+from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon).
+If TRUE, retrieved samples only keep samples exactly encoded by specified filters. Don't use this parameter when \code{filters} include cancer-irrelevant identifiers such as PMID and cohort filters.
 Default is FALSE.}
 
-\item{limit}{Integer to specify the number of returned samples/profiles for each filter.}
+\item{limit}{Integer to specify the number of returned samples/individuals/coverage profiles for each filter. Default is 0 (return all).}
 
-\item{skip}{Integer to specify the number of skipped samples/profiles for each filter. E.g. if skip = 2, limit=500,
-the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned.}
+\item{skip}{Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. E.g. if skip = 2, limit=500,
+the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip).}
 
 \item{biosample_id}{A single or a comma-concatenated list of identifiers used
 in Progenetix database for identifying biosamples.}

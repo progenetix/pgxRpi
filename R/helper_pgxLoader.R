@@ -1,5 +1,3 @@
-#' @import attempt
-
 transform_id <- function(id){
     if (length(id) > 1) {
         filter <- id[1]
@@ -12,7 +10,7 @@ transform_id <- function(id){
 }
 
 null_to_na <- function(x){
-  x <- try_catch(x,.e=function(e){NA})
+  x <- attempt::try_catch(x,.e=function(e){NA})
   if (length(x) == 0){
     return(NA)
   } 
@@ -40,7 +38,7 @@ read_sample <- function(url){
     cbioportal_id <- pick_longer_id(external_info[grep('cbioportal',external_info)])
 
     # create data table for one sample
-    try_catch(total.df[[i]] <- data.frame(biosample_id=res$id,
+    attempt::try_catch(total.df[[i]] <- data.frame(biosample_id=res$id,
                                           individual_id=null_to_na(res$individualId),
                                           callset_ids=null_to_na(res$info$callsetIds),
                                           pgx_legacy_sample_id=pick_longer_id(null_to_na(res$info$legacyIds)),
@@ -150,9 +148,10 @@ pgidCheck <- function(id){
 
 pgxFreqLoader <- function(output, codematches, filters) {
     # check filters again
-  stop_if(.x=length(filters) < 1, msg="\n At least one valid filter has to be provided \n")
+  attempt::stop_if(.x=length(filters) < 1, msg="\n At least one valid filter has to be provided \n")
     # check output format
-  stop_if(.x=!(output %in% c('pgxseg','pgxmatrix')),msg="\n Output is invalid. Only support 'pgxseg' or 'pgxmatrix' \n")
+  attempt::stop_if(.x=is.null(output),msg="\n Output is invalid. Only support 'pgxseg' or 'pgxmatrix' \n")
+  attempt::stop_if(.x=(!output %in% c('pgxseg','pgxmatrix')),msg="\n Output is invalid. Only support 'pgxseg' or 'pgxmatrix' \n")
     # check if filters exists
   idcheck <- pgidCheck(filters)
   if (!all(idcheck)){
@@ -202,12 +201,12 @@ pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,
         url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
         url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
         if (!(exists('res_1'))){
-          try_catch(res_1 <- read_sample(url),.e= function(e){
+          attempt::try_catch(res_1 <- read_sample(url),.e= function(e){
           cat(paste("No samples with the filter", filters[i],"\n"))
             if_next <<- TRUE})
           if (if_next){ next }
           }else {
-            try_catch(temp <- read_sample(url),.e= function(e){
+            attempt::try_catch(temp <- read_sample(url),.e= function(e){
               cat(paste("No samples with the filter", filters[i],"\n"))
               if_next <<- TRUE})
             if (if_next){ next }
@@ -226,11 +225,11 @@ pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,
             filter <- transform_id(biosample_id[c(((i-1)*50+1):j)])
             url <- paste0("http://progenetix.org/beacon/biosamples/?biosampleIds=",filter)
             if (!(exists('res_2'))){
-                try_catch(res_2 <- read_sample(url),.e= function(e){
+                attempt::try_catch(res_2 <- read_sample(url),.e= function(e){
                     if_next <<- TRUE})
                 if (if_next){ next }
             }else {
-                try_catch(temp <- read_sample(url),.e= function(e){
+                attempt::try_catch(temp <- read_sample(url),.e= function(e){
                     if_next <<- TRUE
                     })
                 if (if_next){ next }
@@ -249,17 +248,17 @@ pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,
       filter <- transform_id(individual_id[c(((i-1)*50+1):j)])
       url <- paste0("http://progenetix.org/beacon/biosamples/?individualIds=",filter)
       if (!(exists('res_3'))){
-        try_catch(res_3 <- read_sample(url),.e= function(e){
+        attempt::try_catch(res_3 <- read_sample(url),.e= function(e){
           if_next <<- TRUE})
         if (if_next){ next }
       }else {
-        try_catch(temp <- read_sample(url),.e= function(e){
+        attempt::try_catch(temp <- read_sample(url),.e= function(e){
           if_next <<- TRUE
         })
         if (if_next){ next }
         res_3 <- rbind(res_3, temp)}
     }}
-    stop_if(.x= !(exists('res_1') | exists('res_2')| exists('res_3')) , msg='No samples retrieved')
+    attempt::stop_if(.x= !(exists('res_1') | exists('res_2')| exists('res_3')) , msg='No samples retrieved')
 
     res <- c()
     if (exists('res_1')){
@@ -292,7 +291,7 @@ pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,
 pgxVariantLoader <- function(biosample_id, output, save_file,filename){
     
     if (save_file){
-        stop_if(.x= !(output %in% c("pgxseg","seg")), msg = "The parameter 'output' is invalid (available: 'seg' or 'pgxseg')")
+        attempt::stop_if(.x= !(output %in% c("pgxseg","seg")), msg = "The parameter 'output' is invalid (available: 'seg' or 'pgxseg')")
     }
 
     len <- length(biosample_id)
@@ -309,14 +308,14 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
         if (!(is.null(output))){
             if (output == 'seg' | output == 'pgxseg'){
                 url <- paste0(url, "&output=pgxseg")
-                try_catch(temp <- read_variant_pgxseg(url), .e = function(e){if_next <<- TRUE}, 
+                attempt::try_catch(temp <- read_variant_pgxseg(url), .e = function(e){if_next <<- TRUE}, 
                           .w = function(w){if_next <<- TRUE})
                 if (if_next){ next }
             } else{
                 stop("output is invalid (NULL, 'seg' or 'pgxseg')")
             }
         }else{
-            try_catch(temp <- rjson::fromJSON(file = url), .e = function(e){if_next <<- TRUE}, .w = function(w){if_next <<- TRUE})
+            attempt::try_catch(temp <- rjson::fromJSON(file = url), .e = function(e){if_next <<- TRUE}, .w = function(w){if_next <<- TRUE})
             if (if_next){  next }
             temp <- lapply(temp$response$resultSets[[1]]$results,unlist)
             if (length(temp) == 0){
@@ -409,8 +408,8 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
 
 pgxcallsetLoader <- function(filters,limit,skip,codematches){
   # check filters 
-  stop_if(.x=length(filters) < 1, msg="\n at least one valid filter has to be provided \n")
-  stop_if(.x=length(filters) > 1, msg="\n This query only supports one filter \n")
+  attempt::stop_if(.x=length(filters) < 1, msg="\n at least one valid filter has to be provided \n")
+  attempt::stop_if(.x=length(filters) > 1, msg="\n This query only supports one filter \n")
 
   # start query
   pg.url  <- paste0("http://www.progenetix.org/beacon/analyses/?output=pgxmatrix",'&filters=',filters)
@@ -436,8 +435,8 @@ pgxcallsetLoader <- function(filters,limit,skip,codematches){
 
 
 pgxCovLoader <- function(filters,codematches,skip,limit){
-  stop_if(.x=length(filters) < 1, msg="\n One valid filter has to be provided \n")
-  stop_if(.x=length(filters) > 1, msg="\n This query only supports one filter \n")
+  attempt::stop_if(.x=length(filters) < 1, msg="\n One valid filter has to be provided \n")
+  attempt::stop_if(.x=length(filters) > 1, msg="\n This query only supports one filter \n")
   if (codematches){
     biosample_id <- pgxSampleLoader(biosample_id = NULL,individual_id = NULL,filters = filters,codematches = T,skip=NULL,limit=0)
     biosample_id <- biosample_id$biosample_id
@@ -530,12 +529,12 @@ pgxIndivLoader <- function(individual_id,filters,codematches, skip,limit){
       url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
       url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
       if (!(exists('res_1'))){
-        try_catch(res_1 <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
+        attempt::try_catch(res_1 <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
           cat(paste("No samples with the filter", filters[i],"\n"))
           if_next <<- TRUE})
         if (if_next){ next }
       }else {
-        try_catch(temp <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
+        attempt::try_catch(temp <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
           cat(paste("No samples with the filter", filters[i],"\n"))
           if_next <<- TRUE
         })
@@ -556,18 +555,18 @@ pgxIndivLoader <- function(individual_id,filters,codematches, skip,limit){
       url <- paste0("http://progenetix.org/beacon/individuals/?individualIds=",
                     filter,"&output=datatable")
       if (!(exists('res_2'))){
-        try_catch(res_2 <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
+        attempt::try_catch(res_2 <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
           if_next <<- TRUE})
         if (if_next){ next }
       }else {
-        try_catch(temp <-read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
+        attempt::try_catch(temp <-read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
           if_next <<- TRUE
         })
         if (if_next){ next }
         res_2 <- rbind(res_2, temp)}
     }}
   
-  stop_if(.x= !(exists('res_1') | exists('res_2')) , msg='No samples retrieved')
+  attempt::stop_if(.x= !(exists('res_1') | exists('res_2')) , msg='No samples retrieved')
   
   res <- c()
   if (exists('res_1')){
