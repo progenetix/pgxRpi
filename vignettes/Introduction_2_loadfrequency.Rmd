@@ -31,7 +31,7 @@ The parameters of this function:
 * `type` A string specifying output data type. Available options are "biosample", "individual",
 "variant" or "frequency". 
 * `output` A string specifying output file format. When the parameter `type` is "variant",
-available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxseg" or "pgxmatrix" .
+available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
 * `filters` A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers").
 * `codematches` A logical value determining whether to exclude samples 
@@ -59,10 +59,10 @@ Relevant parameters of `pgxLoader` function: type, output, filters, codematches
 
 There are two output formats
 
-## The first output format (`output` = "pgxseg")
+## The first output format (`output` = "pgxfreq")
 
 ```{r}
-freq_pgxseg <- pgxLoader(type="frequency", output ='pgxseg',
+freq_pgxfreq <- pgxLoader(type="frequency", output ='pgxfreq',
                          filters=c("NCIT:C4038","pgx:icdom-85003"), 
                          codematches = TRUE)
 ```
@@ -72,7 +72,7 @@ The parameter `codematches` determines whether the calculation of CNV frequency 
 The `meta` slot of this object looks like this
 
 ```{r}
-freq_pgxseg$meta
+freq_pgxfreq$meta
 ```
 
 The `data` slot contains a list of the CNV frequency data frames named by the corresponding 
@@ -80,20 +80,20 @@ filters. The data frame with the name 'total' is the concatenated data frames fr
 filters.
 
 ```{r}
-names(freq_pgxseg$data)
+names(freq_pgxfreq$data)
 ```
 
-You can access the data frame with "pgxseg" format of one filter from this list.  
+You can access the data frame with "pgxfreq" format of one filter from this list.  
 
 ```{r}
-head(freq_pgxseg$data[['NCIT:C4038']])
+head(freq_pgxfreq$data[['NCIT:C4038']])
 ```
 
-In the pgxseg format, 
+In the pgxfreq format, 
 
 * `filters`: identifiers for grouping. 
 * `reference_name`, `start` and `end` specify interval location in chromosome.
-* `gain_frequency` and `loss_frequency` indicate the percent values for gains and 
+* `gain_frequency` and `loss_frequency` indicate the percent values across samples (%) for gains and 
 losses overlapping the interval, respectively
 
 
@@ -126,7 +126,9 @@ data frames looks like this
 freq_pgxmatrix$data[['NCIT:C3059']][,c(1:4,3108:3110)]
 ```
 
-In the data frame with "pgxmatrix" format, `filters` is the same as that in the "pgxseg" format. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). Note: it is different from CNV status matrix introduced in Introduction_1. Value in this matrix is calculated across samples while the value in CNV status matrix is overlapped coverage in individual samples.
+In the data frame with "pgxmatrix" format, `filters` is the same as that in the "pgxfreq" format. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). For example, if the column `X1.400000.1400000.DUP` is 9.141, it means that 9.141% samples from the corresponding filter having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
+
+Note: it is different from CNV status matrix introduced in Introduction_1. Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV status matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in the individual sample.
 
 You can also access the total data frame for analyzing multiple frequency sets.
 
@@ -152,7 +154,7 @@ freq_sel <- pgxFreqselect(data=freq_pgxmatrix,
 freq_sel$data$total[,c(1:5)]
 ```
 
-# Visualization of CNV frequency data using 'pgxseg' format
+# Visualization of CNV frequency data using 'pgxfreq' format
 
 ## `pgxFeqplot` function
 
@@ -160,8 +162,8 @@ This function provides CNV frequency plots by genome or chromosomes as you reque
 
 The parameters of this function:
 
-* `data`: frequency object returned by `pgxLoader` function or individual frequency matrix with '.pgxseg' format. 
-In the returned object by `pgxLoader`, the frequency matrices in `data` slot must be stored as `.pgxseg` format, 
+* `data`: frequency object returned by `pgxLoader` function or individual frequency matrix with 'pgxfreq' format. 
+In the returned object by `pgxLoader`, the frequency matrices in `data` slot must be stored as `pgxfreq` format, 
 which can be specified by `output` parameter of `pgxLoader` function.   
 * `chrom`: a vector with chromosomes to be plotted. If NULL, return the plot by genome. If specified the frequencies are plotted with one panel for each chromosome. Default is NULL.
 * `layout`: number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1). 
@@ -174,31 +176,31 @@ return a circos plot with multiple group ids for display and comparison. Default
 Input is an object.
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxseg, filters='pgx:icdom-85003')
+pgxFreqplot(freq_pgxfreq, filters='pgx:icdom-85003')
 ```
 
 Input is individual frequency data. 
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxseg$data[["NCIT:C4038"]])
+pgxFreqplot(freq_pgxfreq$data[["NCIT:C4038"]])
 ```
 
 ### CNV frequency plot by chromosomes
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxseg, filters='NCIT:C4038',chrom=c(1,2,3), layout = c(3,1))  
+pgxFreqplot(freq_pgxfreq, filters='NCIT:C4038',chrom=c(1,2,3), layout = c(3,1))  
 ```
 
 ### CNV frequency circos plot 
 
 ```{r,fig.width=6, fig.height=6}
-pgxFreqplot(freq_pgxseg, filters='pgx:icdom-85003', circos = TRUE)
+pgxFreqplot(freq_pgxfreq, filters='pgx:icdom-85003', circos = TRUE)
 ```
 
 The circos plot also supports multiple group comparison
 
 ```{r,fig.width=6, fig.height=6}
-pgxFreqplot(freq_pgxseg,filters= c("NCIT:C4038","pgx:icdom-85003"),circos = TRUE) 
+pgxFreqplot(freq_pgxfreq,filters= c("NCIT:C4038","pgx:icdom-85003"),circos = TRUE) 
 ```
 
 # Clustering of CNV frequency data using 'pgxmatrix' format

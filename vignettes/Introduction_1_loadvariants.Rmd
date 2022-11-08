@@ -31,7 +31,7 @@ The parameters of this function:
 * `type` A string specifying output data type. Available options are "biosample", "individual",
 "variant" or "frequency". 
 * `output` A string specifying output file format. When the parameter `type` is "variant",
-available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxseg" or "pgxmatrix" .
+available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
 * `filters` A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers").
 * `codematches` A logical value determining whether to exclude samples 
@@ -164,7 +164,7 @@ cnv.status[c(1:3), c(1:5,6213:6215)]
 ```
 
 In this dataframe, `analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for
-individual biosample. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `X1.400000.1400000.DUP` is 1.0 in one row, it means that in the corresponding analysis one or more duplication events occur in the entire (100%) bin located in chromosome 1: 400000-1400000.
+individual biosample. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `X1.400000.1400000.DUP` is 0.200 in one row, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the corresponding analysis.
 
 Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
 

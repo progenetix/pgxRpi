@@ -58,7 +58,7 @@ pgxSegprocess <- function(file,show_KM_plot=F,return_metadata=F,return_seg=F,ret
     }
    
   if (return_metadata == T){
-    meta$followup_time <- ifelse(length(meta$followup_time) == 0,NA,lubridate::time_length(meta$followup_time,unit='day'))
+    meta$followup_time <- ifelse(length(meta$followup_time) == 0,NA,round(lubridate::time_length(meta$followup_time,unit='day')))
     meta$followup_state_id[meta$followup_state_id == "EFO:0030041"] <- 'alive'
     meta$followup_state_id[meta$followup_state_id == "EFO:0030049"] <- 'dead'
     meta$followup_state_id[meta$followup_state_id == "EFO:0030039"] <- 'unknown'
@@ -84,11 +84,11 @@ pgxSegprocess <- function(file,show_KM_plot=F,return_metadata=F,return_seg=F,ret
           freq.seg <- NULL
         } else {
           if (nsamples == 1){
-            gain.freq <-  as.numeric(bin.dup.data[plot.idx,])/nsamples
-            loss.freq <-  as.numeric(bin.del.data[plot.idx,])/nsamples
+            gain.freq <-  (as.numeric(bin.dup.data[plot.idx,])/nsamples)*100
+            loss.freq <-  (as.numeric(bin.del.data[plot.idx,])/nsamples)*100
           } else{
-          gain.freq <-  colSums(bin.dup.data[plot.idx,])/nsamples
-          loss.freq <-  colSums(bin.del.data[plot.idx,])/nsamples
+          gain.freq <-  (colSums(bin.dup.data[plot.idx,])/nsamples)*100
+          loss.freq <-  (colSums(bin.del.data[plot.idx,])/nsamples)*100
           }
           freq.seg.group <- data.frame(group_id=id)
           freq.seg <- cbind(freq.seg.group,bin.data[['bin']][,c(2,3,4)])

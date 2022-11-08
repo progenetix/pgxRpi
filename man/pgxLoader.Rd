@@ -23,7 +23,7 @@ pgxLoader(
 
 \item{output}{A string specifying output file format. When the parameter \code{type} is "variant",
 available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter \code{type} is "frequency",
-available options are "pgxseg" or "pgxmatrix" .}
+available options are "pgxfreq" or "pgxmatrix" .}
 
 \item{filters}{A single or a comma-concatenated list of identifiers for cancer type,
 literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers")}

@@ -150,8 +150,8 @@ pgxFreqLoader <- function(output, codematches, filters) {
     # check filters again
   attempt::stop_if(.x=length(filters) < 1, msg="\n At least one valid filter has to be provided \n")
     # check output format
-  attempt::stop_if(.x=is.null(output),msg="\n Output is invalid. Only support 'pgxseg' or 'pgxmatrix' \n")
-  attempt::stop_if(.x=(!output %in% c('pgxseg','pgxmatrix')),msg="\n Output is invalid. Only support 'pgxseg' or 'pgxmatrix' \n")
+  attempt::stop_if(.x=is.null(output),msg="\n Output is invalid. Only support 'pgxfreq' or 'pgxmatrix' \n")
+  attempt::stop_if(.x=(!output %in% c('pgxfreq','pgxmatrix')),msg="\n Output is invalid. Only support 'pgxfreq' or 'pgxmatrix' \n")
     # check if filters exists
   idcheck <- pgidCheck(filters)
   if (!all(idcheck)){

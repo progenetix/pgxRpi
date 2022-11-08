@@ -14,8 +14,8 @@ pgxFreqplot(
 )
 }
 \arguments{
-\item{data}{frequency object returned by \code{pgxLoader} function or individual frequency matrix with '.pgxseg' format.
-In the returned object by \code{pgxLoader}, the frequency matrices in \code{data} slot must be stored as \code{.pgxseg} format,
+\item{data}{frequency object returned by \code{pgxLoader} function or individual frequency matrix with 'pgxfreq' format.
+In the returned object by \code{pgxLoader}, the frequency matrices in \code{data} slot must be stored as 'pgxfreq' format,
 which can be specified by \code{output} parameter of \code{pgxLoader} function.}
 
 \item{chrom}{A vector with chromosomes to be plotted. If NULL, return the plot

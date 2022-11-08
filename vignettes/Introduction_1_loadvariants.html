@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hangjia Zhao" />
 
-<meta name="date" content="2022-11-02" />
+<meta name="date" content="2022-11-08" />
 
 <title>Introduction_1_loadvariants</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Introduction_1_loadvariants</h1>
 <h4 class="author">Hangjia Zhao</h4>
-<h4 class="date">2022-11-02</h4>
+<h4 class="date">2022-11-08</h4>
 
 
 
@@ -359,7 +359,7 @@ options are “biosample”, “individual”, “variant” or “frequency”.
 <li><code>output</code> A string specifying output file format. When the
 parameter <code>type</code> is “variant”, available options are NULL,
 “pgxseg” ,“pgxmatrix”, “coverage” or “seg” ; When the parameter
-<code>type</code> is “frequency”, available options are “pgxseg” or
+<code>type</code> is “frequency”, available options are “pgxfreq” or
 “pgxmatrix” .</li>
 <li><code>filters</code> A single or a comma-concatenated list of
 identifiers for cancer type, literature, and cohorts such as
@@ -673,9 +673,9 @@ intervals) plus all “loss status” columns (3106 intervals). The status
 is indicated by a coverage value, i.e. the fraction of how much the
 binned interval overlaps with one or more CNVs of the given type
 (DUP/DEL). For example, if the column <code>X1.400000.1400000.DUP</code>
-is 1.0 in one row, it means that in the corresponding analysis one or
-more duplication events occur in the entire (100%) bin located in
-chromosome 1: 400000-1400000.</p>
+is 0.200 in one row, it means that one or more duplication events
+overlapped with 20% of the genomic bin located in chromosome 1:
+400000-1400000 in the corresponding analysis.</p>
 <p>Setting <code>codematches = True</code> can exclude profiles with
 group_id belonging to child terms of the input filters.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>cnv.status <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">output=</span><span class="st">&quot;pgxmatrix&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C9245&quot;</span>,</span>

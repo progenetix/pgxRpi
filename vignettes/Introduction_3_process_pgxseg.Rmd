@@ -85,7 +85,7 @@ is specified in metadata stored in header comments of "pgxseg" files.
 frequency <- pgxSegprocess(file=file_name,return_frequency = T)
 ```
 
-The returned object is same as the CNV frequency output of pgxLoader function (format details see the vignette [Introduction_2_loadfrequency](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_2_loadfrequency.html). It contains two slots 'meta' and 'data'.
+The returned object is same as the CNV frequency object with "pgxfreq" format returned by pgxLoader function (format details see the vignette [Introduction_2_loadfrequency](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_2_loadfrequency.html). It contains two slots 'meta' and 'data'.
 
 The 'meta' slot looks like this
 
@@ -99,11 +99,15 @@ It is noted that not all groups in metadata must exist in segment data (e.g. som
 ```{r}
 names(frequency$data)
 ```
+
 The 'total' data is concatenated CNV matrices across all groups. The individual matrix looks like this
 
 ```{r}
 head(frequency$data$`pgx:icdot-C16.9`)
 ```
+
+In this matirx, `gain_frequency` and `loss_frequency` indicate the percentage (%) of samples from the corresponding group_id for gains and 
+losses overlapping the genomic interval, respectively.
 
 # Visualize CNV frequency by `pgxFreqplot` function
 

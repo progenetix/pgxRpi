@@ -23,8 +23,8 @@ getFreqPlotParameters <- function(type,nc,nr,chrom=NULL,...){
     #Common default parameters for genome and bychrom:
     op <- list(ylab="% with gain or loss",
                plot.size=c(11.8,min(3*nr,8.2)),
-               col.gain="red",
-               col.loss="blue",
+               col.gain="#FFC633",
+               col.loss="#33A0FF",
                plot.unit="mbp",
                percentLines=TRUE,
                continuous=TRUE,

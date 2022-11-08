@@ -2,8 +2,8 @@
 #'
 #' Thie function plots the frequency of deletions and amplifications
 #'
-#' @param data frequency object returned by `pgxLoader` function or individual frequency matrix with '.pgxseg' format. 
-#' In the returned object by `pgxLoader`, the frequency matrices in `data` slot must be stored as `.pgxseg` format, 
+#' @param data frequency object returned by `pgxLoader` function or individual frequency matrix with 'pgxfreq' format. 
+#' In the returned object by `pgxLoader`, the frequency matrices in `data` slot must be stored as 'pgxfreq' format, 
 #' which can be specified by `output` parameter of `pgxLoader` function.  
 #' @param chrom A vector with chromosomes to be plotted. If NULL, return the plot
 #' by genome. If specified the frequencies are plotted with one panel for each
@@ -45,21 +45,21 @@ pgxFreqplot <- function(data,chrom=NULL,layout=c(1,1),filters=NULL,circos = FALS
 
 genomeFreq <- function(data,pos.unit="bp",id=1,...){
   if (all(names(data) %in% c("data","meta"))){
-    data_pgxseg <- data$data[[id]]
+    data_pgxfreq <- data$data[[id]]
   } else{
     attempt::stop_if(.x= length(colnames(data)) == 0, msg="\n The input is invalid \n")
     attempt::stop_if(.x= any(colnames(data)[c(5,6)] != c('gain_frequency','loss_frequency')), msg="\n The input is invalid \n")
     attempt::stop_if(.x=length(unique(data[,1])) > 1, msg="\n The input is invalid (more than one sample id) \n")
-    data_pgxseg <- data
+    data_pgxfreq <- data
   }
    
     nr <- 1
     nc <- 1
     op <- getFreqPlotParameters(type="genome",nc=nc,nr=nr,...)
-    data_pgxseg[,2] <- gsub("X", "23", data_pgxseg[,2])
-    data_pgxseg[,2] <- gsub("Y", "24", data_pgxseg[,2])
-    op$xlim <- getGlobal.xlim(op=op,pos.unit=pos.unit,chrom=as.numeric(unique(data_pgxseg[,2])))
-    x <- adjustPos(position=data_pgxseg[,4],chromosomes=as.numeric(data_pgxseg[,2]),pos.unit=pos.unit,type="genome",op=op)
+    data_pgxfreq[,2] <- gsub("X", "23", data_pgxfreq[,2])
+    data_pgxfreq[,2] <- gsub("Y", "24", data_pgxfreq[,2])
+    op$xlim <- getGlobal.xlim(op=op,pos.unit=pos.unit,chrom=as.numeric(unique(data_pgxfreq[,2])))
+    x <- adjustPos(position=data_pgxfreq[,4],chromosomes=as.numeric(data_pgxfreq[,2]),pos.unit=pos.unit,type="genome",op=op)
     xleft <- x$xleft
     xright <- x$xright
     if(dev.cur()<=1){       #to make Sweave work
@@ -79,7 +79,7 @@ genomeFreq <- function(data,pos.unit="bp",id=1,...){
 
     par(fig=fig,new=new,oma=c(0,0,1,0),mar=op$mar)
 
-    op <- updateFreqParameters(data_pgxseg$loss_frequency,data_pgxseg$gain_frequency,op)
+    op <- updateFreqParameters(data_pgxfreq$loss_frequency,data_pgxfreq$gain_frequency,op)
     plot(1,1,type="n",ylim=op$ylim,xlim=op$xlim,xaxs="i",main="",frame.plot=TRUE,yaxt="n",xaxt="n",ylab="",xlab="")
     chromPattern(pos.unit,op)
     
@@ -97,26 +97,26 @@ genomeFreq <- function(data,pos.unit="bp",id=1,...){
 
     #Add axes, labels and percentage lines:
     addToFreqPlot(op,type="genome")
-    rect(xleft=xleft,ybottom=0,xright=xright,ytop=data_pgxseg$gain_frequency,col=op$col.gain,border=op$col.gain)
-    rect(xleft=xleft,ybottom=0,xright=xright,ytop=-data_pgxseg$loss_frequency,col=op$col.loss,border=op$col.loss)
+    rect(xleft=xleft,ybottom=0,xright=xright,ytop=data_pgxfreq$gain_frequency,col=op$col.gain,border=op$col.gain)
+    rect(xleft=xleft,ybottom=0,xright=xright,ytop=-data_pgxfreq$loss_frequency,col=op$col.loss,border=op$col.loss)
     abline(h=0,lty=1,col="grey82",lwd=1.5)
 
     op$chrom.lty = 1
-    addChromlines(as.numeric(data_pgxseg[,2]),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
-    addArmlines(as.numeric(data_pgxseg[,2]),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
+    addChromlines(as.numeric(data_pgxfreq[,2]),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
+    addArmlines(as.numeric(data_pgxfreq[,2]),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
 }
 
 chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,...){
   if (all(names(data) %in% c("data","meta"))){
-    data_pgxseg <- data$data[[id]]
+    data_pgxfreq <- data$data[[id]]
   } else{
     attempt::stop_if(.x= length(colnames(data)) == 0, msg="\n The input is invalid \n")
     attempt::stop_if(.x= any(colnames(data)[c(5,6)] != c('gain_frequency','loss_frequency')), msg="\n The input is invalid \n")
     attempt::stop_if(.x=length(unique(data[,1])) > 1, msg="\n The input is invalid (more than one sample id) \n")
-    data_pgxseg <- data
+    data_pgxfreq <- data
   }
   
-  nProbe <- nrow(data_pgxseg)
+  nProbe <- nrow(data_pgxfreq)
   nChrom <- length(chrom)
 
     #Grid layout
@@ -134,11 +134,11 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,...){
   }
   mar=c(0.2,0.2,0.3,0.2)
 
-  data_pgxseg[,2] <- gsub("X", "23", data_pgxseg[,2])
-  data_pgxseg[,2] <- gsub("Y", "24", data_pgxseg[,2])
+  data_pgxfreq[,2] <- gsub("X", "23", data_pgxfreq[,2])
+  data_pgxfreq[,2] <- gsub("Y", "24", data_pgxfreq[,2])
     #Adjust positions to be plotted along xaxis; i.e. scale according to plot.unit, and get left and right pos for freq.rectangles to be plotted (either continuous
     #or 1 probe long):
-  x <- adjustPos(position=data_pgxseg[,4],chromosomes=as.numeric(data_pgxseg[,2]),pos.unit=pos.unit,type="chromosome",op=op)
+  x <- adjustPos(position=data_pgxfreq[,4],chromosomes=as.numeric(data_pgxfreq[,2]),pos.unit=pos.unit,type="chromosome",op=op)
   xleft <- x$xleft
   xright <- x$xright
 
@@ -159,8 +159,8 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,...){
 
 
     #Find default ylimits and at.y (tickmarks):
-  use <- which(as.numeric(data_pgxseg[,2]) %in% chrom)
-  op <- updateFreqParameters(data_pgxseg$loss_frequency[use],data_pgxseg$gain_frequency[use],op)
+  use <- which(as.numeric(data_pgxfreq[,2]) %in% chrom)
+  op <- updateFreqParameters(data_pgxfreq$loss_frequency[use],data_pgxfreq$gain_frequency[use],op)
 
     #Make separate plots for each chromosome:
 
@@ -177,9 +177,9 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,...){
       k <- chrom[c]
 
         #Pick out frequencies for this chromsome
-      ind.c <- which(as.numeric(data_pgxseg[,2]) ==k)
-      freqamp.c <- data_pgxseg$gain_frequency[ind.c]
-      freqdel.c <- data_pgxseg$loss_frequency[ind.c]
+      ind.c <- which(as.numeric(data_pgxfreq[,2]) ==k)
+      freqamp.c <- data_pgxfreq$gain_frequency[ind.c]
+      freqdel.c <- data_pgxfreq$loss_frequency[ind.c]
 
       xlim <- c(0,max(xright[ind.c]))
 
@@ -270,21 +270,21 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,...){
 cplotpgxFreq  <- function(data,filters){
   
   if (all(names(data) %in% c("data","meta"))){
-    data_pgxseg <- data$data[filters]
-    id_name <-  names(data_pgxseg)
+    data_pgxfreq <- data$data[filters]
+    id_name <-  names(data_pgxfreq)
   } else{
     attempt::stop_if(.x= length(colnames(data)) == 0, msg="\n The input is invalid \n")
     attempt::stop_if(.x= any(colnames(data)[c(5,6)] != c('gain_frequency','loss_frequency')), msg="\n The input is invalid \n")
-    data_pgxseg <- list()
+    data_pgxfreq <- list()
     id_name <- unique(data[,1])
     for (i in id_name){
-      data_pgxseg[[i]] <- data[data[,1] %in% i,]
+      data_pgxfreq[[i]] <- data[data[,1] %in% i,]
     }
   }
   
   id_1 <- id_name[1]
-  data_cir_1 <- data_pgxseg[[id_1]][,c(2,3,4,5,6)]
-  cex_text <- ifelse(length(data_pgxseg) == 1, 0.8, 0.6)
+  data_cir_1 <- data_pgxfreq[[id_1]][,c(2,3,4,5,6)]
+  cex_text <- ifelse(length(data_pgxfreq) == 1, 0.8, 0.6)
   data_cir_1[,5] <- -data_cir_1[,5]
   data_cir_1[,1] <- paste0('chr',data_cir_1[,1])
   circlize::circos.clear()
@@ -295,16 +295,16 @@ cplotpgxFreq  <- function(data,filters){
                             value1 = unlist(value[1])
                             value2 = unlist(value[2])
                             pos=unlist(region[1]+(region[2]-region[1])/2)
-                            circlize::circos.barplot(value=value1,pos=pos, border = 'red',col = 'red')
-                            circlize::circos.barplot(value=value2,pos=pos, border = 'blue',col = 'blue')
+                            circlize::circos.barplot(value=value1,pos=pos, border = '#FFC633',col = '#FFC633')
+                            circlize::circos.barplot(value=value2,pos=pos, border = '#33A0FF',col = '#33A0FF')
                             y = seq(-100,100,by=20)
-                            circlize::circos.segments(0,y,circlize::CELL_META$xlim[2], y,col=ifelse(y>0,'#FF9999','#99CCFF'))
+                            circlize::circos.segments(0,y,circlize::CELL_META$xlim[2], y,col=ifelse(y>0,'#FFC633','#33A0FF'))
                         })
   if (length(id_name) <=2 ){text(0,0,id_1,cex = cex_text)}
   if (length(id_name) > 1){
     for (i in c(2:length(id_name))){
       id <- id_name[i]
-      data_cir <- data_pgxseg[[id]][,c(2,3,4,5,6)]
+      data_cir <- data_pgxfreq[[id]][,c(2,3,4,5,6)]
       data_cir[,5] <- -data_cir[,5]
       data_cir[,1] <- paste0('chr',data_cir[,1])
       circlize::circos.genomicTrack(data_cir, ylim = c(-100, 100),numeric.column = c("gain_frequency", "loss_frequency"),
@@ -312,10 +312,10 @@ cplotpgxFreq  <- function(data,filters){
                                               value1 = unlist(value[1])
                                               value2 = unlist(value[2])
                                               pos=unlist(region[1]+(region[2]-region[1])/2)
-                                              circlize::circos.barplot(value=value1,pos=pos, border = 'red',col = 'red')
-                                              circlize::circos.barplot(value=value2,pos=pos, border = 'blue',col = 'blue')
+                                              circlize::circos.barplot(value=value1,pos=pos, border = '#FFC633',col = '#FFC633')
+                                              circlize::circos.barplot(value=value2,pos=pos, border = '#33A0FF',col = '#33A0FF')
                                               y = seq(-100,100,by=20)
-                                              circlize::circos.segments(0,y,circlize::CELL_META$xlim[2], y,col=ifelse(y>0,'#FF9999','#99CCFF'))
+                                              circlize::circos.segments(0,y,circlize::CELL_META$xlim[2], y,col=ifelse(y>0,'#FFC633','#33A0FF'))
                                           })
       if (i == 2 & length(id_name) == 2){text(0,-0.1*(i-1),id,cex = cex_text)}
       }
