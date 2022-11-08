@@ -14,4 +14,6 @@ If you are interested in accessing CNV variant data, get started from this [vign
 
 If you are interested in accessing CNV frequency data, get started from this [vignette](http://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_2_loadfrequency.html)
 
+If you are interested in processing local pgxseg files, get started from this [vignette](http://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_3_process_pgxseg.html)
+
 When you face problems, try to reinstall the latest version. If reinstallation doesn't help, please contact us.
