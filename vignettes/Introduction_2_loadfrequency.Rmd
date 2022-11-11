@@ -33,7 +33,7 @@ The parameters of this function:
 * `output` A string specifying output file format. When the parameter `type` is "variant",
 available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
 * `filters` A single or a comma-concatenated list of identifiers for cancer type,
-literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers").
+literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers").
 * `codematches` A logical value determining whether to exclude samples 
 from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
 If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
@@ -52,6 +52,7 @@ database for identifying individuals.
 instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
 * `filename` A string specifying the path and name of the file to be saved. 
 Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
+
 
 # Retrieve CNV frequency data
 
@@ -86,10 +87,12 @@ names(freq_pgxfreq$data)
 You can access the data frame with "pgxfreq" format of one filter from this list.  
 
 ```{r}
+print(dim(freq_pgxfreq$data[['NCIT:C4038']]))
 head(freq_pgxfreq$data[['NCIT:C4038']])
 ```
 
-In the pgxfreq format, 
+In the pgxfreq format, the whole genome (GRCh38) is partitioned into 3106 intervals or bins (the size 
+of most bins is 1MB except a few bins close to telomeres).
 
 * `filters`: identifiers for grouping. 
 * `reference_name`, `start` and `end` specify interval location in chromosome.
@@ -136,6 +139,7 @@ You can also access the total data frame for analyzing multiple frequency sets.
 freq_pgxmatrix$data[['total']][,c(1:4,3108:3110)]
 ```
 
+
 # Select ids of interests from original object of CNV frequency
 
 It is realized by `pgxFreqselect` function.
@@ -154,9 +158,10 @@ freq_sel <- pgxFreqselect(data=freq_pgxmatrix,
 freq_sel$data$total[,c(1:5)]
 ```
 
+
 # Visualization of CNV frequency data using 'pgxfreq' format
 
-## `pgxFeqplot` function
+## `pgxFreqplot` function
 
 This function provides CNV frequency plots by genome or chromosomes as you request.
 
@@ -170,6 +175,9 @@ which can be specified by `output` parameter of `pgxLoader` function.
 * `filters`: Index or string value to indicate which filter to be plotted. The length of filters is limited to one if the parameter `circos` is False. Default is the first filter.
 * `circos`: a logical value to indicate if return a circos plot. If TRUE, it can 
 return a circos plot with multiple group ids for display and comparison. Default is FALSE.
+* `highlight`: Indices of genomic bins to be highlighted with red color.
+* `assembly`: A string specifying which genome assembly version should be applied to CNV frequency plotting. Allowed options are "hg19", "hg38". Default is "hg38" (genome version used in Progenetix).
+
 
 ### CNV frequency plot by genome (GRCh38)
 
@@ -202,6 +210,39 @@ The circos plot also supports multiple group comparison
 ```{r,fig.width=6, fig.height=6}
 pgxFreqplot(freq_pgxfreq,filters= c("NCIT:C4038","pgx:icdom-85003"),circos = TRUE) 
 ```
+
+### Highlight interesting genomic intervals
+
+If you want to look at the CNV frequency at specific genomic bins, you can use `highlight` parameter.
+For example, when you are interested in CNV pattern of CCND1 gene in samples with infiltrating duct carcinoma (icdom-85003).
+You could first find the genomic bin where CCND1 (chr11:69641156-69654474) is located.
+
+```{r}
+# Extract the CNV frequency data frame of samples from 'icdom-85003' from 
+# the previously returned object
+freq_IDC <- freq_pgxfreq$data$`pgx:icdom-85003`
+# search the genomic bin where CCND1 is located
+bin <- which(freq_IDC$reference_name == 11 & freq_IDC$start <= 69641156 &  
+             freq_IDC$end >= 69654474)
+freq_IDC[bin,]
+```
+
+Then you could highlight this genomic bin like this
+
+```{r, fig.width=7, fig.height=5}
+pgxFreqplot(freq_pgxfreq,filters = 'pgx:icdom-85003', chrom = 11,highlight = bin)
+```
+
+Note: For CNV analysis of specific genes, the highlighted plot is rough as a reference, 
+because the bin size in frequency plots is 1MB, which is possible to cover multiple genes.
+
+The highlighting is also available for genome plots and circos plots. And you could highlight 
+multiple bins by a vector of indices.
+
+```{r, fig.width=7, fig.height=5}
+pgxFreqplot(freq_pgxfreq,filters = 'pgx:icdom-85003',highlight = c(1:100))
+```
+
 
 # Clustering of CNV frequency data using 'pgxmatrix' format
 

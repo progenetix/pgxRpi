@@ -10,11 +10,12 @@ pgxFreqplot(
   layout = c(1, 1),
   filters = NULL,
   circos = FALSE,
-  ...
+  highlight = NULL,
+  assembly = "hg38"
 )
 }
 \arguments{
-\item{data}{frequency object returned by \code{pgxLoader} function or individual frequency matrix with 'pgxfreq' format.
+\item{data}{Frequency object returned by \code{pgxLoader} function or individual frequency matrix with 'pgxfreq' format.
 In the returned object by \code{pgxLoader}, the frequency matrices in \code{data} slot must be stored as 'pgxfreq' format,
 which can be specified by \code{output} parameter of \code{pgxLoader} function.}
 
@@ -32,6 +33,11 @@ is limited to one if the parameter \code{circos} is False. Default is 1.}
 \item{circos}{A logical value to indicate if return a circos plot. If TRUE, it
 can return a circos plot with multiple filters for display and comparison.
 Default is FALSE.}
+
+\item{highlight}{Indices of genomic bins to be highlighted with red color.}
+
+\item{assembly}{A string specifying which genome assembly version should be applied to CNV frequency plotting.
+Allowed options are "hg19", "hg38". Default is "hg38" (genome version used in Progenetix).}
 }
 \value{
 The binned CNV frequency plot

@@ -12,7 +12,7 @@
 ###Required by: 
 ### plotFreq (genomeFreq and chromosomeFreq)
 
-getFreqPlotParameters <- function(type,nc,nr,chrom=NULL,...){
+getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
     
     #Apply a scaling factor according to number of columns and rows in plot:
     #seems to work ok:
@@ -28,7 +28,7 @@ getFreqPlotParameters <- function(type,nc,nr,chrom=NULL,...){
                plot.unit="mbp",
                percentLines=TRUE,
                continuous=TRUE,
-               assembly="hg38",
+               assembly=assembly,
                las=1,
                chrom.lty=5,
                chrom.side=1,
