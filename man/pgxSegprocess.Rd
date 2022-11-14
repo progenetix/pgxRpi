@@ -6,6 +6,7 @@
 \usage{
 pgxSegprocess(
   file,
+  group_id = "group_id",
   show_KM_plot = F,
   return_metadata = F,
   return_seg = F,
@@ -17,13 +18,15 @@ pgxSegprocess(
 \arguments{
 \item{file}{A string specifying the path and name of the "pgxseg" file where the data is to be read.}
 
+\item{group_id}{A string specifying which id is used for grouping in KM plot or CNV frequency calculation. Default is "group_id".}
+
 \item{show_KM_plot}{A logical value determining whether to return the Kaplan-Meier plot based on metadata. Default is FALSE.}
 
 \item{return_metadata}{A logical value determining whether to return metadata. Default is FALSE.}
 
 \item{return_seg}{A logical value determining whether to return segment data. Default is FALSE.}
 
-\item{return_frequency}{A logical value determining whether to return frequency data. The frequency calculation is based on segments in segment data and group id in metadata. Default is FALSE.}
+\item{return_frequency}{A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.}
 
 \item{assembly}{A string specifying which genome assembly version should be applied to CNV frequency calculation and plotting. Allowed options are "hg19", "hg38". Default is "hg38".}
 
