@@ -19,6 +19,8 @@ null_to_na <- function(x){
 
 # pick longer external arrayexpress & cbioportal & legacy ids
 pick_longer_id <- function(x){
+  if (length(x) == 0){return(NA)}
+  if(all(is.na(x))){return(NA)}
   return(x[which.max(nchar(x))])
 }
 
@@ -61,8 +63,7 @@ read_sample <- function(url){
                                           external_cellosaurus_id=null_to_na(cellosaurus_id),
                                           external_PMID=null_to_na(pmid),
                                           external_arrayexpress_id=null_to_na(arrayexpress_id),
-                                          external_cbioportal_id=null_to_na(cellosaurus_id),
-                                          followup_state=null_to_na(res$followupState$label),
+                                          external_cbioportal_id=null_to_na(cbioportal_id),
                                           geoprov_country=null_to_na(res$provenance$geoLocation$properties$country),
                                           geoprov_city=null_to_na(res$provenance$geoLocation$properties$city), 
                                           geoprov_iso_alpha3=null_to_na(res$provenance$geoLocation$properties$ISO3166alpha3),
@@ -70,7 +71,7 @@ read_sample <- function(url){
                                           geoprov_long=null_to_na(res$provenance$geoLocation$properties$longitude),
                                           data_use_condition=null_to_na(res$dataUseConditions$id), 
                                           update_time=null_to_na(res$updated)),.e=function(e){
-                                            cat(i,'\n')
+                                            cat('Sample', i,'is not exported \n')
                                           })
   }
   total.df <- Reduce(rbind, total.df)

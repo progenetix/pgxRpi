@@ -33,7 +33,7 @@ The parameters of this function:
 * `output` A string specifying output file format. When the parameter `type` is "variant",
 available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
 * `filters` A single or a comma-concatenated list of identifiers for cancer type,
-literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers").
+literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers").
 * `codematches` A logical value determining whether to exclude samples 
 from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
 If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
@@ -59,8 +59,8 @@ Relevant parameters of `pgxLoader` function: type, filters, skip, limit,codematc
 
 ```{r}
 biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512")
-
-head(biosamples)
+# data looks like this
+biosamples[c(1700:1705),]
 ```
 
 The data contains many columns representing different aspects of sample information. 
@@ -71,7 +71,7 @@ are analysed more than one time and have different analysis ids (callset_ids).
 
 ```{r}
 biosamples_2 <- pgxLoader(type="biosample", filters = "NCIT:C3512",skip=0, limit = 1000)
-
+# Dimension: Number of samples * features
 print(dim(biosamples))
 print(dim(biosamples_2))
 ```
@@ -119,11 +119,11 @@ of interest come from, you can either search by filters:
 
 ```{r}
 individuals <- pgxLoader(type='individual',filters='NCIT:C3270',codematches = T)
-
+# Dimension: Number of individuals * features
 print(dim(individuals))
-head(individuals)
+# data looks like this
+individuals[c(36:40),]
 ```
-
 or by individual id which you can get from the query of sample
 
 ```{r}
@@ -212,7 +212,7 @@ head(cnv_covergae$whole_genome_coverage)
 The first column is the total called coverage, followed by duplication coverage and deletion coverage.
 
 Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
-26 samples are excluded from the original 47 samples in this case.
+21 samples are excluded from the original 47 samples in this case.
 
 ```{r}
 cnv_covergae_2 <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948",

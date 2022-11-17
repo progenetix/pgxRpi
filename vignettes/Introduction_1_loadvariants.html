@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hangjia Zhao" />
 
-<meta name="date" content="2022-11-08" />
+<meta name="date" content="2022-11-17" />
 
 <title>Introduction_1_loadvariants</title>
 
@@ -341,7 +341,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Introduction_1_loadvariants</h1>
 <h4 class="author">Hangjia Zhao</h4>
-<h4 class="date">2022-11-08</h4>
+<h4 class="date">2022-11-17</h4>
 
 
 
@@ -363,7 +363,8 @@ parameter <code>type</code> is “variant”, available options are NULL,
 “pgxmatrix” .</li>
 <li><code>filters</code> A single or a comma-concatenated list of
 identifiers for cancer type, literature, and cohorts such as
-c(“NCIT:C7376”,“pgx:icdom-98353”,“<a href="PMID:22824167" class="uri">PMID:22824167</a>”, “pgx:cohort-TCGAcancers”).</li>
+c(“NCIT:C7376”,“pgx:icdom-98353”,“PMID<!-- -->:22824167”,
+“pgx:cohort-TCGAcancers”).</li>
 <li><code>codematches</code> A logical value determining whether to
 exclude samples from child concepts of specified filters that belong to
 cancer type/tissue encoding system (NCIt, icdom/t, Uberon). If TRUE,
@@ -398,78 +399,71 @@ TRUE. Default is “variants.seg/pgxseg” in current work directory.</li>
 <p>Relevant parameters of <code>pgxLoader</code> function: type,
 filters, skip, limit,codematches,biosample_id, individual_id</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>biosamples <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;biosample&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3512&quot;</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(biosamples)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     biosample_id   individual_id    callset_ids    pgx_legacy_sample_id</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva6du pgxind-kftx26ng pgxcs-kftvlmuu PGX_AM_BS_AdSqLu-bjo-17</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva6dv pgxind-kftx26ni pgxcs-kftvlmvb PGX_AM_BS_AdSqLu-bjo-18</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftva6dx pgxind-kftx26nk pgxcs-kftvlmvt PGX_AM_BS_AdSqLu-bjo-19</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxbs-kftva6dz pgxind-kftx26nm pgxcs-kftvlmwa PGX_AM_BS_AdSqLu-bjo-20</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva6e0 pgxind-kftx26no pgxcs-kftvlmwr PGX_AM_BS_AdSqLu-bjo-21</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva6e2 pgxind-kftx26nq pgxcs-kftvlmx8 PGX_AM_BS_AdSqLu-bjo-22</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   cellline_id histological_diagnosis_id histological_diagnosis_label</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   icdo_morphology_id icdo_morphology_label icdo_topography_id</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   icdo_topography_label sampled_tissue_id sampled_tissue_label</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1             Lung, NOS    UBERON:0002048                 lung</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2             Lung, NOS    UBERON:0002048                 lung</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3             Lung, NOS    UBERON:0002048                 lung</span></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4             Lung, NOS    UBERON:0002048                 lung</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5             Lung, NOS    UBERON:0002048                 lung</span></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6             Lung, NOS    UBERON:0002048                 lung</span></span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   biosample_status_id biosample_status_label pathological_stage_id</span></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   pathological_stage_label experiment_id series_id platform_id</span></span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_cellosaurus_id external_PMID external_arrayexpress_id</span></span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                    &lt;NA&gt;  PMID:9591638                     &lt;NA&gt;</span></span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                    &lt;NA&gt;  PMID:9591638                     &lt;NA&gt;</span></span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                    &lt;NA&gt;  PMID:9591638                     &lt;NA&gt;</span></span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                    &lt;NA&gt;  PMID:9591638                     &lt;NA&gt;</span></span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                    &lt;NA&gt;  PMID:9591638                     &lt;NA&gt;</span></span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                    &lt;NA&gt;  PMID:9591638                     &lt;NA&gt;</span></span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   external_cbioportal_id followup_state geoprov_country geoprov_city</span></span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                   &lt;NA&gt;             NA         Finland     Helsinki</span></span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                   &lt;NA&gt;             NA         Finland     Helsinki</span></span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                   &lt;NA&gt;             NA         Finland     Helsinki</span></span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                   &lt;NA&gt;             NA         Finland     Helsinki</span></span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                   &lt;NA&gt;             NA         Finland     Helsinki</span></span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                   &lt;NA&gt;             NA         Finland     Helsinki</span></span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   geoprov_iso_alpha3 geoprov_lat geoprov_long data_use_condition</span></span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                FIN       60.17        24.94        DUO:0000004</span></span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                FIN       60.17        24.94        DUO:0000004</span></span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                FIN       60.17        24.94        DUO:0000004</span></span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                FIN       60.17        24.94        DUO:0000004</span></span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                FIN       60.17        24.94        DUO:0000004</span></span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                FIN       60.17        24.94        DUO:0000004</span></span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  update_time</span></span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 2020-09-10 17:44:06.193000</span></span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 2020-09-10 17:44:06.194000</span></span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 2020-09-10 17:44:06.196000</span></span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 2020-09-10 17:44:06.197000</span></span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 2020-09-10 17:44:06.198000</span></span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 2020-09-10 17:44:06.200000</span></span></code></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># data looks like this</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>biosamples[<span class="fu">c</span>(<span class="dv">1700</span><span class="sc">:</span><span class="dv">1705</span>),]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        biosample_id   individual_id    callset_ids pgx_legacy_sample_id</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1700 pgxbs-kftvjjhj pgxind-kftx5fxv pgxcs-kftwjer3 PGX_AM_BS_GSM1857283</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1701 pgxbs-kftvjjhk pgxind-kftx5fxx pgxcs-kftwjerl PGX_AM_BS_GSM1857284</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1702 pgxbs-kftvjjhm pgxind-kftx5fxz pgxcs-kftwjes3 PGX_AM_BS_GSM1857285</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1703 pgxbs-kftvjjho pgxind-kftx5fy1 pgxcs-kftwjesk PGX_AM_BS_GSM1857286</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1704 pgxbs-kftvjjhp pgxind-kftx5fy3 pgxcs-kftwjet1 PGX_AM_BS_GSM1857287</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1705 pgxbs-kftvjjhr pgxind-kftx5fy5 pgxcs-kftwjetj PGX_AM_BS_GSM1857288</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      cellline_id histological_diagnosis_id histological_diagnosis_label</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1700        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1701        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1702        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1703        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1704        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1705        &lt;NA&gt;                NCIT:C3512          Lung Adenocarcinoma</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      icdo_morphology_id icdo_morphology_label icdo_topography_id</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1700    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1701    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1702    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1703    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1704    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1705    pgx:icdom-81403   Adenocarcinoma, NOS    pgx:icdot-C34.9</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      icdo_topography_label sampled_tissue_id sampled_tissue_label</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1700             Lung, NOS    UBERON:0002048                 lung</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1701             Lung, NOS    UBERON:0002048                 lung</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1702             Lung, NOS    UBERON:0002048                 lung</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1703             Lung, NOS    UBERON:0002048                 lung</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1704             Lung, NOS    UBERON:0002048                 lung</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1705             Lung, NOS    UBERON:0002048                 lung</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      biosample_status_id biosample_status_label pathological_stage_id</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1700         EFO:0009656      neoplastic sample           NCIT:C27975</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1701         EFO:0009656      neoplastic sample           NCIT:C27976</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1702         EFO:0009656      neoplastic sample           NCIT:C27976</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1703         EFO:0009656      neoplastic sample           NCIT:C27976</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1704         EFO:0009656      neoplastic sample           NCIT:C27976</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1705         EFO:0009656      neoplastic sample           NCIT:C27975</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      pathological_stage_label  experiment_id    series_id platform_id</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1700                 Stage Ia geo:GSM1857283 geo:GSE72192 geo:GPL3720</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1701                 Stage Ib geo:GSM1857284 geo:GSE72192 geo:GPL3720</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1702                 Stage Ib geo:GSM1857285 geo:GSE72192 geo:GPL3720</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1703                 Stage Ib geo:GSM1857286 geo:GSE72192 geo:GPL3720</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1704                 Stage Ib geo:GSM1857287 geo:GSE72192 geo:GPL3720</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1705                 Stage Ia geo:GSM1857288 geo:GSE72192 geo:GPL3720</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      external_cellosaurus_id external_PMID external_arrayexpress_id</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1700                    &lt;NA&gt; PMID:26444668                     &lt;NA&gt;</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1701                    &lt;NA&gt; PMID:26444668                     &lt;NA&gt;</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1702                    &lt;NA&gt; PMID:26444668                     &lt;NA&gt;</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1703                    &lt;NA&gt; PMID:26444668                     &lt;NA&gt;</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1704                    &lt;NA&gt; PMID:26444668                     &lt;NA&gt;</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1705                    &lt;NA&gt; PMID:26444668                     &lt;NA&gt;</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      external_cbioportal_id geoprov_country  geoprov_city geoprov_iso_alpha3</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1700                   &lt;NA&gt;           Spain San Sebastian                ESP</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1701                   &lt;NA&gt;           Spain San Sebastian                ESP</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1702                   &lt;NA&gt;           Spain San Sebastian                ESP</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1703                   &lt;NA&gt;           Spain San Sebastian                ESP</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1704                   &lt;NA&gt;           Spain San Sebastian                ESP</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1705                   &lt;NA&gt;           Spain San Sebastian                ESP</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      geoprov_lat geoprov_long data_use_condition                update_time</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1700       43.31        -1.97        DUO:0000004 2020-09-10 17:46:09.788000</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1701       43.31        -1.97        DUO:0000004 2020-09-10 17:46:09.790000</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1702       43.31        -1.97        DUO:0000004 2020-09-10 17:46:09.791000</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1703       43.31        -1.97        DUO:0000004 2020-09-10 17:46:09.793000</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1704       43.31        -1.97        DUO:0000004 2020-09-10 17:46:09.794000</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1705       43.31        -1.97        DUO:0000004 2020-09-10 17:46:09.796000</span></span></code></pre></div>
 <p>The data contains many columns representing different aspects of
 sample information. By default, it returns all related samples
 (limit=0). You can access a subset of them via the parameter
@@ -479,11 +473,11 @@ access the first 1000 samples , you can set <code>limit</code> = 1000,
 they are analysed more than one time and have different analysis ids
 (callset_ids).</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>biosamples_2 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;biosample&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3512&quot;</span>,<span class="at">skip=</span><span class="dv">0</span>, <span class="at">limit =</span> <span class="dv">1000</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Dimension: Number of samples * features</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(biosamples))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 4644   32</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 4645   31</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(biosamples_2))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1023   32</span></span></code></pre></div>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1023   31</span></span></code></pre></div>
 <p>The number of samples in specific group can be queried by
 <code>pgxCount</code> function.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pgxCount</span>(<span class="at">filters =</span> <span class="st">&quot;NCIT:C3512&quot;</span>)</span>
@@ -509,45 +503,41 @@ individual id</p>
 NCIT:C3512, biosample id and individual id</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>biosamples[biosamples<span class="sc">$</span>histological_diagnosis_id <span class="sc">!=</span> <span class="st">&quot;NCIT:C3512&quot;</span>,]</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        biosample_id   individual_id    callset_ids        pgx_legacy_sample_id</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4645 pgxbs-kftva5zv pgxind-kftx266l pgxcs-kftvlijb PGX_AM_BS_9788624_GB-har-01</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646 pgxbs-kftva5zw pgxind-kftx266n pgxcs-kftvlijs PGX_AM_BS_9788624_GB-har-02</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647 pgxbs-kftva6d4 pgxind-kftx26ml pgxcs-kftvlmn8     PGX_AM_BS_AdSqLu-bjo-01</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646 pgxbs-kftva5zv pgxind-kftx266l pgxcs-kftvlijb PGX_AM_BS_9788624_GB-har-01</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647 pgxbs-kftva5zw pgxind-kftx266n pgxcs-kftvlijs PGX_AM_BS_9788624_GB-har-02</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4648 pgxbs-kftva6d4 pgxind-kftx26ml pgxcs-kftvlmn8     PGX_AM_BS_AdSqLu-bjo-01</span></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      cellline_id histological_diagnosis_id histological_diagnosis_label</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4645        &lt;NA&gt;                NCIT:C3058                 Glioblastoma</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646        &lt;NA&gt;                NCIT:C3058                 Glioblastoma</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647        &lt;NA&gt;                NCIT:C3493 Squamous Cell Lung Carcinoma</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646        &lt;NA&gt;                NCIT:C3058                 Glioblastoma</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647        &lt;NA&gt;                NCIT:C3058                 Glioblastoma</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4648        &lt;NA&gt;                NCIT:C3493 Squamous Cell Lung Carcinoma</span></span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      icdo_morphology_id        icdo_morphology_label icdo_topography_id</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4645    pgx:icdom-94403            Glioblastoma, NOS    pgx:icdot-C71.0</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646    pgx:icdom-94403            Glioblastoma, NOS    pgx:icdot-C71.0</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647    pgx:icdom-80703 Squamous cell carcinoma, NOS    pgx:icdot-C34.9</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646    pgx:icdom-94403            Glioblastoma, NOS    pgx:icdot-C71.0</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647    pgx:icdom-94403            Glioblastoma, NOS    pgx:icdot-C71.0</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4648    pgx:icdom-80703 Squamous cell carcinoma, NOS    pgx:icdot-C34.9</span></span>
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      icdo_topography_label sampled_tissue_id sampled_tissue_label</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4645              Cerebrum    UBERON:0001869  cerebral hemisphere</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646              Cerebrum    UBERON:0001869  cerebral hemisphere</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647             Lung, NOS    UBERON:0002048                 lung</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646              Cerebrum    UBERON:0001869  cerebral hemisphere</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647              Cerebrum    UBERON:0001869  cerebral hemisphere</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4648             Lung, NOS    UBERON:0002048                 lung</span></span>
 <span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      biosample_status_id biosample_status_label pathological_stage_id</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4645         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4648         EFO:0009656      neoplastic sample           NCIT:C92207</span></span>
 <span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      pathological_stage_label experiment_id series_id platform_id</span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4645            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4648            Stage Unknown          &lt;NA&gt;      &lt;NA&gt;        &lt;NA&gt;</span></span>
 <span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      external_cellosaurus_id external_PMID external_arrayexpress_id</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4645                    &lt;NA&gt;  PMID:9788624                     &lt;NA&gt;</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646                    &lt;NA&gt;  PMID:9788624                     &lt;NA&gt;</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647                    &lt;NA&gt;  PMID:9591638                     &lt;NA&gt;</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      external_cbioportal_id followup_state geoprov_country  geoprov_city</span></span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4645                   &lt;NA&gt;             NA           Japan Yamaguchi-shi</span></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646                   &lt;NA&gt;             NA           Japan Yamaguchi-shi</span></span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647                   &lt;NA&gt;             NA         Finland      Helsinki</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      geoprov_iso_alpha3 geoprov_lat geoprov_long data_use_condition</span></span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4645                JPN       34.19       131.47        DUO:0000004</span></span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646                JPN       34.19       131.47        DUO:0000004</span></span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647                FIN       60.17        24.94        DUO:0000004</span></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     update_time</span></span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4645 2020-09-10 17:44:05.760000</span></span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646 2020-09-10 17:44:05.762000</span></span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647 2020-09-10 17:44:06.170000</span></span></code></pre></div>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646                    &lt;NA&gt;  PMID:9788624                     &lt;NA&gt;</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647                    &lt;NA&gt;  PMID:9788624                     &lt;NA&gt;</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4648                    &lt;NA&gt;  PMID:9591638                     &lt;NA&gt;</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      external_cbioportal_id geoprov_country  geoprov_city geoprov_iso_alpha3</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646                   &lt;NA&gt;           Japan Yamaguchi-shi                JPN</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647                   &lt;NA&gt;           Japan Yamaguchi-shi                JPN</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4648                   &lt;NA&gt;         Finland      Helsinki                FIN</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      geoprov_lat geoprov_long data_use_condition                update_time</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4646       34.19       131.47        DUO:0000004 2020-09-10 17:44:05.760000</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4647       34.19       131.47        DUO:0000004 2020-09-10 17:44:05.762000</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4648       60.17        24.94        DUO:0000004 2020-09-10 17:44:06.170000</span></span></code></pre></div>
 </div>
 <div id="retrieve-meatdata-of-individuals-from-specific-groups-of-interests" class="section level1">
 <h1>Retrieve meatdata of individuals from specific groups of
@@ -558,59 +548,53 @@ filters, skip, limit,codematches,individual_id</p>
 where the samples of interest come from, you can either search by
 filters:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>individuals <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&#39;individual&#39;</span>,<span class="at">filters=</span><span class="st">&#39;NCIT:C3270&#39;</span>,<span class="at">codematches =</span> T)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Dimension: Number of individuals * features</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(individuals))</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 1980   22</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(individuals)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     individual_id               legacy_ids       sex_id     sex_label</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxind-kftx27k6 PGX_IND_NBcl-roy-GI-ME-N PATO:0020000 genotypic sex</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxind-kftx27k8   PGX_IND_NBcl-roy-IMR32 PATO:0020000 genotypic sex</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxind-kftx27ka     PGX_IND_NBcl-roy-NGP PATO:0020000 genotypic sex</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxind-kftx27kd PGX_IND_NBcl-roy-SK-N-AS PATO:0020000 genotypic sex</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxind-kftx27kf PGX_IND_NBcl-roy-SMS-KCR PATO:0020000 genotypic sex</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 pgxind-kftx27kh    PGX_IND_NBcl-roy-TR14 PATO:0020000 genotypic sex</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   data_use_conditions_id data_use_conditions_label histological_diagnosis_id</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            DUO:0000004            no restriction                NCIT:C3270</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3            DUO:0000004            no restriction                NCIT:C3270</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            DUO:0000004            no restriction                NCIT:C3270</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5            DUO:0000004            no restriction                NCIT:C3270</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6            DUO:0000004            no restriction                NCIT:C3270</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7            DUO:0000004            no restriction                NCIT:C3270</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   histological_diagnosis_label index_disease_notes index_disease_followup_time</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                Neuroblastoma                  NA                        None</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                Neuroblastoma                  NA                        None</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                Neuroblastoma                  NA                        None</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                Neuroblastoma                  NA                        None</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                Neuroblastoma                  NA                        None</span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7                Neuroblastoma                  NA                        None</span></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   index_disease_followup_state_id index_disease_followup_state_label</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                     EFO:0030039                 no followup status</span></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                     EFO:0030039                 no followup status</span></span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                     EFO:0030039                 no followup status</span></span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                     EFO:0030039                 no followup status</span></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                     EFO:0030039                 no followup status</span></span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7                     EFO:0030039                 no followup status</span></span>
-<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   auxiliary_disease_id auxiliary_disease_label auxiliary_disease_notes</span></span>
-<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                   NA                      NA                      NA</span></span>
-<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                   NA                      NA                      NA</span></span>
-<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                   NA                      NA                      NA</span></span>
-<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                   NA                      NA                      NA</span></span>
-<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                   NA                      NA                      NA</span></span>
-<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7                   NA                      NA                      NA</span></span>
-<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   geoprov_city geoprov_country geoprov_iso_alpha3 geoprov_lat geoprov_long</span></span>
-<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         Gent         Belgium                 NA       51.05         3.72</span></span>
-<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         Gent         Belgium                 NA       51.05         3.72</span></span>
-<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         Gent         Belgium                 NA       51.05         3.72</span></span>
-<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5         Gent         Belgium                 NA       51.05         3.72</span></span>
-<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6         Gent         Belgium                 NA       51.05         3.72</span></span>
-<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7         Gent         Belgium                 NA       51.05         3.72</span></span>
-<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   cell_line_donation_id cell_line_donation_label</span></span>
-<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                    NA                       NA</span></span>
-<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                    NA                       NA</span></span>
-<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                    NA                       NA</span></span>
-<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                    NA                       NA</span></span>
-<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6                    NA                       NA</span></span>
-<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7                    NA                       NA</span></span></code></pre></div>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># data looks like this</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>individuals[<span class="fu">c</span>(<span class="dv">36</span><span class="sc">:</span><span class="dv">40</span>),]</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      individual_id                legacy_ids       sex_id     sex_label</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37 pgxind-kftx27zd PGX_IND_9006325_NB-pla-23 PATO:0020000 genotypic sex</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38 pgxind-kftx27zf PGX_IND_9006325_NB-pla-24 PATO:0020000 genotypic sex</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39 pgxind-kftx27zh PGX_IND_9006325_NB-pla-25 PATO:0020000 genotypic sex</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40 pgxind-kftx27zj PGX_IND_9006325_NB-pla-26 PATO:0020000 genotypic sex</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41 pgxind-kftx27zl PGX_IND_9006325_NB-pla-27 PATO:0020000 genotypic sex</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    data_use_conditions_id data_use_conditions_label histological_diagnosis_id</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37            DUO:0000004            no restriction                NCIT:C3270</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38            DUO:0000004            no restriction                NCIT:C3270</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39            DUO:0000004            no restriction                NCIT:C3270</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40            DUO:0000004            no restriction                NCIT:C3270</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41            DUO:0000004            no restriction                NCIT:C3270</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    histological_diagnosis_label index_disease_notes index_disease_followup_time</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37                Neuroblastoma                  NA                        P41M</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38                Neuroblastoma                  NA                        P18M</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39                Neuroblastoma                  NA                         P8M</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40                Neuroblastoma                  NA                        P19M</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41                Neuroblastoma                  NA                        P74M</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    index_disease_followup_state_id index_disease_followup_state_label</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37                     EFO:0030049            dead (follow-up status)</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38                     EFO:0030049            dead (follow-up status)</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39                     EFO:0030049            dead (follow-up status)</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40                     EFO:0030041           alive (follow-up status)</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41                     EFO:0030041           alive (follow-up status)</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    auxiliary_disease_id auxiliary_disease_label auxiliary_disease_notes</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37                   NA                      NA                      NA</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38                   NA                      NA                      NA</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39                   NA                      NA                      NA</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40                   NA                      NA                      NA</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41                   NA                      NA                      NA</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     geoprov_city geoprov_country geoprov_iso_alpha3 geoprov_lat geoprov_long</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37 San Francisco   United States                 NA       37.77      -122.42</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38 San Francisco   United States                 NA       37.77      -122.42</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39 San Francisco   United States                 NA       37.77      -122.42</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40 San Francisco   United States                 NA       37.77      -122.42</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41 San Francisco   United States                 NA       37.77      -122.42</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    cell_line_donation_id cell_line_donation_label</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 37                    NA                       NA</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 38                    NA                       NA</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 39                    NA                       NA</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40                    NA                       NA</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41                    NA                       NA</span></span></code></pre></div>
 <p>or by individual id which you can get from the query of sample</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>individual <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&#39;individual&#39;</span>,<span class="at">individual_id =</span> <span class="st">&#39;pgxind-kftx26ml&#39;</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -719,7 +703,7 @@ in columns.</p>
 <p>The first column is the total called coverage, followed by
 duplication coverage and deletion coverage.</p>
 <p>Setting <code>codematches = True</code> can exclude profiles with
-group_id belonging to child terms of the input filters. 26 samples are
+group_id belonging to child terms of the input filters. 21 samples are
 excluded from the original 47 samples in this case.</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>cnv_covergae_2 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">output=</span><span class="st">&quot;coverage&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C2948&quot;</span>,</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                            <span class="at">codematches =</span> T)</span>
