@@ -87,8 +87,8 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=F,return_meta
           freq.seg <- NULL
         } else {
           if (nsamples == 1){
-            gain.freq <-  (as.numeric(bin.dup.data[plot.idx,])/nsamples)*100
-            loss.freq <-  (as.numeric(bin.del.data[plot.idx,])/nsamples)*100
+            gain.freq <-  (bin.dup.data[plot.idx,]/nsamples)*100
+            loss.freq <-  (bin.del.data[plot.idx,]/nsamples)*100
           } else{
           gain.freq <-  (colSums(bin.dup.data[plot.idx,])/nsamples)*100
           loss.freq <-  (colSums(bin.del.data[plot.idx,])/nsamples)*100
@@ -111,7 +111,7 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=F,return_meta
       frequency$meta <- rbind(frequency$meta, data.frame(group_id = 'total', 
                                                          group_label='',
                                                          sample_count=total_sample_count))
-      frequency$data[['total']] <- Reduce(rbind,frequency$data)
+      frequency$data[['total']] <- do.call(rbind,frequency$data)
 
       }
     }

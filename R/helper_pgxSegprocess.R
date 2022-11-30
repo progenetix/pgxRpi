@@ -12,8 +12,8 @@ extract.bin.feature <- function(data,genome='hg38', overlap = 1000){
   
   for (sample_idx in c(1:length(unique(data[,1])))){
     ind.data <- data[data[,1] %in% unique(data[,1])[sample_idx],]
-    ind_dup <- rep(F,dim(bins)[1])
-    ind_del<- rep(F,dim(bins)[1])
+    ind_dup <- rep(0,dim(bins)[1])
+    ind_del<- rep(0,dim(bins)[1])
     for (j in c(1:dim(ind.data)[1])){
       ind.seg.start <- ind.data[j,3]
       ind.seg.end <- ind.data[j,4]
@@ -21,15 +21,16 @@ extract.bin.feature <- function(data,genome='hg38', overlap = 1000){
       overlap.dist <- sapply(sel.bin,function(x){min(bins[x,4],ind.seg.end)-max(bins[x,3],ind.seg.start)})
       sel.bin <- sel.bin[overlap.dist >= overlap]
       if (length(sel.bin) == 0){next}
-      ind_dup[sel.bin] <- ind.data[j,6] == 'DUP'
-      ind_del[sel.bin] <- ind.data[j,6] == 'DEL'
+      ind_dup[sel.bin] <- ind_dup[sel.bin] + as.numeric(ind.data[j,6] == 'DUP')
+      ind_del[sel.bin] <- ind_del[sel.bin] + as.numeric(ind.data[j,6] == 'DEL')
     }
-    
+    ind_dup[ind_dup > 1] <- 1
+    ind_del[ind_del > 1] <- 1
     total_dup[[sample_idx]] <- ind_dup
     total_del[[sample_idx]] <- ind_del
   }
-  total_dup <- Reduce(rbind,total_dup)
-  total_del <- Reduce(rbind,total_del)
+  total_dup <- do.call(rbind,total_dup)
+  total_del <- do.call(rbind,total_del)
   
   rownames(total_dup) <- unique(data[,1])
   rownames(total_del) <- unique(data[,1])
