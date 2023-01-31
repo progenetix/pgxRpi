@@ -1,3 +1,253 @@
+####################################################################
+## Author: Gro Nilsen, Knut Liestøl and Ole Christian Lingjærde.
+## Maintainer: Gro Nilsen <gronilse@ifi.uio.no>
+## License: Artistic 2.0
+## Part of the copynumber package with minor modification
+## Reference: Nilsen and Liestøl et al. (2012), BMC Genomics
+####################################################################
+
+genomeFreq <- function(data,pos.unit="bp",id=1,highlight,assembly,...){
+  if (all(names(data) %in% c("data","meta"))){
+    data_pgxfreq <- data$data[[id]]
+  } else{
+    attempt::stop_if(.x= length(colnames(data)) == 0, msg="\n The input is invalid \n")
+    attempt::stop_if(.x= any(colnames(data)[c(5,6)] != c('gain_frequency','loss_frequency')), msg="\n The input is invalid \n")
+    attempt::stop_if(.x=length(unique(data[,1])) > 1, msg="\n The input is invalid (more than one sample id) \n")
+    data_pgxfreq <- data
+  }
+
+  nr <- 1
+  nc <- 1
+  op <- getFreqPlotParameters(type="genome",nc=nc,nr=nr,assembly=assembly,...)
+  data_pgxfreq[,2] <- gsub("X", "23", data_pgxfreq[,2])
+  data_pgxfreq[,2] <- gsub("Y", "24", data_pgxfreq[,2])
+  op$xlim <- getGlobal.xlim(op=op,pos.unit=pos.unit,chrom=as.numeric(unique(data_pgxfreq[,2])))
+  x <- adjustPos(position=data_pgxfreq[,4],chromosomes=as.numeric(data_pgxfreq[,2]),pos.unit=pos.unit,type="genome",op=op)
+  xleft <- x$xleft
+  xright <- x$xright
+  if(dev.cur()<=1){       #to make Sweave work
+    dev.new(width=op$plot.size[1],height=op$plot.size[2],record=TRUE)
+  }
+
+
+  #Initialize:
+  row=1
+  clm=1
+  new = FALSE
+
+  #Division of plotting window:
+  frames <- framedim(1,1)
+
+  fig <- c(frames$left[clm],frames$right[clm],frames$bot[row],frames$top[row])
+
+  par(fig=fig,new=new,oma=c(0,0,1,0),mar=op$mar)
+
+  op <- updateFreqParameters(data_pgxfreq$loss_frequency,data_pgxfreq$gain_frequency,op)
+  plot(1,1,type="n",ylim=op$ylim,xlim=op$xlim,xaxs="i",main="",frame.plot=TRUE,yaxt="n",xaxt="n",ylab="",xlab="")
+  chromPattern(pos.unit,op)
+
+  # edit title
+  if (all(names(data) %in% c("data","meta"))){
+    id_name <- names(data$data[id])
+    meta <- data$meta[data$meta[,1] == id_name,]
+    if (meta[2] == ''){
+      op$main <- paste(id_name," (", meta[3], " samples)", sep="")
+    } else{
+      op$main <- paste(id_name, ": ",meta[2], " (", meta[3], " samples)", sep="")}
+  }
+
+  title(main=op$main,line=op$main.line,cex.main=op$cex.main)
+
+  if (!is.null(highlight)){
+    op$col.gain <- rep(op$col.gain, dim(data_pgxfreq)[1])
+    op$col.gain[highlight] <- 'red'
+      op$col.loss <- rep(op$col.loss, dim(data_pgxfreq)[1])
+      op$col.loss[highlight] <- 'red'
+  }
+
+  #Add axes, labels and percentage lines:
+  addToFreqPlot(op,type="genome")
+  rect(xleft=xleft,ybottom=0,xright=xright,ytop=data_pgxfreq$gain_frequency,col=op$col.gain,border=op$col.gain)
+  rect(xleft=xleft,ybottom=0,xright=xright,ytop=-data_pgxfreq$loss_frequency,col=op$col.loss,border=op$col.loss)
+  abline(h=0,lty=1,col="grey82",lwd=1.5)
+
+  op$chrom.lty = 1
+  addChromlines(as.numeric(data_pgxfreq[,2]),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
+  addArmlines(as.numeric(data_pgxfreq[,2]),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
+}
+
+chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id=1,highlight,assembly,...){
+  if (all(names(data) %in% c("data","meta"))){
+    data_pgxfreq <- data$data[[id]]
+  } else{
+    attempt::stop_if(.x= length(colnames(data)) == 0, msg="\n The input is invalid \n")
+    attempt::stop_if(.x= any(colnames(data)[c(5,6)] != c('gain_frequency','loss_frequency')), msg="\n The input is invalid \n")
+    attempt::stop_if(.x=length(unique(data[,1])) > 1, msg="\n The input is invalid (more than one sample id) \n")
+    data_pgxfreq <- data
+  }
+
+  nProbe <- nrow(data_pgxfreq)
+  nChrom <- length(chrom)
+
+  #Grid layout
+  nr <- layout[1]
+  nc <- layout[2]
+
+  #Get plot parameters:
+  op <- getFreqPlotParameters(type="bychrom",nc=nc,nr=nr,chrom=chrom,assembly=assembly,...)
+
+  #Margins for entire plot in window:
+  if(all(op$title=="")){
+    oma <- c(0,0,0,0)
+  }else{
+    oma <- c(0,0,1,0)
+  }
+  mar=c(0.2,0.2,0.3,0.2)
+
+  data_pgxfreq[,2] <- gsub("X", "23", data_pgxfreq[,2])
+  data_pgxfreq[,2] <- gsub("Y", "24", data_pgxfreq[,2])
+  #Adjust positions to be plotted along xaxis; i.e. scale according to plot.unit, and get left and right pos for freq.rectangles to be plotted (either continuous
+  #or 1 probe long):
+  x <- adjustPos(position=data_pgxfreq[,4],chromosomes=as.numeric(data_pgxfreq[,2]),pos.unit=pos.unit,type="chromosome",op=op)
+  xleft <- x$xleft
+  xright <- x$xright
+
+  #Divide the plotting window by the function "framedim":
+  frames <- framedim(nr,nc)
+
+  #make separate plots for each value of thres.gain/thres.loss
+
+
+  if(dev.cur()<=1){       #to make Sweave work
+    dev.new(width=op$plot.size[1],height=op$plot.size[2],record=TRUE)
+  }
+
+  #Initialize row and column index:
+  row=1
+  clm=1
+  new = FALSE
+
+
+  #Find default ylimits and at.y (tickmarks):
+  use <- which(as.numeric(data_pgxfreq[,2]) %in% chrom)
+  op <- updateFreqParameters(data_pgxfreq$loss_frequency[use],data_pgxfreq$gain_frequency[use],op)
+
+  #Make separate plots for each chromosome:
+
+  for(c in 1:nChrom){
+
+    #Frame dimensions for plot c:
+    fig.c <- c(frames$left[clm],frames$right[clm],frames$bot[row],frames$top[row])
+    par(fig=fig.c,new=new,oma=oma,mar=mar)
+
+    #Make list with frame dimensions:
+    frame.c <- list(left=frames$left[clm],right=frames$right[clm],bot=frames$bot[row],top=frames$top[row])
+
+    #Select relevant chromosome number
+    k <- chrom[c]
+
+    #Pick out frequencies for this chromsome
+    ind.c <- which(as.numeric(data_pgxfreq[,2]) ==k)
+    freqamp.c <- data_pgxfreq$gain_frequency[ind.c]
+    freqdel.c <- data_pgxfreq$loss_frequency[ind.c]
+
+    xlim <- c(0,max(xright[ind.c]))
+
+    #Plot ideogram at below frequencies:
+    if(op$plot.ideo){
+      #Ideogram frame:
+      ideo.frame <- frame.c
+      ideo.frame$top <- frame.c$bot + (frame.c$top-frame.c$bot)*op$ideo.frac
+
+      par(fig=unlist(ideo.frame),new=new,mar=op$mar.i)
+      #Plot ideogram and get maximum probe position in ideogram:
+      plotIdeogram(chrom=k,cyto.text=op$cyto.text,cyto.data=op$assembly,cex=op$cex.cytotext,unit=op$plot.unit)
+
+      #Get maximum position for this chromosome:
+      xmaxI <- chromMax(chrom=k,cyto.data=op$assembly,pos.unit=op$plot.unit)
+      xlim <- c(0,xmaxI)
+
+      new <- TRUE
+    }
+
+    #Freq.plot-dimensions:
+    frame.c$bot <- frame.c$bot + (frame.c$top-frame.c$bot)*op$ideo.frac
+    par(fig=unlist(frame.c),new=new,mar=op$mar)
+
+    #Limits:
+    if(!is.null(op$xlim)){
+      xlim <- op$xlim
+    }
+
+    #Empty plot:
+    plot(1,1,type="n",ylim=op$ylim,xlim=xlim,xaxs="i",main=op$main[c],frame.plot=FALSE,yaxt="n",xaxt="n",cex.main=op$cex.main,ylab="",xlab="")
+
+    #Add axes, labels and percentageLines:
+    chrom.op <- op
+    chrom.op$xlim <- xlim
+
+    addToFreqPlot(chrom.op,type="bychrom")
+
+    #Plot frequencies as rectangles
+    # check if highlight exists
+    if (length(which(highlight %in% ind.c)) > 0){
+      op$col.gain <- rep(op$col.gain, dim(data_pgxfreq)[1])
+      op$col.loss <- rep(op$col.loss, dim(data_pgxfreq)[1])
+      op$col.gain[highlight] <- 'red'
+        op$col.loss[highlight] <- 'red'
+          rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=freqamp.c,col=op$col.gain[ind.c],border=op$col.gain[ind.c])
+          rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=-freqdel.c,col=op$col.loss[ind.c],border=op$col.loss[ind.c])
+
+    } else{
+      rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=freqamp.c,col=op$col.gain,border=op$col.gain)
+      rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=-freqdel.c,col=op$col.loss,border=op$col.loss)
+    }
+
+
+    #Add line at y=0 and x=0
+    abline(h=0,lty=1,col="grey90")
+    abline(v=0)
+
+    # edit title
+    if (all(names(data) %in% c("data","meta"))){
+      id_name <- names(data$data[id])
+      meta <- data$meta[data$meta[,1] == id_name,]
+      if (meta[2] == ''){
+        op$title <- paste(id_name," (", meta[3], " samples)", sep="")
+      } else{
+        op$title <- paste(id_name, ": ",meta[2], " (", meta[3], " samples)", sep="")}
+    }
+
+
+    #If page is full; start plotting on new page
+    if(c%%(nr*nc)==0 && c!=nChrom){
+      #Add main title to page:
+      title(op$title,outer=TRUE,line=-0.6,cex.main=0.85)
+
+      #Start new page when prompted by user:
+      devAskNewPage(ask = TRUE)
+
+      #Reset columns and row in layout:
+      clm = 1
+      row = 1
+      new=FALSE
+
+    }else{
+      #Update column and row index:
+      if(clm<nc){
+        clm <- clm+1
+      }else{
+        clm <- 1
+        row <- row+1
+      }#endif
+      new=TRUE
+    }#endif
+
+  }#endfor
+
+  title(op$title,outer=TRUE,line=-0.6,cex.main=0.85)
+}
+
 #Input:
 ### type: plot type (genome or bychrom)
 ### nc: number of columns in plot
@@ -9,17 +259,17 @@
 #Output:
 ### op: a list containing default and user modified plot parameters
 
-###Required by: 
+###Required by:
 ### plotFreq (genomeFreq and chromosomeFreq)
 
 getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
-    
+
     #Apply a scaling factor according to number of columns and rows in plot:
     #seems to work ok:
     cr <- nc*nr
     f <- 1-0.013*cr
-    
-    
+
+
     #Common default parameters for genome and bychrom:
     op <- list(ylab="% with gain or loss",
                plot.size=c(11.8,min(3*nr,8.2)),
@@ -52,7 +302,7 @@ getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
                cex.cytotext=0.6*f,
                cex.chrom=0.8*f
     )
-    
+
     #Defaults specific to plot type:
     #For genome plot:
     if(type=="genome"){
@@ -62,22 +312,22 @@ getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
         op$plot.ideo <- FALSE
         op$mar <- c(1.5*op$f,3*op$f,2.3*op$f,1*op$f)
     }
-    
+
     #For chromosome plot:
     if(type=="bychrom"){
         op$main <- paste("Chromosome ",chrom,sep="")
         op$plot.ideo=TRUE
     }
-    
-    
-    
+
+
+
     #Set/modify parameters more depending on user input:
     #Check for user modifications
     op <- modifyList(op,list(...))
-    
+
     #Set assembly to refer to stored data instead of character string:
     op$assembly <- get(op$assembly)
-    
+
     #Placement of labels and axis annotation:
     if(is.null(op$mgp)){
         op$mgp <- c(1.3,0.05,0)*f
@@ -86,17 +336,17 @@ getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
         mgp.y <- op$mgp
     }
     op$mgp.y <- mgp.y
-    
+
     #Xlabel
     if(is.null(op$xlab)){
         op$xlab <- paste("Position (",op$plot.unit,")",sep="")
     }
-    
+
     #margins:
     if(is.null(op$mar)){
-        op$mar <- if(op$plot.ideo) c(0.2*f,3*f,2.5*f,f) else c(1.5*f,3*f,2.5*f,f)    
+        op$mar <- if(op$plot.ideo) c(0.2*f,3*f,2.5*f,f) else c(1.5*f,3*f,2.5*f,f)
     }
-    
+
     #Set default ideo.frac and ideogram margins:
     if(op$plot.ideo){
         #ideogram margins:
@@ -106,7 +356,7 @@ getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
             op$mar.i <- op$mar.i + c(2,0,0,0)
         }
         #Make sure left and right margins are equal for mar and mar.i:
-        op$mar.i[c(2,4)] <- op$mar[c(2,4)] 
+        op$mar.i[c(2,4)] <- op$mar[c(2,4)]
         if(is.na(op$ideo.frac)){
             #ideo.frac has not been defined by user:
             op$ideo.frac <- 0.05*sqrt(sqrt(cr))
@@ -117,8 +367,8 @@ getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
         }
     }else{
         op$ideo.frac <- 0
-    } 
-    
+    }
+
     #Check that we have a title for each plot:
     if(type=="genome"){
         op$main <- op$main[1]
@@ -147,39 +397,39 @@ getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
 ### getGlobal.xlim
 
 getArmandChromStop <- function(cyto.data, unit){
-  
+
   #Sort cyto.data by chromosome number; let be represented by X=23 and Y=24:
   chrom <- cyto.data[,1]
   use.chrom <- gsub("chr","",chrom)  #Remove 'chr' from chrom-strings
   use.chrom[use.chrom=="X"] <- "23"	#Replace X by 23
   use.chrom[use.chrom=="Y"] <- "24"	#Replace Y by 24
   num.chrom <- as.numeric(use.chrom)	#Convert to numeric chromosomes
-  
+
   #Order such that chromosomes are in increasing order from 1:24:
   ord.chrom <- order(num.chrom)
-  cyto.data <- cyto.data[ord.chrom,,drop=FALSE] 	
-  
+  cyto.data <- cyto.data[ord.chrom,,drop=FALSE]
+
   #Get chromosome stopping positions:
   chrom <- cyto.data[,1]
   chrom.stop <- which(chrom[1:length(chrom)-1]!=chrom[2:length(chrom)])
   chrom.stop <- c(chrom.stop,length(chrom))  #include last chromstop as well
-  
+
   #Get p-arm stopping positions:
   arm.char <- substring(cyto.data[,4],1,1)   #Retrive first character in name which identifies p and q arms
   arm.stop <- which(arm.char[1:length(arm.char)-1]!=arm.char[2:length(arm.char)])
   p.stop <- arm.stop[-which(arm.stop%in%chrom.stop)]  #Remove qstops
-  
+
   pos.chromstop <- cyto.data[chrom.stop,3]  #Local stopping position for each chromosome
   pos.pstop <- cyto.data[p.stop,3]		#Local stopping position for each p-arm
-  
+
   #Factor used to convert positions into desired unit
   f <- switch(unit,
               bp = 1,
               kbp = 10^(-3),
               mbp = 10^(-6))
-  
+
   return(list(pstop=pos.pstop*f,chromstop=pos.chromstop*f))
-  
+
 }
 
 #Function to get a scaling factor such that positions may be converted from unit2 to unit1:
@@ -199,11 +449,11 @@ getArmandChromStop <- function(cyto.data, unit){
 ### getGlobal.xlim
 
 convert.unit <- function(unit1,unit2){
-    
+
     factor <- NA
     #Allowed units:
     units <- c("bp","kbp","mbp")
-    
+
     if(identical(unit1,unit2)){
         factor <- 1
     }else{
@@ -231,20 +481,20 @@ convert.unit <- function(unit1,unit2){
             }
         }
     }
-    
+
     if(is.na(factor)){
         if(all(units!=unit1)){
             stop("plot.unit must be one of 'kbp' and 'mbp'",call.=FALSE)
         }
-        
+
     }
-    
+
     return(factor)
 }
 
 #function that find global limits on xaxis (used in genome plots)
 
-##Input: 
+##Input:
 ### op: list with plot parameters
 ### pos.unit: the unit used for positions in data
 ### chrom: a vector of unique chromosome numbers found in data
@@ -259,7 +509,7 @@ convert.unit <- function(unit1,unit2){
 ### getArmandChromStop
 ### convert.unit
 
-getGlobal.xlim <- function(op,pos.unit,chrom){  
+getGlobal.xlim <- function(op,pos.unit,chrom){
     #Set xlim using chromosome information in cytoband; must transform to global information
     chromstop <- getArmandChromStop(op$assembly,pos.unit)$chromstop
     glob.chromstop <- cumsum(chromstop)   #Global stopping position for each chromosome
@@ -272,9 +522,9 @@ getGlobal.xlim <- function(op,pos.unit,chrom){
         glob.chromstop <- glob.chromstop[-23]
     }
     xlim <- c(0,glob.chromstop[length(glob.chromstop)])*scale.fac
-    
-    return(xlim) 
-}  
+
+    return(xlim)
+}
 
 #Function to covert local posistions to global positions based on a defined set of local stop positions chromosomes given in cyto.data
 
@@ -289,18 +539,18 @@ getGlobal.xlim <- function(op,pos.unit,chrom){
 
 ##Required by:
 ### adjustSeg
-### getx 
+### getx
 ### plotCircle
 
 ##Requires:
 ### getArmandChromStop
 
 getGlobPos <- function(chromosomes, position, pos.unit, cyto.data){
-    
-    #Get local stopping posistions for each p-arm and each chromosome from cytoband data 
+
+    #Get local stopping posistions for each p-arm and each chromosome from cytoband data
     l <- getArmandChromStop(cyto.data=cyto.data,unit=pos.unit)
-    chromstop <- l$chromstop 
-    
+    chromstop <- l$chromstop
+
     #Need to make sure that none of the input positions are larger than chromosome stop postions:
     u.chrom <- unique(chromosomes)
     new.pos <- position
@@ -309,13 +559,13 @@ getGlobPos <- function(chromosomes, position, pos.unit, cyto.data){
         #Check for positions that are larger than chromosome max position
         out <- which(position[probe.c] > chromstop[u.chrom[j]])
         #Replace these positions by max chrom position:
-        new.pos[probe.c][out] <- chromstop[u.chrom[j]] 
+        new.pos[probe.c][out] <- chromstop[u.chrom[j]]
     }
     glob.chromstop <- cumsum(chromstop)   #Global stopping position for each chromosome
-    
+
     glob.pos <- new.pos + c(0,glob.chromstop[-length(glob.chromstop)])[chromosomes]  #Calculate global positions by adding global chromstop (for chrom > 1, for chrom=1 positions remain unchanged
     return(glob.pos)
-    
+
 }
 
 # Function to return the values to be plotted along xaxis depending on the choice of xaxis (index or pos), and the type of plot
@@ -326,7 +576,7 @@ getGlobPos <- function(chromosomes, position, pos.unit, cyto.data){
 ### xaxis: index or pos
 ### type: plot type; genome, chromosome, sample or aspcf
 ### chromosomes: vector of same length as pos giving the corresponding chromosome numbers
-### pos: vector giving probe positions 
+### pos: vector giving probe positions
 ### unit: unit used to represent positons   (bp,kbp, or mbp)
 ### op: a list containing other plot parameters
 
@@ -343,25 +593,25 @@ getGlobPos <- function(chromosomes, position, pos.unit, cyto.data){
 
 getx <- function(xaxis,type,chromosomes,pos,unit,op){
     if(xaxis=="pos"){
-        
+
         x <- pos
         if(type=="genome"){
             #Convert to global position:
-            global.pos <- getGlobPos(chromosomes,pos,pos.unit=unit,cyto.data=op$assembly)   
+            global.pos <- getGlobPos(chromosomes,pos,pos.unit=unit,cyto.data=op$assembly)
             x <- global.pos
         }
-        
+
         #Want to scale the x-axis to fit the desired unit given in plot.unit (default is mega base pairs)
         scale.fac <- convert.unit(unit1=op$plot.unit,unit2=unit)
         x <- x*scale.fac
-        
+
     }else{
         #xaxis=="index"
-        x <- 1:length(pos) 
+        x <- 1:length(pos)
     }#endif
-    
+
     return(x)
-    
+
 }
 
 #Function that returns the index where each chromosome starts (and the last chromosome ends)
@@ -378,10 +628,10 @@ getx <- function(xaxis,type,chromosomes,pos,unit,op){
 separateChrom <- function(v){
     d <- diff(v)   #get difference between value (i+1) and value i in vector v
     cp <- which(d!=0)+1  #get changepoints
-    
+
     #Add start of vector and (stop+1) of the whole vector
     cp <- c(1,cp,(length(v)+1))
-    
+
     return(cp)
 }
 
@@ -403,7 +653,7 @@ numericArms <- function(chrom,char.arms){
     arms <- rep(NA,length(char.arms))
     arms[p.arm] <- chrom[p.arm]*2-1
     arms[q.arm] <- chrom[q.arm]*2
-    
+
     return(arms)
 }
 
@@ -418,7 +668,7 @@ numericArms <- function(chrom,char.arms){
 ##Required by:
 ### getArms
 
-numericChrom <- function(chrom){ 
+numericChrom <- function(chrom){
     if(!is.numeric(chrom)){
         if(is.factor(chrom)){
             #If chrom is factor; need to convert to character first
@@ -430,7 +680,7 @@ numericChrom <- function(chrom){
         #Replace Y by 24
         chry <- c(which(chrom=="y"),which(chrom=="Y"))
         chrom[chry] <- 24
-        
+
         chrom <- as.numeric(chrom)
     }
     return(chrom)
@@ -445,14 +695,14 @@ numericChrom <- function(chrom){
 ### cyto.data: object specifying which genome assembly version should be used for cytoband data
 
 ##Output:
-### arms: a character vector with arms; dentoed p and q 
+### arms: a character vector with arms; dentoed p and q
 
 ##Required by:
 ### adjustPos
 ### multipcf
 ### pcf
 ### winsorize
-### aspcf 
+### aspcf
 
 
 ##Requires:
@@ -460,44 +710,44 @@ numericChrom <- function(chrom){
 ### numericChrom
 
 getArms <- function(chrom, pos, pos.unit="bp", cyto.data){
-    
+
     #Make sure chromosomes are numeric:
     chrom <- numericChrom(chrom)
-    
+
     nProbe <- length(chrom)
     chrom.list <- unique(chrom)
     nChrom <- length(chrom.list)
-    
-    #Get local stopping posistions for each p-arm and each chromosome from cytoband data 
+
+    #Get local stopping posistions for each p-arm and each chromosome from cytoband data
     l <- getArmandChromStop(cyto.data=cyto.data,unit=pos.unit)
     pStop <- l$pstop
-    chromStop <- l$chromstop 
-    
+    chromStop <- l$chromstop
+
     #Intitialize
     arms <- rep(NA,nProbe)
-    
+
     for(i in 1:nChrom){
         #Find corresponding arm numbers:
         c <- chrom.list[i]
         ind.c <- which(chrom==c)
-        
+
         arms[ind.c] <- "q"
         p.arm <- ind.c[pos[ind.c]<=pStop[c]]
         arms[p.arm] <- "p"   #p-arm
-        
+
     }
-    
+
     return(arms)
 }
 
 #Function that scales positions according to plotunit, converts to global positions if type=genome, and finds start and stop positions (left and right) for recatangles to be plotted. Also makes sure that frequencies are shown as continuous if this is desired
 
 ##Input:
-### position: the genomic postions to be plotted 
+### position: the genomic postions to be plotted
 ### chromosomes: the chromosomes corresponding to the positions
 ### pos.unit: the unit used for positions (bp,kbp,mbp)
 ### type: plot type (genome or chromosome)
-###op: a list of other set plot parameters 
+###op: a list of other set plot parameters
 
 ##Output:
 ### xleft: the left/start position of the plot rectangle
@@ -511,7 +761,7 @@ getArms <- function(chrom, pos, pos.unit="bp", cyto.data){
 ### getArms
 ### numericArms
 adjustPos <- function(position,chromosomes,pos.unit,type,op){
-    
+
     if(type=="chromosome"){
         #Only need to scale positions first
         pos <- getx(xaxis="pos",type=type,chromosomes=NULL,pos=position,unit=pos.unit,op=op)
@@ -519,37 +769,37 @@ adjustPos <- function(position,chromosomes,pos.unit,type,op){
         #Need to scale and convert to global pos:
         pos <- getx(xaxis="pos",type=type,chromosomes=chromosomes,pos=position,unit=pos.unit,op=op)
     }
-    
+
     nPos <- length(position)
     #Define left-pos and right-pos for freqency-rectangle to be plotted:
     xleft <- pos
     xright <- pos
-    
+
     #Should frequencies be plotted continously across probes?:
     if(op$continuous){
         #The rectangles should start and end halfway between two probes, except across different arms/chromosomes, fixing this below
         half <- (pos[2:nPos]-pos[1:(nPos-1)])/2
         xleft[2:nPos] <- xleft[2:nPos] - half
-        xright[1:(nPos-1)] <- xright[1:(nPos-1)] + half   
+        xright[1:(nPos-1)] <- xright[1:(nPos-1)] + half
     }else{
         #Let rectangle be one probe wide:
         xleft[2:nPos] <- xleft[2:nPos] - 0.5
         xright[1:(nPos-1)] <- xright[1:(nPos-1)] + 0.5
     }
-    
-    
+
+
     if(type!="genome"){
         #First find locations for change in arm number:
         char.arms <- getArms(chromosomes,position,pos.unit,op$assembly)
         arms <- numericArms(chromosomes,char.arms)
         #Where do arms start:
         n.arm <- length(unique(arms))
-        
+
         if(n.arm>1){
             #Locate where arm starts (if more than one arm):
             sep.arm <- separateChrom(arms)
             sep.arm <- sep.arm[-c(1,length(sep.arm))]
-            #Keep positions at arm-change 
+            #Keep positions at arm-change
             xleft[sep.arm] <- pos[sep.arm]
             xright[sep.arm-1] <- pos[sep.arm-1]
         }
@@ -561,12 +811,12 @@ adjustPos <- function(position,chromosomes,pos.unit,type,op){
             sep.chrom <- sep.chrom[-c(1,length(sep.chrom))]
             #keep positions at chrom change
             xleft[sep.chrom] <- pos[sep.chrom]
-            xright[sep.chrom-1] <- pos[sep.chrom-1]   
+            xright[sep.chrom-1] <- pos[sep.chrom-1]
         }
     }
-    
+
     return(list(xleft=xleft,xright=xright))
-    
+
 }
 
 #Function to find frame dimensions when a window is to be sectioned into nrow rows and ncol columns:
@@ -586,19 +836,19 @@ framedim <- function(nrow,ncol){
     cr <- 1:ncol
     left <- rep(1/ncol,ncol)*cl
     right <- rep(1/ncol,ncol)*cr
-    
+
     rt <- nrow:1
     rb <- (nrow-1):0
     top <- rep(1/nrow,nrow)*rt
     bot <- rep(1/nrow,nrow)*rb
-    
+
     return(list(left=left,right=right,bot=bot,top=top))
 }
 
 
 #Function to set default ylim and at.y for plotFreq
 
-##Input: 
+##Input:
 ### freq.del: vector with deletion frequencies
 ### freq.amp: vector with amplification frequencies
 ### op: list with plot parameters
@@ -606,13 +856,13 @@ framedim <- function(nrow,ncol){
 ##Output:
 ### op: list wiht updated plot parameters
 
-##Required by: 
+##Required by:
 ### plotFreq (genomeFreq and chromosomeFreq)
 
 updateFreqParameters <- function(freq.del,freq.amp,op){
     #Y-limits; symmetric:
     max.freq <- max(c(freq.del,freq.amp))
-    
+
     #Define tickmarks on y-axis
     if(max.freq>30){
         at.y <- seq(0,100,by=25)
@@ -627,11 +877,11 @@ updateFreqParameters <- function(freq.del,freq.amp,op){
     #Make sure ylim includes the first tickmark above max.freq
     q <- min(op$at.y[op$at.y>=max.freq])
     ylim <- c(-q,q)
-    
+
     if(is.null(op$ylim)){
         op$ylim <- ylim
     }
-    
+
     return(op)
 }
 
@@ -652,17 +902,17 @@ chromPattern <- function(pos.unit,op) {
     #Drop chrom24 if no observations for this chrom in data/segments:
     #if(!any(segments[,2]==24)){
     # chrom.mark <- chrom.mark[-length(chrom.mark)]
-    #} 
+    #}
     #Let background be black to avoid white parts in arms without probes:
     #rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col = "white")
     for (i in 1:(length(chrom.mark)-1)) {
         if(i%%2==0){
             rect(chrom.mark[i], par("usr")[3], chrom.mark[i+1], par("usr")[4], col = "grey95")#, border=NA)
-        } 
+        }
     }
 }
 
-##Function that adds percentagelines, yaxis, xaxis and labels to frequency plots 
+##Function that adds percentagelines, yaxis, xaxis and labels to frequency plots
 #Input:
 ### op: a list with plot parameters
 ### type: plot type (genome or bychrom)
@@ -673,7 +923,7 @@ chromPattern <- function(pos.unit,op) {
 ##Requires:
 ### get.xticks
 addToFreqPlot <- function(op,type){
-    
+
     #Add y-lines if wanted
     if(is.logical(op$percentLines)){
         if(!op$percentLines){
@@ -685,7 +935,7 @@ addToFreqPlot <- function(op,type){
     if(!is.null(op$percentLines)){
         abline(h=c(-op$percentLines,op$percentLines),lty=3,col="grey82")
     }
-    
+
     #Add yaxis and lab:
     #Make sure tickmarks are at percentLines
     if(!is.null(op$percentLines)){
@@ -694,7 +944,7 @@ addToFreqPlot <- function(op,type){
     op$at.y <- c(-op$at.y,op$at.y)
     axis(side=2,cex.axis=op$cex.axis,at=op$at.y,mgp=op$mgp.y,las=op$las,tcl=-0.2,labels=abs(op$at.y))
     title(ylab=op$ylab,cex.lab=op$cex.lab,line=op$mgp.y[1])
-    
+
     #Add xaxis:
     if(op$plot.ideo || type=="genome"){
         axis(side=1,labels=FALSE,tcl=0)
@@ -705,8 +955,8 @@ addToFreqPlot <- function(op,type){
         axis(side=1,tcl=-0.2,at=op$at.x,cex.axis=op$cex.axis,mgp=op$mgp)
         title(xlab=op$xlab,cex.lab=op$cex.lab,line=op$mgp[1])
     }
-    
-    
+
+
 }
 
 #Function used to separate chromosomes by stapled lines in genome plot
@@ -753,12 +1003,12 @@ addChromlines <- function(chromosomes,xaxis,unit,ind=NULL,cex,op){
     #Separate chromosomes by vertical lines in existing plot:
     nChrom <- length(unique(chromosomes))
     arg <- list(chrom.lwd=1, chrom.lty=2, chrom.col="darkgrey",chrom.side=3, chrom.cex=cex,chrom.line=c(0,0.3))
-    
+
     if(!is.null(op)){
         arg <- modifyList(arg,op)
     }
     abline(v=chrom.mark[2:(length(chrom.mark)-1)],col=arg$chrom.col,lwd=arg$chrom.lwd,lty=arg$chrom.lty)
-    
+
     at <- (chrom.mark[1:nChrom]-1)+(chrom.mark[2:(nChrom+1)]-chrom.mark[1:nChrom])/2
     chrom.names <- unique(chromosomes)
     chrom.names <- gsub("23","X", chrom.names)
@@ -768,7 +1018,7 @@ addChromlines <- function(chromosomes,xaxis,unit,ind=NULL,cex,op){
     top <- seq(2,length(chrom.mark),2)
     mtext(chrom.names[bot],side=1,line=arg$chrom.line[1],at=at[bot],cex=arg$chrom.cex)
     mtext(chrom.names[top],side=3,line=arg$chrom.line[2],at=at[top],cex=arg$chrom.cex)
-    
+
 }
 
 # Function that separates chromosome arms in genome-plots by dashed lines
@@ -789,10 +1039,10 @@ addArmlines <- function(chromosomes,xaxis,unit,ind=NULL,cex,op){
         arm.mark <- armstop*scale.fac
         #Separate arms by vertical lines in existing plot:
         arg <- list(chrom.lwd=1, chrom.lty=2, chrom.col="darkgrey",chrom.side=3, chrom.cex=cex,chrom.line=c(0,0.3))
-        
+
         if(!is.null(op)){
             arg <- modifyList(arg,op)
-        }  
+        }
         abline(v=arm.mark[1:(length(arm.mark)-1)],col=arg$chrom.col,lwd=arg$chrom.lwd,lty=2)
     }
 }
@@ -816,7 +1066,7 @@ addArmlines <- function(chromosomes,xaxis,unit,ind=NULL,cex,op){
 ### convert.unit
 
 plotIdeogram <- function(chrom,cyto.text=FALSE,cex=0.6,cyto.data,cyto.unit="bp",unit){
-    
+
     if(chrom==23){
         chrom.cytoband <- cyto.data[cyto.data[,1]=="chrX",]
     }else{
@@ -826,21 +1076,21 @@ plotIdeogram <- function(chrom,cyto.text=FALSE,cex=0.6,cyto.data,cyto.unit="bp",
             chrom.cytoband <- cyto.data[cyto.data[,1]==paste("chr",chrom,sep=""),]
         }
     }
-    
+
     cyto.start <- chrom.cytoband[,2]
     cyto.end <- chrom.cytoband[,3]
     scale <- convert.unit(unit1=unit,unit2=cyto.unit)
-    
+
     xleft <- cyto.start*scale
     xright <- cyto.end*scale
     n <- length(xleft)
     chrom.length <- xright[n]-xleft[1]
-    
+
     stain <- chrom.cytoband[,5]
     sep.stain <- c("gpos","gneg","acen","gvar","stalk")
-    
+
     g <- sapply(sep.stain,grep,x=stain,fixed=TRUE)
-    
+
     centromere <- g$acen
     stalk <- g$stalk
     col <- rep("",n)
@@ -855,19 +1105,19 @@ plotIdeogram <- function(chrom,cyto.text=FALSE,cex=0.6,cyto.data,cyto.unit="bp",
     density <- rep(NA,n)
     angle <- rep(45,n)
     density[stain=="gvar"] <- 15
-    
-    
+
+
     ylow <- 0
     yhigh <- 1
-    
-    
+
+
     plot(x=c(0,max(xright)),y=c(ylow,yhigh),type="n",axes=FALSE,xlab="",ylab="",xlim=c(0,max(xright)),ylim=c(0,1),xaxs="i")
-    
+
     #Rectangles:
     skip.rect <- c(1,centromere,n,stalk)
     rect(xleft[-skip.rect],rep(ylow,n-length(skip.rect)),xright[-skip.rect],rep(yhigh,n-length(skip.rect)),
          col=col[-skip.rect],border="black",density=density[-skip.rect],angle=angle[-skip.rect])
-    
+
     #Round edges at ideogram start, stop and at centromere:
     draw.roundEdge(start=xleft[1],stop=xright[1],y0=ylow,y1=yhigh,col=col[1],bow="left",density=density[1],angle=angle[1],chrom.length=chrom.length)
     draw.roundEdge(start=xleft[centromere[1]],stop=xright[centromere[1]],y0=ylow,y1=yhigh,col=col[centromere[1]],bow="right",density=density[centromere[1]],
@@ -875,7 +1125,7 @@ plotIdeogram <- function(chrom,cyto.text=FALSE,cex=0.6,cyto.data,cyto.unit="bp",
     draw.roundEdge(start=xleft[centromere[2]],stop=xright[centromere[2]],y0=ylow,y1=yhigh,col=col[centromere[2]],bow="left",density=density[centromere[2]],
                    angle=angle[centromere[2]],lwd=1,chrom.length=chrom.length)
     draw.roundEdge(start=xleft[n],stop=xright[n],y0=ylow,y1=yhigh,col=col[n],bow="right",density=density[n],angle=angle[n],chrom.length=chrom.length)
-    
+
     #Draw stalk-segment:
     if(length(stalk)>0){
         for(i in 1:length(stalk)){
@@ -885,7 +1135,7 @@ plotIdeogram <- function(chrom,cyto.text=FALSE,cex=0.6,cyto.data,cyto.unit="bp",
     if(cyto.text){
         mtext(text=paste(chrom.cytoband[,4],"-",sep=" "),side=1,at=(xleft + (xright-xleft)/2),cex=cex,las=2,adj=1,xpd=NA)#,line=-1)#,outer=TRUE)
     }
-    
+
 }
 
 # Function for plotIdeogram
@@ -900,22 +1150,22 @@ draw.roundEdge <- function(start,stop,y0,y1,col,bow,density=NA,angle=45,lwd=1,ch
         i <- i+1
     }
     f <- f[-length(f)]
-    
+
     Y <- c(y1,y1,y1-f,half,y0+rev(f),y0,y0)
-    
+
     #X points in roundedge
     cyto.length <- stop-start
-    
+
     share <- cyto.length/chrom.length
     if(share>0.2){
         #to create bow in end of chromosome 24
         share <- 0.2
     }
-    
+
     if(bow=="left"){
-        
+
         round.start <- start + cyto.length*(1-share)^20
-        
+
         x <- seq(round.start,start,length.out=(length(f)+2))
         revx <- rev(x[-length(x)])
         x <- c(x,revx)
@@ -927,12 +1177,12 @@ draw.roundEdge <- function(start,stop,y0,y1,col,bow,density=NA,angle=45,lwd=1,ch
             revx <- rev(x[-length(x)])
             x <- c(x,revx)
             X <- c(start,x,start)
-            
+
         }
     }
-    
+
     polygon(x=X,y=Y,col=col,border="black",density=density,angle=angle,lwd=lwd)
-    
+
 }
 
 # Function for plotIdeogram
@@ -945,7 +1195,7 @@ drawStalk <- function(start,stop,y0,y1,col){
     y_2 <- c(y1,y1-0.25,y1-0.25,y1)
     y <- c(y_1,y_2)
     polygon(x=x,y=y,col=col)
-    
+
 }
 
 #Get the maximum position on a given chromosome
@@ -965,24 +1215,24 @@ drawStalk <- function(start,stop,y0,y1,col){
 ## Requires:
 ### convert.unit
 chromMax <- function(chrom,cyto.data,pos.unit,cyto.unit="bp"){
-    
+
     #Get scaling factor for positions
     s <- convert.unit(unit1=pos.unit,unit2=cyto.unit)
-    
+
     #Get the rows in cytoband data that correspond to this chromosome
     if(chrom==23){
         txt <- "chrX"
     }else if(chrom==24){
         txt <- "chrY"
     }else{
-        txt <- paste("chr",chrom,sep="") 
+        txt <- paste("chr",chrom,sep="")
     }
     rows <- which(cyto.data[,1]==txt)
-    
+
     ##Get max position for this chromosome and scale according to pos.unit
     max.pos <- max(cyto.data[rows,3])
     max.pos <- max.pos*s
-    
+
     return(max.pos)
-    
+
 }

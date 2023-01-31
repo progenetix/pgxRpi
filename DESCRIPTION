@@ -2,13 +2,16 @@ Package: pgxRpi
 Title: Access The API of Progenetix Database in R
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Hangjia",
+    c(person(given = "Hangjia",
            family = "Zhao",
            role = c("aut", "cre"),
-           email = "hangjia.zhao@uzh.ch")
+           email = "hangjia.zhao@uzh.ch"),
+	   person(given = "Michael",
+           family = "Baudis",
+           role = c("aut"),
+           email = "michael.baudis@mls.uzh.ch"))
 Description: It is an API wrapper package to retrieve data from Progenetix database.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+License: Apache License (>= 2)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
