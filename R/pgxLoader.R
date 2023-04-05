@@ -64,7 +64,7 @@ pgxLoader <- function(
         cat("\n WARNING: The parameter 'biosample_id' is not used in this query. Only 'filters' are accepted. \n")
       }
       if (!is.null(individual_id)){
-        cat("\n WARNING: The parameter 'individual_id' is not used in this query. Only 'filters' is accepted. \n")
+        cat("\n WARNING: The parameter 'individual_id' is not used in this query. Only 'filters' are accepted. \n")
       }
     }
       
@@ -72,7 +72,7 @@ pgxLoader <- function(
   
     if (type == "variant"){
       if (is.null(biosample_id)){
-        stop("The parameter biosample_id cannot be NULL")
+        stop("The parameter 'biosample_id' is missing. At least one valid biosample id has to be provided")
       }
       if (!is.null(filters)){
         cat("\n WARNING: The parameter 'filters' is not used in this query. Only 'biosample_id' is accepted. \n")

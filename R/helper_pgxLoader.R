@@ -149,10 +149,10 @@ pgidCheck <- function(id){
 
 pgxFreqLoader <- function(output, codematches, filters) {
     # check filters again
-  attempt::stop_if(.x=length(filters) < 1, msg="\n At least one valid filter has to be provided \n")
+  attempt::stop_if(.x=length(filters) < 1, msg="\n The parameter 'filters' is missing. At least one valid filter has to be provided \n")
     # check output format
-  attempt::stop_if(.x=is.null(output),msg="\n Output is invalid. Only support 'pgxfreq' or 'pgxmatrix' \n")
-  attempt::stop_if(.x=(!output %in% c('pgxfreq','pgxmatrix')),msg="\n Output is invalid. Only support 'pgxfreq' or 'pgxmatrix' \n")
+  attempt::stop_if(.x=is.null(output),msg="\n The parameter 'output' is missing. Only support 'pgxfreq' or 'pgxmatrix' \n")
+  attempt::stop_if(.x=(!output %in% c('pgxfreq','pgxmatrix')),msg="\n The parameter 'output' is invalid. Only support 'pgxfreq' or 'pgxmatrix' \n")
     # check if filters exists
   idcheck <- pgidCheck(filters)
   if (!all(idcheck)){
@@ -292,7 +292,7 @@ pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,
 pgxVariantLoader <- function(biosample_id, output, save_file,filename){
     
     if (save_file){
-        attempt::stop_if(.x= !(output %in% c("pgxseg","seg")), msg = "The parameter 'output' is invalid (available: 'seg' or 'pgxseg')")
+        attempt::stop_if(.x= !(output %in% c("pgxseg","seg")), msg = "The parameter 'output' is invalid when 'save_file=TRUE' (available: 'seg' or 'pgxseg')")
     }
 
     len <- length(biosample_id)
@@ -409,8 +409,8 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
 
 pgxcallsetLoader <- function(filters,limit,skip,codematches){
   # check filters 
-  attempt::stop_if(.x=length(filters) < 1, msg="\n at least one valid filter has to be provided \n")
-  attempt::stop_if(.x=length(filters) > 1, msg="\n This query only supports one filter \n")
+  attempt::stop_if(.x=length(filters) < 1, msg="\n The parameter 'filters' is missing. At least one valid filter has to be provided \n")
+  attempt::stop_if(.x=length(filters) > 1, msg="\n The parameter 'filters' is invalid. This query only supports one filter \n")
 
   # start query
   pg.url  <- paste0("http://www.progenetix.org/beacon/analyses/?output=pgxmatrix",'&filters=',filters)
@@ -436,8 +436,8 @@ pgxcallsetLoader <- function(filters,limit,skip,codematches){
 
 
 pgxCovLoader <- function(filters,codematches,skip,limit){
-  attempt::stop_if(.x=length(filters) < 1, msg="\n One valid filter has to be provided \n")
-  attempt::stop_if(.x=length(filters) > 1, msg="\n This query only supports one filter \n")
+  attempt::stop_if(.x=length(filters) < 1, msg="\n The parameter 'filters' is missing. One valid filter has to be provided \n")
+  attempt::stop_if(.x=length(filters) > 1, msg="\n The parameter 'filters' is invalid. This query only supports one filter \n")
   if (codematches){
     biosample_id <- pgxSampleLoader(biosample_id = NULL,individual_id = NULL,filters = filters,codematches = T,skip=NULL,limit=0)
     biosample_id <- biosample_id$biosample_id
