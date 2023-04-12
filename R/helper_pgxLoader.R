@@ -27,7 +27,6 @@ pick_longer_id <- function(x){
 
 read_sample <- function(url){
   res.json <- rjson::fromJSON(file = url)
-  
   res.list <- res.json$response$resultSets[[1]]$results
   total.df <- list()
   for ( i in seq(length(res.list))){
@@ -108,8 +107,9 @@ pgidCheck <- function(id){
   icdom.idx <- grep('icdom',id)
   icdot.idx <- grep('icdot',id)
   uberon.idx <- grep('UBERON',id)
-  
-  remain.id <- id
+  # this query doesn't work for individual GSM id
+  geogsm.idx <- grep('geo:GSM',id)
+  remain.id <- id[!id %in% id[geogsm.idx]]
   if (length(ncit.idx) > 0){
     url <- "https://progenetix.org/services/collations?filters=NCIT"
     res <- rjson::fromJSON(file = url)
@@ -137,6 +137,7 @@ pgidCheck <- function(id){
     res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
     remain.id <- remain.id [!remain.id%in% id[uberon.idx]]
   }
+  
 
   if (length(remain.id) > 0){
     url <- paste0("https://progenetix.org/services/collations?filters=",transform_id(remain.id))
@@ -144,7 +145,7 @@ pgidCheck <- function(id){
     res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
   }
   
-  return(id %in% res.id)
+  return(id %in% c(res.id,id[geogsm.idx]))
 }
 
 pgxFreqLoader <- function(output, codematches, filters) {
@@ -195,6 +196,7 @@ pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,
       if (!all(idcheck)){
         cat("WARNING: No results for filters", filters[!idcheck], "in progenetix database.\n")
         filters <- filters[idcheck]
+        if (length(filters) == 0){return()}
       }
       for (i in c(1:length(filters))) {
         if_next <- FALSE
