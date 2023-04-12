@@ -443,6 +443,7 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
     biosample_id <- biosample_id$biosample_id
     
     if (length(biosample_id) == 0){
+      cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")
       return()
     }}
   
@@ -456,7 +457,10 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
   
   if (codematches){
     sel_sample_idx <- sample %in% biosample_id 
-    if (sum(sel_sample_idx) == 0){cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")}
+    if (sum(sel_sample_idx) == 0){
+      cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")
+      return()
+      }
   } else{
     sel_sample_idx <- seq(length(sample))
   }
@@ -478,8 +482,16 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
   total_frac <- lapply(data_2, function(x){
     x[[2]]
   })
+  # some results are SNV instead of CNV
+  rm_idx <- which(sapply(total_frac,length) == 0)
+  if (length(rm_idx) > 0){
+    sel.sample <- sample[sel_sample_idx][-rm_idx]
+    data_2 <- data_2[-rm_idx]
+  } else{
+    sel.sample <- sample[sel_sample_idx]
+  }
   total_frac <- Reduce(rbind, total_frac)
-  rownames(total_frac) <- make.unique(sample[sel_sample_idx])
+  rownames(total_frac) <- make.unique(sel.sample)
   total_frac <- total_frac[,c(2,6,4)]
   
   data_2 <- lapply(data_2,function(x){
@@ -502,7 +514,7 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
   }) 
   
   data_3 <- Reduce(rbind,data_3)
-  rownames(data_3) <- make.unique(sample[sel_sample_idx])
+  rownames(data_3) <- make.unique(sel.sample)
   
   arm_frac <- data_3[,c(1:96)]
   chrom_frac <- data_3[,c(97:144)]
