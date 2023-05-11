@@ -66,8 +66,7 @@ biosamples[c(1700:1705),]
 The data contains many columns representing different aspects of sample information. 
 By default, it returns all related samples (limit=0). You can access a subset of them 
 via the parameter `limit` and `skip`. For example, if you want to access the first 1000 samples
-, you can set `limit` = 1000, `skip` = 0. Some samples may have multiple records because they
-are analysed more than one time and have different analysis ids (callset_ids).
+, you can set `limit` = 1000, `skip` = 0. 
 
 ```{r}
 biosamples_2 <- pgxLoader(type="biosample", filters = "NCIT:C3512",skip=0, limit = 1000)

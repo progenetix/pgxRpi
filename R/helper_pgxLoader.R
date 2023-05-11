@@ -9,75 +9,6 @@ transform_id <- function(id){
     return(filter)
 }
 
-null_to_na <- function(x){
-  x <- attempt::try_catch(x,.e=function(e){NA})
-  if (length(x) == 0){
-    return(NA)
-  } 
-  return(x)
-}
-
-# pick longer external arrayexpress & cbioportal & legacy ids
-pick_longer_id <- function(x){
-  if (length(x) == 0){return(NA)}
-  if(all(is.na(x))){return(NA)}
-  return(x[which.max(nchar(x))])
-}
-
-
-read_sample <- function(url){
-  res.json <- rjson::fromJSON(file = url)
-  res.list <- res.json$response$resultSets[[1]]$results
-  total.df <- list()
-  for ( i in seq(length(res.list))){
-    res <- res.list[[i]]
-    # extract external reference id
-    external_info <- unlist(lapply(res$externalReferences,function(x){x$id}))
-    cellosaurus_id <- external_info[grep('cellosaurus',external_info)]
-    pmid <- external_info[grep('PMID',external_info,ignore.case = T)]
-    arrayexpress_id <- pick_longer_id(external_info[grep('arrayexpress',external_info)])
-    cbioportal_id <- pick_longer_id(external_info[grep('cbioportal',external_info)])
-
-    # create data table for one sample
-    attempt::try_catch(total.df[[i]] <- data.frame(biosample_id=res$id,
-                                          individual_id=null_to_na(res$individualId),
-                                          callset_ids=null_to_na(res$info$callsetIds),
-                                          pgx_legacy_sample_id=pick_longer_id(null_to_na(res$info$legacyIds)),
-                                          cellline_id=null_to_na(res$info$cellLine),
-                                          histological_diagnosis_id=null_to_na(res$histologicalDiagnosis$id),
-                                          histological_diagnosis_label=null_to_na(res$histologicalDiagnosis$label),
-                                          icdo_morphology_id=null_to_na(res$icdoMorphology$id),
-                                          icdo_morphology_label=null_to_na(res$icdoMorphology$label),
-                                          icdo_topography_id=null_to_na(res$icdoTopography$id),
-                                          icdo_topography_label=null_to_na(res$icdoTopography$label),
-                                          sampled_tissue_id=null_to_na(res$sampledTissue$id),
-                                          sampled_tissue_label=null_to_na(res$sampledTissue$label),
-                                          biosample_status_id=null_to_na(res$biosampleStatus$id),
-                                          biosample_status_label=null_to_na(res$biosampleStatus$label),
-                                          pathological_stage_id=null_to_na(res$pathologicalStage$id),
-                                          pathological_stage_label=null_to_na(res$pathologicalStage$label),
-                                          experiment_id=null_to_na(res$analysisInfo$experimentId),
-                                          series_id=null_to_na(res$analysisInfo$seriesId),
-                                          platform_id=null_to_na(res$analysisInfo$platformId),
-                                          external_cellosaurus_id=null_to_na(cellosaurus_id),
-                                          external_PMID=null_to_na(pmid),
-                                          external_arrayexpress_id=null_to_na(arrayexpress_id),
-                                          external_cbioportal_id=null_to_na(cbioportal_id),
-                                          geoprov_country=null_to_na(res$provenance$geoLocation$properties$country),
-                                          geoprov_city=null_to_na(res$provenance$geoLocation$properties$city), 
-                                          geoprov_iso_alpha3=null_to_na(res$provenance$geoLocation$properties$ISO3166alpha3),
-                                          geoprov_lat=null_to_na(res$provenance$geoLocation$properties$latitude), 
-                                          geoprov_long=null_to_na(res$provenance$geoLocation$properties$longitude),
-                                          data_use_condition=null_to_na(res$dataUseConditions$id), 
-                                          update_time=null_to_na(res$updated)),.e=function(e){
-                                            cat('Sample', i,'is not exported \n')
-                                          })
-  }
-  total.df <- Reduce(rbind, total.df)
-  return(total.df)
-}
-
-
 read_variant_pgxseg <- function(url){
     result <- read.table(url, header = T, sep="\t")
     colnames(result)[2] <- 'chromosome'
@@ -200,11 +131,11 @@ pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,
       }
       for (i in c(1:length(filters))) {
         if_next <- FALSE
-        url <- paste0("http://progenetix.org/beacon/biosamples/?filters=",filters[i])
+        url <- paste0("http://progenetix.org/beacon/biosamples/?filters=",filters[i],"&output=datatable")
         url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
         url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
         if (!(exists('res_1'))){
-          attempt::try_catch(res_1 <- read_sample(url),.e= function(e){
+          attempt::try_catch(res_1 <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
           cat(paste("No samples with the filter", filters[i],"\n"))
             if_next <<- TRUE})
           if (if_next){ next }
@@ -226,13 +157,13 @@ pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,
                 j<-len
             }
             filter <- transform_id(biosample_id[c(((i-1)*50+1):j)])
-            url <- paste0("http://progenetix.org/beacon/biosamples/?biosampleIds=",filter)
+            url <- paste0("http://progenetix.org/beacon/biosamples/?biosampleIds=",filter,"&output=datatable")
             if (!(exists('res_2'))){
-                attempt::try_catch(res_2 <- read_sample(url),.e= function(e){
+                attempt::try_catch(res_2 <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
                     if_next <<- TRUE})
                 if (if_next){ next }
             }else {
-                attempt::try_catch(temp <- read_sample(url),.e= function(e){
+                attempt::try_catch(temp <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
                     if_next <<- TRUE
                     })
                 if (if_next){ next }
@@ -249,13 +180,13 @@ pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,
         j<-len
       }
       filter <- transform_id(individual_id[c(((i-1)*50+1):j)])
-      url <- paste0("http://progenetix.org/beacon/biosamples/?individualIds=",filter)
+      url <- paste0("http://progenetix.org/beacon/biosamples/?individualIds=",filter,"&output=datatable")
       if (!(exists('res_3'))){
-        attempt::try_catch(res_3 <- read_sample(url),.e= function(e){
+        attempt::try_catch(res_3 <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
           if_next <<- TRUE})
         if (if_next){ next }
       }else {
-        attempt::try_catch(temp <- read_sample(url),.e= function(e){
+        attempt::try_catch(temp <- read.table(url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
           if_next <<- TRUE
         })
         if (if_next){ next }
@@ -269,11 +200,11 @@ pgxSampleLoader <- function(biosample_id,individual_id,filters,codematches,skip,
     } 
     
     if (exists('res_2')){
-      res <- rbind(res, res_2)
+      res <- plyr::rbind.fill(res, res_2)
     }
 
     if (exists('res_3')){
-      res <- rbind(res, res_3)
+      res <- plyr::rbind.fill(res, res_3)
     }
 
     if (codematches){
@@ -307,7 +238,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file,filename){
         }
         filter <- transform_id(biosample_id[c(((i-1)*50+1):j)])
         url <- paste0("http://progenetix.org/beacon/variants/?biosampleIds=",
-                      filter)
+                      filter,"&limit=0")
         if (!(is.null(output))){
             if (output == 'seg' | output == 'pgxseg'){
                 url <- paste0(url, "&output=pgxseg")
