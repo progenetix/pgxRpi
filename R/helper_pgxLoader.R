@@ -38,9 +38,16 @@ pgidCheck <- function(id){
   icdom.idx <- grep('icdom',id)
   icdot.idx <- grep('icdot',id)
   uberon.idx <- grep('UBERON',id)
-  # this query doesn't work for individual GSM id
+  # this query doesn't work for individual GSM id and age filters
   geogsm.idx <- grep('geo:GSM',id)
-  remain.id <- id[!id %in% id[geogsm.idx]]
+  age.idx <- grep('age:',id)
+  pass.idx <- c(geogsm.idx,age.idx)
+  if (length(pass.idx > 0)){
+    remain.id <- id[-pass.idx]
+  } else{
+    remain.id <- id
+  }
+  
   if (length(ncit.idx) > 0){
     url <- "https://progenetix.org/services/collations?filters=NCIT"
     res <- rjson::fromJSON(file = url)
@@ -76,7 +83,7 @@ pgidCheck <- function(id){
     res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
   }
   
-  return(id %in% c(res.id,id[geogsm.idx]))
+  return(id %in% c(res.id,id[pass.idx]))
 }
 
 pgxFreqLoader <- function(output, codematches, filters) {
@@ -467,11 +474,22 @@ pgxIndivLoader <- function(individual_id,filters,codematches, skip,limit){
       cat("WARNING: No results for filters", filters[!idcheck], "in progenetix database.\n")
       filters <- filters[idcheck]
     }
+    
+    # pick age filter
+    age.idx <- grep('age:',filters)
+    if (length(age.idx)>0){
+      age.filter <- filters[age.idx]
+      trans.filters <- filters[-age.idx]
+      trans.filters <- sapply(trans.filters, FUN=function(x){transform_id(c(x,age.filter))})
+    } else{
+      trans.filters <- filters
+    }
+    
     # start query
-    for (i in c(1:length(filters))) {
+    for (i in c(1:length(trans.filters))) {
       if_next <- FALSE
       url <- paste0("http://progenetix.org/beacon/individuals/?filters=",
-                    filters[i],"&output=datatable")
+                    trans.filters[i],"&output=datatable")
       url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
       url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
       if (!(exists('res_1'))){

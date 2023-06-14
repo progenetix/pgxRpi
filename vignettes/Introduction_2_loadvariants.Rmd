@@ -1,0 +1,216 @@
+---
+title: "Introduction_2_loadvariants"
+author: "Hangjia Zhao"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{introduction_2_loadvariants}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Load library 
+
+```{r setup}
+library(pgxRpi)
+```
+
+## `pgxLoader` function in this package
+
+This function loads various data from `Progenetix` database.  
+
+The parameters of this function:
+
+* `type` A string specifying output data type. Available options are "biosample", "individual",
+"variant" or "frequency". 
+* `output` A string specifying output file format. When the parameter `type` is "variant",
+available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
+* `filters` Identifiers for cancer type, literature, cohorts, and age such as 
+c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). 
+Multiple filters are combined using an OR logic, except for filters associated with age, 
+which use an AND logic when combined with other filters. 
+* `codematches` A logical value determining whether to exclude samples 
+from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
+If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
+Do not use this parameter when `filters` include cancer-irrelevant filters such as PMID and cohort identifiers.
+Default is FALSE.
+* `limit` Integer to specify the number of returned samples/individuals/coverage profiles for each filter. 
+Default is 0 (return all). 
+* `skip` Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. 
+E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
+Default is NULL (no skip). 
+* `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
+* `individual_id` Identifiers used in Progenetix database for identifying individuals. 
+* `save_file` A logical value determining whether to save the variant data as file 
+instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
+* `filename` A string specifying the path and name of the file to be saved. 
+Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
+
+# Retrive CNV coverage of biosamples from specific groups of interests
+
+## Across genomic bins 
+
+Relevant parameters of `pgxLoader` function: type, output, filters, codematches, skip,limit
+
+```{r}
+cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C9245")
+```
+
+By default, it returns all available profiles (limit=0), so the query may spend several minutes 
+when the number of retrieved samples is large. It is noted that the number of analysis 
+profiles does not necessarily equal the number of samples.
+
+The data looks like this
+
+```{r}
+print(dim(cnv.status))
+cnv.status[c(1:3), c(1:5,6213:6215)]
+```
+
+In this dataframe, `analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for
+individual biosample. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `X1.400000.1400000.DUP` is 0.200 in one row, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the corresponding analysis.
+
+Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
+
+```{r}
+cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C9245",
+                        codematches = T)
+```
+
+Only 2745 profiles are left.
+
+```{r}
+dim(cnv.status)
+```
+
+## Across chromosomes or the whole genome 
+
+Relevant parameters of `pgxLoader` function: type, output, filters, codematches, skip, limit
+
+```{r}
+cnv_covergae <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948")
+```
+
+It includes CNV coverage across chromosome arms, whole chromosomes, or whole genome.
+
+```{r}
+names(cnv_covergae)
+```
+
+The data of CNV coverage across chromosomal arms looks like this
+
+```{r}
+head(cnv_covergae$chrom_arm_coverage)[,c(1:4, 49:52)]
+```
+
+The row names are id of biosamples from the group NCIT:C2948. There are 96 columns. 
+The first 48 columns are duplication coverage across chromosomal arms, followed by deletion coverage.
+The data of CNV coverage across whole chromosomes is similar, with the only difference in columns.
+
+The data of CNV coverage across genome (hg38) looks like this
+
+```{r}
+head(cnv_covergae$whole_genome_coverage)
+```
+
+The first column is the total called coverage, followed by duplication coverage and deletion coverage.
+
+Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
+21 samples are excluded from the original 47 samples in this case.
+
+```{r}
+cnv_covergae_2 <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948",
+                            codematches = T)
+
+print(dim(cnv_covergae$chrom_arm_coverage))
+print(dim(cnv_covergae_2$chrom_arm_coverage))
+```
+
+# Retrieve segment variants by biosampleid
+
+Relevant parameters of `pgxLoader` function: type, output, biosample_id, save_file, filename
+
+Because of the time-out problem, the segment variant data can only be accessed by 
+individual biosample id instead of filters.
+
+## Get biosamples id from biosample information
+
+The biosample information is also obtained by `pgxLoader` and the vignette about metadata
+query see [Introduction_1_loadmetadata](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_1_loadmetadata.html)
+
+```{r}
+biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512",codematches = TRUE)
+
+biosample_id <- biosamples$biosample_id[c(1:20)]
+```
+
+There are three output formats. 
+
+## The first output format (by default)
+
+ This format contains variant id and associated biosample id as well as analysis id. The variant is represented as 'DUP' (duplication) or 'DEL' (deletion) in specific chromosome locations. 
+
+```{r}
+variant_1 <- pgxLoader(type="variant", biosample_id = biosample_id)
+head(variant_1)
+```
+
+## The second output format (`output` = "pgxseg")
+
+This format is '.pgxseg' file format. It contains segment mean values (in `log2` column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)). A few variants are point mutations represented by columns `reference_bases` and `alternate_bases`.
+
+```{r}
+variant_2 <- pgxLoader(type="variant", biosample_id = biosample_id,output = "pgxseg")
+head(variant_2)
+```
+
+## The third output format (`output` = "seg")
+
+This format is similar to the general '.seg' file format and compatible with IGV tool for visualization. The only difference between this file format and the general '.seg' file format is the fifth column. It represents variant type in this format while in the general '.seg' file format, it represents number of probes or bins covered by the segment. In addition, the point mutation variants are excluded in this file format.
+
+```{r}
+variant_3 <- pgxLoader(type="variant", biosample_id = biosample_id,output = "seg")
+head(variant_3)
+```
+
+# Export variants data for visualization
+
+Setting `save_file` as TRUE in `pgxLoader` function would make this function doesn't return 
+variants data directly but let the retrieved data saved in the current work directory by default or other 
+paths (specified by `filename`). The export is only available for variants data (type='variant'). 
+
+## Upload 'pgxseg' file to Progenetix website
+
+The following command creates a '.pgxseg' file with the name "variants.pgxseg" in "~/Downloads/" folder. 
+
+```{r}
+pgxLoader(type='variant', output='pgxseg', biosample_id=biosample_id, save_file=TRUE, 
+          filename="~/Downloads/variants.pgxseg")
+```
+
+You can upload this '.pgxseg' file to [this link](https://progenetix.org/service-collection/uploader) 
+for visualization.
+
+## Upload '.seg' file to IGV
+
+The following command creates a special '.seg' file with the name "variants.seg" in "~/Downloads/" folder. 
+
+```{r}
+pgxLoader(type='variant', output='seg', biosample_id=biosample_id, save_file=TRUE, 
+          filename="~/Downloads/variants.seg")
+```
+
+You can upload this '.seg' file to [IGV tool](https://software.broadinstitute.org/software/igv/) for visualization.
+
+# Session Info
+
+```{r echo = FALSE}
+sessionInfo()
+```

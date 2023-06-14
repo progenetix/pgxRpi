@@ -23,14 +23,16 @@ pgxLoader(
 
 \item{output}{A string specifying output file format. When the parameter \code{type} is "variant",
 available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter \code{type} is "frequency",
-available options are "pgxfreq" or "pgxmatrix" .}
+available options are "pgxfreq" or "pgxmatrix".}
 
-\item{filters}{A single or a comma-concatenated list of identifiers for cancer type,
-literature, and cohorts such as c("NCIT:C7376","pgx:icdom-98353","PMID:22824167", "pgx:cohort-TCGAcancers")}
+\item{filters}{Identifiers for cancer type, literature, cohorts, and age such as c("NCIT:C7376", "pgx:icdom-98353", "PMID:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y").
+Multiple filters are combined using an OR logic, except for filters associated with age,
+which use an AND logic when combined with other filters.}
 
 \item{codematches}{A logical value determining whether to exclude samples
 from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon).
-If TRUE, retrieved samples only keep samples exactly encoded by specified filters. Don't use this parameter when \code{filters} include cancer-irrelevant identifiers such as PMID and cohort filters.
+If TRUE, retrieved samples only keep samples exactly encoded by specified filters.
+Do not use this parameter when \code{filters} include cancer-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.}
 
 \item{limit}{Integer to specify the number of returned samples/individuals/coverage profiles for each filter. Default is 0 (return all).}
@@ -38,11 +40,9 @@ Default is FALSE.}
 \item{skip}{Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. E.g. if skip = 2, limit=500,
 the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip).}
 
-\item{biosample_id}{A single or a comma-concatenated list of identifiers used
-in Progenetix database for identifying biosamples.}
+\item{biosample_id}{Identifiers used in Progenetix database for identifying biosamples.}
 
-\item{individual_id}{A single or a comma-concatenated list of identifiers used
-in Progenetix database for identifying individuals.}
+\item{individual_id}{Identifiers used in Progenetix database for identifying individuals.}
 
 \item{save_file}{A logical value determining whether to save the variant data as file
 instead of direct return. Only used when the parameter \code{type} is "variant" and \code{output} is "pgxseg" or "seg". Default is FALSE.}

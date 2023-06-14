@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Hangjia Zhao" />
+
+<meta name="date" content="2023-06-14" />
+
+<title>Introduction_2_loadvariants</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction_2_loadvariants</h1>
+<h4 class="author">Hangjia Zhao</h4>
+<h4 class="date">2023-06-14</h4>
+
+
+
+<div id="load-library" class="section level1">
+<h1>Load library</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pgxRpi)</span></code></pre></div>
+<div id="pgxloader-function-in-this-package" class="section level2">
+<h2><code>pgxLoader</code> function in this package</h2>
+<p>This function loads various data from <code>Progenetix</code>
+database.</p>
+<p>The parameters of this function:</p>
+<ul>
+<li><code>type</code> A string specifying output data type. Available
+options are “biosample”, “individual”, “variant” or “frequency”.</li>
+<li><code>output</code> A string specifying output file format. When the
+parameter <code>type</code> is “variant”, available options are NULL,
+“pgxseg” ,“pgxmatrix”, “coverage” or “seg” ; When the parameter
+<code>type</code> is “frequency”, available options are “pgxfreq” or
+“pgxmatrix” .</li>
+<li><code>filters</code> Identifiers for cancer type, literature,
+cohorts, and age such as c(“NCIT:C7376”, “pgx:icdom-98353”,
+“PMID<!-- -->:22824167”, “pgx:cohort-TCGAcancers”, “age:&gt;=P50Y”).
+Multiple filters are combined using an OR logic, except for filters
+associated with age, which use an AND logic when combined with other
+filters.</li>
+<li><code>codematches</code> A logical value determining whether to
+exclude samples from child concepts of specified filters that belong to
+cancer type/tissue encoding system (NCIt, icdom/t, Uberon). If TRUE,
+retrieved samples only keep samples exactly encoded by specified
+filters. Do not use this parameter when <code>filters</code> include
+cancer-irrelevant filters such as PMID and cohort identifiers. Default
+is FALSE.</li>
+<li><code>limit</code> Integer to specify the number of returned
+samples/individuals/coverage profiles for each filter. Default is 0
+(return all).</li>
+<li><code>skip</code> Integer to specify the number of skipped
+samples/individuals/coverage profiles for each filter. E.g. if skip = 2,
+limit=500, the first 2*500 =1000 profiles are skipped and the next 500
+profiles are returned. Default is NULL (no skip).</li>
+<li><code>biosample_id</code> Identifiers used in Progenetix database
+for identifying biosamples.</li>
+<li><code>individual_id</code> Identifiers used in Progenetix database
+for identifying individuals.</li>
+<li><code>save_file</code> A logical value determining whether to save
+the variant data as file instead of direct return. Only used when the
+parameter <code>type</code> is “variant” and <code>output</code> is
+“pgxseg” or “seg”. Default is FALSE.</li>
+<li><code>filename</code> A string specifying the path and name of the
+file to be saved. Only used if the parameter <code>save_file</code> is
+TRUE. Default is “variants.seg/pgxseg” in current work directory.</li>
+</ul>
+</div>
+</div>
+<div id="retrive-cnv-coverage-of-biosamples-from-specific-groups-of-interests" class="section level1">
+<h1>Retrive CNV coverage of biosamples from specific groups of
+interests</h1>
+<div id="across-genomic-bins" class="section level2">
+<h2>Across genomic bins</h2>
+<p>Relevant parameters of <code>pgxLoader</code> function: type, output,
+filters, codematches, skip,limit</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cnv.status <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">output=</span><span class="st">&quot;pgxmatrix&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C9245&quot;</span>)</span></code></pre></div>
+<p>By default, it returns all available profiles (limit=0), so the query
+may spend several minutes when the number of retrieved samples is large.
+It is noted that the number of analysis profiles does not necessarily
+equal the number of samples.</p>
+<p>The data looks like this</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(cnv.status))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 3796 6215</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>cnv.status[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">6213</span><span class="sc">:</span><span class="dv">6215</span>)]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      analysis_id   biosample_id   group_id X1.0.400000.DUP</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxcs-kftvot4r pgxbs-kftvgri2 NCIT:C9135               0</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxcs-kftvotdj pgxbs-kftvgriv NCIT:C5164               0</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxcs-kftvqbjx pgxbs-kftvgwdd NCIT:C9119               0</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   X1.400000.1400000.DUP Y.54400000.55400000.DEL Y.55400000.56400000.DEL</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                     0                       0                       0</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                     0                       0                       0</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                     0                       0                       0</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Y.56400000.57227415.DEL</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                       0</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                       0</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3                       0</span></span></code></pre></div>
+<p>In this dataframe, <code>analysis_id</code> is the identifier for
+individual analysis, <code>biosample_id</code> is the identifier for
+individual biosample. One biosample_id may correspond to multiple
+analysis_id. <code>group_id</code> equals the meaning of
+<code>filters</code>. It’s followed by all “gain status” columns (3106
+intervals) plus all “loss status” columns (3106 intervals). The status
+is indicated by a coverage value, i.e. the fraction of how much the
+binned interval overlaps with one or more CNVs of the given type
+(DUP/DEL). For example, if the column <code>X1.400000.1400000.DUP</code>
+is 0.200 in one row, it means that one or more duplication events
+overlapped with 20% of the genomic bin located in chromosome 1:
+400000-1400000 in the corresponding analysis.</p>
+<p>Setting <code>codematches = True</code> can exclude profiles with
+group_id belonging to child terms of the input filters.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cnv.status <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">output=</span><span class="st">&quot;pgxmatrix&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C9245&quot;</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">codematches =</span> T)</span></code></pre></div>
+<p>Only 2745 profiles are left.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(cnv.status)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 2745 6215</span></span></code></pre></div>
+</div>
+<div id="across-chromosomes-or-the-whole-genome" class="section level2">
+<h2>Across chromosomes or the whole genome</h2>
+<p>Relevant parameters of <code>pgxLoader</code> function: type, output,
+filters, codematches, skip, limit</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cnv_covergae <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">output=</span><span class="st">&quot;coverage&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C2948&quot;</span>)</span></code></pre></div>
+<p>It includes CNV coverage across chromosome arms, whole chromosomes,
+or whole genome.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(cnv_covergae)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;chrom_arm_coverage&quot;    &quot;whole_chrom_coverage&quot;  &quot;whole_genome_coverage&quot;</span></span></code></pre></div>
+<p>The data of CNV coverage across chromosomal arms looks like this</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cnv_covergae<span class="sc">$</span>chrom_arm_coverage)[,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">49</span><span class="sc">:</span><span class="dv">52</span>)]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                1p.dup 1q.dup 2p.dup 2q.dup 1p.del 1q.del 2p.del 2q.del</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvh262      0  0.000  0.000  0.000  0.000      0      0      0</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvh9fp      0  0.000  0.000  0.000  0.000      0      0      0</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvhf4h      0  0.000  0.000  0.000  0.000      0      0      0</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvhf4i      0  0.000  0.000  0.000  0.000      0      0      0</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvhf4k      0  0.000  0.000  0.000  0.225      0      0      0</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvhf4m      0  0.979  0.989  0.003  0.000      0      0      0</span></span></code></pre></div>
+<p>The row names are id of biosamples from the group NCIT:C2948. There
+are 96 columns. The first 48 columns are duplication coverage across
+chromosomal arms, followed by deletion coverage. The data of CNV
+coverage across whole chromosomes is similar, with the only difference
+in columns.</p>
+<p>The data of CNV coverage across genome (hg38) looks like this</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cnv_covergae<span class="sc">$</span>whole_genome_coverage)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                cnvfraction dupfraction delfraction</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvh262       0.080       0.036       0.044</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvh9fp       0.058       0.010       0.048</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvhf4h       0.000       0.000       0.000</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvhf4i       0.000       0.000       0.000</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvhf4k       0.027       0.000       0.027</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; pgxbs-kftvhf4m       0.176       0.159       0.017</span></span></code></pre></div>
+<p>The first column is the total called coverage, followed by
+duplication coverage and deletion coverage.</p>
+<p>Setting <code>codematches = True</code> can exclude profiles with
+group_id belonging to child terms of the input filters. 21 samples are
+excluded from the original 47 samples in this case.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cnv_covergae_2 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">output=</span><span class="st">&quot;coverage&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C2948&quot;</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                            <span class="at">codematches =</span> T)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(cnv_covergae<span class="sc">$</span>chrom_arm_coverage))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 47 96</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">dim</span>(cnv_covergae_2<span class="sc">$</span>chrom_arm_coverage))</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 26 96</span></span></code></pre></div>
+</div>
+</div>
+<div id="retrieve-segment-variants-by-biosampleid" class="section level1">
+<h1>Retrieve segment variants by biosampleid</h1>
+<p>Relevant parameters of <code>pgxLoader</code> function: type, output,
+biosample_id, save_file, filename</p>
+<p>Because of the time-out problem, the segment variant data can only be
+accessed by individual biosample id instead of filters.</p>
+<div id="get-biosamples-id-from-biosample-information" class="section level2">
+<h2>Get biosamples id from biosample information</h2>
+<p>The biosample information is also obtained by <code>pgxLoader</code>
+and the vignette about metadata query see <a href="https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_1_loadmetadata.html">Introduction_1_loadmetadata</a></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>biosamples <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;biosample&quot;</span>, <span class="at">filters =</span> <span class="st">&quot;NCIT:C3512&quot;</span>,<span class="at">codematches =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>biosample_id <span class="ot">&lt;-</span> biosamples<span class="sc">$</span>biosample_id[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)]</span></code></pre></div>
+<p>There are three output formats.</p>
+</div>
+<div id="the-first-output-format-by-default" class="section level2">
+<h2>The first output format (by default)</h2>
+<p>This format contains variant id and associated biosample id as well
+as analysis id. The variant is represented as ‘DUP’ (duplication) or
+‘DEL’ (deletion) in specific chromosome locations.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>variant_1 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_1)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                        variant_id   biosample_id    analysis_id</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxvar-5bab576b727983b2e00b9c4c pgxbs-kftva6du pgxcs-kftvlmuu</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxvar-5bab576b727983b2e00b9c4a pgxbs-kftva6du pgxcs-kftvlmuu</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxvar-5bab576b727983b2e00b9c4b pgxbs-kftva6du pgxcs-kftvlmuu</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxvar-5bab576b727983b2e00b9c4d pgxbs-kftva6du pgxcs-kftvlmuu</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxvar-5bab576b727983b2e00b9c4f pgxbs-kftva6du pgxcs-kftvlmuu</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxvar-5bab576b727983b2e00b9c4e pgxbs-kftva6du pgxcs-kftvlmuu</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     variant chr     start       end    reference_genome</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 1:124300000-247249719:DUP   1 124300000 247249719 refseq:NC_000001.11</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2         4:0-191273063:DUP   4         0 191273063 refseq:NC_000004.12</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3         5:0-180857866:DUP   5         0 180857866 refseq:NC_000005.10</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4          6:0-60499999:DUP   6         0  60499999 refseq:NC_000006.12</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  6:60500000-149099999:DEL   6  60500000 149099999 refseq:NC_000006.12</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6         9:0-140273252:DEL   9         0 140273252 refseq:NC_000009.12</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   variant_status               updated_time</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 low-level gain 2023-05-25T15:44:56.056707</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 low-level gain 2023-05-25T15:44:56.055934</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 low-level gain 2023-05-25T15:44:56.056321</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 low-level gain 2023-05-25T15:44:56.057089</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5   partial loss 2023-05-25T15:44:56.057857</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6   partial loss 2023-05-25T15:44:56.057475</span></span></code></pre></div>
+</div>
+<div id="the-second-output-format-output-pgxseg" class="section level2">
+<h2>The second output format (<code>output</code> = “pgxseg”)</h2>
+<p>This format is ‘.pgxseg’ file format. It contains segment mean values
+(in <code>log2</code> column), which are equal to log2(copy number of
+measured sample/copy number of control sample (usually 2)). A few
+variants are point mutations represented by columns
+<code>reference_bases</code> and <code>alternate_bases</code>.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>variant_2 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id,<span class="at">output =</span> <span class="st">&quot;pgxseg&quot;</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_2)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     biosample_id chromosome     start       end log2 variant_type</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva6du          1 124300000 247249719   NA          DUP</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva6du          4         0 191273063   NA          DUP</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftva6du          5         0 180857866   NA          DUP</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxbs-kftva6du          6         0  60499999   NA          DUP</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva6du          6  60500000 149099999   NA          DEL</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva6du          9         0 140273252   NA          DEL</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   reference_bases alternate_bases</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1               .               .</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2               .               .</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3               .               .</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4               .               .</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5               .               .</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6               .               .</span></span></code></pre></div>
+</div>
+<div id="the-third-output-format-output-seg" class="section level2">
+<h2>The third output format (<code>output</code> = “seg”)</h2>
+<p>This format is similar to the general ‘.seg’ file format and
+compatible with IGV tool for visualization. The only difference between
+this file format and the general ‘.seg’ file format is the fifth column.
+It represents variant type in this format while in the general ‘.seg’
+file format, it represents number of probes or bins covered by the
+segment. In addition, the point mutation variants are excluded in this
+file format.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>variant_3 <span class="ot">&lt;-</span> <span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&quot;variant&quot;</span>, <span class="at">biosample_id =</span> biosample_id,<span class="at">output =</span> <span class="st">&quot;seg&quot;</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(variant_3)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     biosample_id chromosome     start       end variant_type log2</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 pgxbs-kftva6du          1 124300000 247249719          DUP   NA</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 pgxbs-kftva6du          4         0 191273063          DUP   NA</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 pgxbs-kftva6du          5         0 180857866          DUP   NA</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 pgxbs-kftva6du          6         0  60499999          DUP   NA</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 pgxbs-kftva6du          6  60500000 149099999          DEL   NA</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 pgxbs-kftva6du          9         0 140273252          DEL   NA</span></span></code></pre></div>
+</div>
+</div>
+<div id="export-variants-data-for-visualization" class="section level1">
+<h1>Export variants data for visualization</h1>
+<p>Setting <code>save_file</code> as TRUE in <code>pgxLoader</code>
+function would make this function doesn’t return variants data directly
+but let the retrieved data saved in the current work directory by
+default or other paths (specified by <code>filename</code>). The export
+is only available for variants data (type=‘variant’).</p>
+<div id="upload-pgxseg-file-to-progenetix-website" class="section level2">
+<h2>Upload ‘pgxseg’ file to Progenetix website</h2>
+<p>The following command creates a ‘.pgxseg’ file with the name
+“variants.pgxseg” in “~/Downloads/” folder.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&#39;variant&#39;</span>, <span class="at">output=</span><span class="st">&#39;pgxseg&#39;</span>, <span class="at">biosample_id=</span>biosample_id, <span class="at">save_file=</span><span class="cn">TRUE</span>, </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">filename=</span><span class="st">&quot;~/Downloads/variants.pgxseg&quot;</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The file is saved</span></span></code></pre></div>
+<p>You can upload this ‘.pgxseg’ file to <a href="https://progenetix.org/service-collection/uploader">this link</a>
+for visualization.</p>
+</div>
+<div id="upload-.seg-file-to-igv" class="section level2">
+<h2>Upload ‘.seg’ file to IGV</h2>
+<p>The following command creates a special ‘.seg’ file with the name
+“variants.seg” in “~/Downloads/” folder.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pgxLoader</span>(<span class="at">type=</span><span class="st">&#39;variant&#39;</span>, <span class="at">output=</span><span class="st">&#39;seg&#39;</span>, <span class="at">biosample_id=</span>biosample_id, <span class="at">save_file=</span><span class="cn">TRUE</span>, </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">filename=</span><span class="st">&quot;~/Downloads/variants.seg&quot;</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The file is saved</span></span></code></pre></div>
+<p>You can upload this ‘.seg’ file to <a href="https://software.broadinstitute.org/software/igv/">IGV tool</a>
+for visualization.</p>
+</div>
+</div>
+<div id="session-info" class="section level1">
+<h1>Session Info</h1>
+<pre><code>#&gt; R version 4.2.2 (2022-10-31)
+#&gt; Platform: aarch64-apple-darwin20 (64-bit)
+#&gt; Running under: macOS Ventura 13.0.1
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] pgxRpi_0.0.0.9000
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] attempt_0.3.1   digest_0.6.30   R6_2.5.1        lifecycle_1.0.3
+#&gt;  [5] jsonlite_1.8.4  magrittr_2.0.3  evaluate_0.18   stringi_1.7.8  
+#&gt;  [9] cachem_1.0.6    rlang_1.0.6     cli_3.6.0       rstudioapi_0.14
+#&gt; [13] jquerylib_0.1.4 bslib_0.4.1     vctrs_0.5.2     rmarkdown_2.18 
+#&gt; [17] rjson_0.2.21    tools_4.2.2     stringr_1.5.0   glue_1.6.2     
+#&gt; [21] xfun_0.35       yaml_2.3.6      fastmap_1.1.0   compiler_4.2.2 
+#&gt; [25] htmltools_0.5.3 knitr_1.41      sass_0.4.4</code></pre>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

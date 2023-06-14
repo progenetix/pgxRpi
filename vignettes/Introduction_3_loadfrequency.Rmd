@@ -1,0 +1,325 @@
+---
+title: "Introduction_3_loadfrequency"
+author: "Hangjia Zhao"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction_3_loadfrequency}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Load library 
+
+```{r setup}
+library(pgxRpi)
+```
+
+## `pgxLoader` function in this package
+
+This function loads various data from `Progenetix` database.  
+
+The parameters of this function:
+
+* `type` A string specifying output data type. Available options are "biosample", "individual",
+"variant" or "frequency". 
+* `output` A string specifying output file format. When the parameter `type` is "variant",
+available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
+* `filters` Identifiers for cancer type, literature, cohorts, and age such as 
+c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). 
+Multiple filters are combined using an OR logic, except for filters associated with age, 
+which use an AND logic when combined with other filters. 
+* `codematches` A logical value determining whether to exclude samples 
+from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
+If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
+Do not use this parameter when `filters` include cancer-irrelevant filters such as PMID and cohort identifiers.
+Default is FALSE.
+* `limit` Integer to specify the number of returned samples/individuals/coverage profiles for each filter. 
+Default is 0 (return all). 
+* `skip` Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. 
+E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
+Default is NULL (no skip). 
+* `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
+* `individual_id` Identifiers used in Progenetix database for identifying individuals. 
+* `save_file` A logical value determining whether to save the variant data as file 
+instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
+* `filename` A string specifying the path and name of the file to be saved. 
+Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
+
+
+# Retrieve CNV frequency data
+
+Relevant parameters of `pgxLoader` function: type, output, filters, codematches
+
+There are two output formats
+
+## The first output format (`output` = "pgxfreq")
+
+```{r}
+freq_pgxfreq <- pgxLoader(type="frequency", output ='pgxfreq',
+                         filters=c("NCIT:C4038","pgx:icdom-85003"), 
+                         codematches = TRUE)
+```
+
+The parameter `codematches` determines whether the calculation of CNV frequency excludes samples from child terms.
+
+The `meta` slot of this object looks like this
+
+```{r}
+freq_pgxfreq$meta
+```
+
+The `data` slot contains a list of the CNV frequency data frames named by the corresponding 
+filters. The data frame with the name 'total' is the concatenated data frames from all 
+filters.
+
+```{r}
+names(freq_pgxfreq$data)
+```
+
+You can access the data frame with "pgxfreq" format of one filter from this list.  
+
+```{r}
+print(dim(freq_pgxfreq$data[['NCIT:C4038']]))
+head(freq_pgxfreq$data[['NCIT:C4038']])
+```
+
+In the pgxfreq format, the whole genome (GRCh38) is partitioned into 3106 intervals or bins (the size 
+of most bins is 1MB except a few bins close to telomeres).
+
+* `filters`: identifiers for grouping. 
+* `reference_name`, `start` and `end` specify interval location in chromosome.
+* `gain_frequency` and `loss_frequency` indicate the percent values across samples (%) for gains and 
+losses overlapping the interval, respectively
+
+
+## The second output format (`output` = "pgxmatrix")
+
+Choose 8 NCIT codes of interests that correspond to different tumor types
+
+```{r}
+code <-c("C3059","C3716","C4917","C3512","C3493","C3771","C4017","C4001")
+# add prefix for query
+code <- sub(".",'NCIT:C',code)
+```
+
+load data with the specified code
+
+```{r}
+freq_pgxmatrix <- pgxLoader(type='frequency',output = 'pgxmatrix',filters=code,codematches=TRUE)
+```
+
+The `meta` slot of this object looks like this
+
+```{r}
+freq_pgxmatrix$meta
+```
+
+The `data` slot contains a list of the nine CNV frequency data frames. One of these nine
+data frames looks like this
+
+```{r}
+freq_pgxmatrix$data[['NCIT:C3059']][,c(1:4,3108:3110)]
+```
+
+In the data frame with "pgxmatrix" format, `filters` is the same as that in the "pgxfreq" format. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). For example, if the column `X1.400000.1400000.DUP` is 9.141, it means that 9.141% samples from the corresponding filter having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
+
+Note: it is different from CNV status matrix introduced in [Introduction_2_loadvariants](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_2_loadvariants.html). Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV status matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in the individual sample.
+
+You can also access the total data frame for analyzing multiple frequency sets.
+
+```{r}
+freq_pgxmatrix$data[['total']][,c(1:4,3108:3110)]
+```
+
+# Select ids of interests from original object of CNV frequency
+
+It is realized by `pgxFreqselect` function.
+
+This function can select filters of interests from input object and return a new object 
+with selected filters.
+
+The parameters of this function:
+
+* `data`: CNV frequency data returned by `pgxLoader` function. 
+* `filters`: identifiers of interests such as c("NCIT:C7376","pgx:icdom-98353").
+
+```{r}
+freq_sel <- pgxFreqselect(data=freq_pgxmatrix, 
+                          filters = c("NCIT:C4917","NCIT:C3512","NCIT:C3493"))
+freq_sel$data$total[,c(1:5)]
+```
+
+
+# Visualization of CNV frequency data using 'pgxfreq' format
+
+## `pgxFreqplot` function
+
+This function provides CNV frequency plots by genome or chromosomes as you request.
+
+The parameters of this function:
+
+* `data`: frequency object returned by `pgxLoader` function or individual frequency matrix with 'pgxfreq' format. 
+In the returned object by `pgxLoader`, the frequency matrices in `data` slot must be stored as `pgxfreq` format, 
+which can be specified by `output` parameter of `pgxLoader` function.   
+* `chrom`: a vector with chromosomes to be plotted. If NULL, return the plot by genome. If specified the frequencies are plotted with one panel for each chromosome. Default is NULL.
+* `layout`: number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1). 
+* `filters`: Index or string value to indicate which filter to be plotted. The length of filters is limited to one if the parameter `circos` is False. Default is the first filter.
+* `circos`: a logical value to indicate if return a circos plot. If TRUE, it can 
+return a circos plot with multiple group ids for display and comparison. Default is FALSE.
+* `highlight`: Indices of genomic bins to be highlighted with red color.
+* `assembly`: A string specifying which genome assembly version should be applied to CNV frequency plotting. Allowed options are "hg19", "hg38". Default is "hg38" (genome version used in Progenetix).
+
+
+### CNV frequency plot by genome (GRCh38)
+
+Input is an object.
+
+```{r, fig.width=7, fig.height=5}
+pgxFreqplot(freq_pgxfreq, filters='pgx:icdom-85003')
+```
+
+Input is individual frequency data. 
+
+```{r, fig.width=7, fig.height=5}
+pgxFreqplot(freq_pgxfreq$data[["NCIT:C4038"]])
+```
+
+### CNV frequency plot by chromosomes
+
+```{r, fig.width=7, fig.height=5}
+pgxFreqplot(freq_pgxfreq, filters='NCIT:C4038',chrom=c(1,2,3), layout = c(3,1))  
+```
+
+### CNV frequency circos plot 
+
+```{r,fig.width=6, fig.height=6}
+pgxFreqplot(freq_pgxfreq, filters='pgx:icdom-85003', circos = TRUE)
+```
+
+The circos plot also supports multiple group comparison
+
+```{r,fig.width=6, fig.height=6}
+pgxFreqplot(freq_pgxfreq,filters= c("NCIT:C4038","pgx:icdom-85003"),circos = TRUE) 
+```
+
+### Highlight interesting genomic intervals
+
+If you want to look at the CNV frequency at specific genomic bins, you can use `highlight` parameter.
+For example, when you are interested in CNV pattern of CCND1 gene in samples with infiltrating duct carcinoma (icdom-85003).
+You could first find the genomic bin where CCND1 (chr11:69641156-69654474) is located.
+
+```{r}
+# Extract the CNV frequency data frame of samples from 'icdom-85003' from 
+# the previously returned object
+freq_IDC <- freq_pgxfreq$data$`pgx:icdom-85003`
+# search the genomic bin where CCND1 is located
+bin <- which(freq_IDC$reference_name == 11 & freq_IDC$start <= 69641156 &  
+             freq_IDC$end >= 69654474)
+freq_IDC[bin,]
+```
+
+Then you could highlight this genomic bin like this
+
+```{r, fig.width=7, fig.height=5}
+pgxFreqplot(freq_pgxfreq,filters = 'pgx:icdom-85003', chrom = 11,highlight = bin)
+```
+
+Note: For CNV analysis of specific genes, the highlighted plot is rough as a reference, 
+because the bin size in frequency plots is 1MB, which is possible to cover multiple genes.
+
+The highlighting is also available for genome plots and circos plots. And you could highlight 
+multiple bins by a vector of indices.
+
+```{r, fig.width=7, fig.height=5}
+pgxFreqplot(freq_pgxfreq,filters = 'pgx:icdom-85003',highlight = c(1:100))
+```
+
+# Clustering of CNV frequency data using 'pgxmatrix' format
+
+## Hierarchical clustering
+
+Use hierarchical clustering to cluster the tumor types which are picked before by NCIt code.
+
+```{r}
+# extract CNV frequency data from `total` slot
+freq_mat <- freq_pgxmatrix$data[['total']][,2:dim(freq_pgxmatrix$data[['total']])[2]]
+rownames(freq_mat) <- freq_pgxmatrix$data[['total']]$filters
+# do clustering
+dist_mat <- dist(freq_mat, method = 'euclidean')
+hclust_res <- hclust(dist_mat, method = "ward.D")
+```
+
+The clustering result is shown below. 
+
+```{r}
+hcd <- as.dendrogram(hclust_res)
+plot(hcd, type = "rectangle", ylab = "Height")
+# Based on the plot, the number of clusters is set to 4.
+cut<- cutree(hclust_res, k = 4)
+rect.hclust(hclust_res , k = 4, border = 2:6)
+```
+
+## Merge frequency matrix
+
+Merge the frequency matrix by calculating the difference between gain frequency 
+and loss frequency per interval (gain-loss)
+
+```{r}
+diff_mat <- freq_mat[,1:3106]-freq_mat[,3107:6212]
+```
+
+Sort the merged matrix by clustering membership 
+
+```{r}
+sort_idx <- order(cut)
+cut <- cut[sort_idx]
+diff_mat <- diff_mat[sort_idx,]
+```
+
+## Get metadata (label, sample number)
+
+From the `meta` slot of the object
+
+```{r}
+meta <- freq_pgxmatrix$meta[sort_idx,]
+```
+
+## Plot heatmap
+
+Plot a heatmap to show the merged matrix. The color in the rowside shows cluster membership calculated by the original frequency matrix   
+
+```{r fig.width=10, fig.height=5}
+library("RColorBrewer")
+library('pheatmap')
+rownames(diff_mat) <- paste(meta[,1], paste0("(",meta[,3],")"),meta[,2])
+
+parlength <- 100
+myBreaks <- c(seq(min(diff_mat), 0, length.out=ceiling(parlength/2) + 1), 
+              seq(max(diff_mat)/parlength, max(diff_mat), length.out=floor(parlength/2)))
+
+annotation_row <- data.frame(cluster=factor(cut))
+annotation_col <- data.frame(chr=factor(substring(colnames(diff_mat),1,
+                                                  last=regexpr("\\.", colnames(diff_mat))-1),
+                                        levels = c(gsub('^','X',seq(1,22)), 'X','Y')))
+rownames(annotation_col) <- colnames(diff_mat)
+rownames(annotation_row) <- rownames(diff_mat)
+
+pheatmap(as.matrix(diff_mat), scale = "none",cluster_cols = FALSE, cluster_rows = FALSE,
+         width = 8,height = 10,cellwidth=0.1,breaks=myBreaks,show_colnames=FALSE ,
+         annotation_row = annotation_row,annotation_col = annotation_col,annotation_legend=TRUE)
+```
+
+# Session Info
+
+```{r echo = FALSE}
+sessionInfo()
+```
+
