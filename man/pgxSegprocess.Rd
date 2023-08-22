@@ -33,9 +33,9 @@ pgxSegprocess(
 \item{...}{Other parameters relevant to KM plot. These include \code{pval}, \code{pval.coord}, \code{pval.method}, \code{conf.int}, \code{linetype}, and \code{palette} (see ggsurvplot from survminer)}
 }
 \value{
-Segments data, CNV frequency object, meta data or KM plots from "pgxseg" files
+Segments data, CNV frequency object, meta data or KM plots from local "pgxseg" files
 }
 \description{
-This function extracts segments, CNV frequency, and metadata from "pgxseg" files and
+This function extracts segments, CNV frequency, and metadata from local "pgxseg" files and
 supports survival data visualization
 }

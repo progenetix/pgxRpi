@@ -1,6 +1,6 @@
 #' Extract, analyse and visualize "pgxseg" files
 #'
-#' This function extracts segments, CNV frequency, and metadata from "pgxseg" files and
+#' This function extracts segments, CNV frequency, and metadata from local "pgxseg" files and
 #' supports survival data visualization  
 #'
 #' @param file A string specifying the path and name of the "pgxseg" file where the data is to be read. 
@@ -11,7 +11,7 @@
 #' @param return_frequency A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.
 #' @param assembly A string specifying which genome assembly version should be applied to CNV frequency calculation and plotting. Allowed options are "hg19", "hg38". Default is "hg38".
 #' @param ... Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot from survminer)
-#' @return Segments data, CNV frequency object, meta data or KM plots from "pgxseg" files
+#' @return Segments data, CNV frequency object, meta data or KM plots from local "pgxseg" files
 #' @export
 
 pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=F,return_metadata=F,return_seg=F,return_frequency=F,assembly='hg38',...){
@@ -70,6 +70,18 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=F,return_meta
   
   if (return_seg == T | return_frequency == T){
     seg <- read.table(file,sep='\t',header=T)
+    # sort chr and start per sample
+    seg <- lapply(unique(seg[,1]),FUN = function(x){
+      indseg <- seg[seg[,1] == x,]
+      indseg <- indseg[order(as.numeric(indseg[,3])),]
+      chr <- indseg[,2]
+      chr[chr == 'X'] <- 23
+      chr[chr == 'Y'] <- 24
+      indseg <- indseg[order(as.numeric(chr)),]
+      return(indseg)
+      })
+    seg <- do.call(rbind,seg)
+    rownames(seg) <- seq_len(dim(seg)[1])
     if (return_frequency == T){
       bin.data <- extract.bin.feature(seg,genome=assembly)
       bin.dup.data <- bin.data[['dup']]

@@ -2,11 +2,10 @@
 title: "Introduction_3_loadfrequency"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Introduction_3_loadfrequency}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: 
+  rmarkdown::html_document:
+        toc: true
+        toc_float: true
 ---
 
 ```{r, include = FALSE}
@@ -22,53 +21,36 @@ knitr::opts_chunk$set(
 library(pgxRpi)
 ```
 
-## `pgxLoader` function in this package
+## `pgxLoader` function 
 
 This function loads various data from `Progenetix` database.  
 
-The parameters of this function:
+The parameters of this function used in this tutorial:
 
 * `type` A string specifying output data type. Available options are "biosample", "individual",
 "variant" or "frequency". 
-* `output` A string specifying output file format. When the parameter `type` is "variant",
-available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
+* `output` A string specifying output file format. When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
 * `filters` Identifiers for cancer type, literature, cohorts, and age such as 
-c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). 
-Multiple filters are combined using an OR logic, except for filters associated with age, 
-which use an AND logic when combined with other filters. 
+c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y").
+For more information about filters, see the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
 * `codematches` A logical value determining whether to exclude samples 
 from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
 If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
 Do not use this parameter when `filters` include cancer-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.
-* `limit` Integer to specify the number of returned samples/individuals/coverage profiles for each filter. 
-Default is 0 (return all). 
-* `skip` Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. 
-E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
-Default is NULL (no skip). 
-* `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
-* `individual_id` Identifiers used in Progenetix database for identifying individuals. 
-* `save_file` A logical value determining whether to save the variant data as file 
-instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
-* `filename` A string specifying the path and name of the file to be saved. 
-Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
-
 
 # Retrieve CNV frequency data
 
-Relevant parameters of `pgxLoader` function: type, output, filters, codematches
+## Relevant parameters
 
-There are two output formats
+type, output, filters, codematches
 
 ## The first output format (`output` = "pgxfreq")
 
 ```{r}
 freq_pgxfreq <- pgxLoader(type="frequency", output ='pgxfreq',
-                         filters=c("NCIT:C4038","pgx:icdom-85003"), 
-                         codematches = TRUE)
+                         filters=c("NCIT:C4038","pgx:icdom-85003"))
 ```
-
-The parameter `codematches` determines whether the calculation of CNV frequency excludes samples from child terms.
 
 The `meta` slot of this object looks like this
 
@@ -97,8 +79,9 @@ of most bins is 1MB except a few bins close to telomeres).
 * `filters`: identifiers for grouping. 
 * `reference_name`, `start` and `end` specify interval location in chromosome.
 * `gain_frequency` and `loss_frequency` indicate the percent values across samples (%) for gains and 
-losses overlapping the interval, respectively
+losses overlapping the interval, respectively.
 
+The parameter `codematches` determines whether the calculation of CNV frequency excludes samples from child terms.
 
 ## The second output format (`output` = "pgxmatrix")
 
@@ -113,7 +96,7 @@ code <- sub(".",'NCIT:C',code)
 load data with the specified code
 
 ```{r}
-freq_pgxmatrix <- pgxLoader(type='frequency',output = 'pgxmatrix',filters=code,codematches=TRUE)
+freq_pgxmatrix <- pgxLoader(type='frequency',output = 'pgxmatrix',filters=code)
 ```
 
 The `meta` slot of this object looks like this
@@ -129,7 +112,7 @@ data frames looks like this
 freq_pgxmatrix$data[['NCIT:C3059']][,c(1:4,3108:3110)]
 ```
 
-In the data frame with "pgxmatrix" format, `filters` is the same as that in the "pgxfreq" format. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). For example, if the column `X1.400000.1400000.DUP` is 9.141, it means that 9.141% samples from the corresponding filter having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
+In the data frame with "pgxmatrix" format, `filters` is the same as that in the "pgxfreq" format. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). For example, if the column `X1.400000.1400000.DUP` is 8.457, it means that 8.457% samples from the corresponding filter having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
 
 Note: it is different from CNV status matrix introduced in [Introduction_2_loadvariants](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_2_loadvariants.html). Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV status matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in the individual sample.
 
@@ -139,7 +122,7 @@ You can also access the total data frame for analyzing multiple frequency sets.
 freq_pgxmatrix$data[['total']][,c(1:4,3108:3110)]
 ```
 
-# Select ids of interests from original object of CNV frequency
+## Select ids of interests from original object 
 
 It is realized by `pgxFreqselect` function.
 
@@ -156,7 +139,6 @@ freq_sel <- pgxFreqselect(data=freq_pgxmatrix,
                           filters = c("NCIT:C4917","NCIT:C3512","NCIT:C3493"))
 freq_sel$data$total[,c(1:5)]
 ```
-
 
 # Visualization of CNV frequency data using 'pgxfreq' format
 
@@ -177,28 +159,30 @@ return a circos plot with multiple group ids for display and comparison. Default
 * `highlight`: Indices of genomic bins to be highlighted with red color.
 * `assembly`: A string specifying which genome assembly version should be applied to CNV frequency plotting. Allowed options are "hg19", "hg38". Default is "hg38" (genome version used in Progenetix).
 
+## CNV frequency plot by genome 
 
-### CNV frequency plot by genome (GRCh38)
-
-Input is an object.
+### Input is an object.
 
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(freq_pgxfreq, filters='pgx:icdom-85003')
 ```
 
-Input is individual frequency data. 
+### Input is individual frequency data. 
 
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(freq_pgxfreq$data[["NCIT:C4038"]])
 ```
 
-### CNV frequency plot by chromosomes
+By default, the supported genome for plotting is GRCh38. You
+can set the `assembly` parameter to 'hg19' if the plotting genome is GRCh37.
+
+## CNV frequency plot by chromosomes
 
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(freq_pgxfreq, filters='NCIT:C4038',chrom=c(1,2,3), layout = c(3,1))  
 ```
 
-### CNV frequency circos plot 
+## CNV frequency circos plot 
 
 ```{r,fig.width=6, fig.height=6}
 pgxFreqplot(freq_pgxfreq, filters='pgx:icdom-85003', circos = TRUE)
@@ -210,7 +194,7 @@ The circos plot also supports multiple group comparison
 pgxFreqplot(freq_pgxfreq,filters= c("NCIT:C4038","pgx:icdom-85003"),circos = TRUE) 
 ```
 
-### Highlight interesting genomic intervals
+## Highlight interesting genomic intervals
 
 If you want to look at the CNV frequency at specific genomic bins, you can use `highlight` parameter.
 For example, when you are interested in CNV pattern of CCND1 gene in samples with infiltrating duct carcinoma (icdom-85003).

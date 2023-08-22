@@ -2,11 +2,10 @@
 title: "Introduction_2_loadvariants"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{introduction_2_loadvariants}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: 
+  rmarkdown::html_document:
+        toc: true
+        toc_float: true
 ---
 
 ```{r, include = FALSE}
@@ -22,77 +21,57 @@ knitr::opts_chunk$set(
 library(pgxRpi)
 ```
 
-## `pgxLoader` function in this package
+## `pgxLoader` function 
 
 This function loads various data from `Progenetix` database.  
 
-The parameters of this function:
+The parameters of this function used in this tutorial:
 
 * `type` A string specifying output data type. Available options are "biosample", "individual",
 "variant" or "frequency". 
 * `output` A string specifying output file format. When the parameter `type` is "variant",
-available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
+available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg".
 * `filters` Identifiers for cancer type, literature, cohorts, and age such as 
-c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). 
-Multiple filters are combined using an OR logic, except for filters associated with age, 
-which use an AND logic when combined with other filters. 
+c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y").
+For more information about filters, see the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
+* `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
 * `codematches` A logical value determining whether to exclude samples 
 from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
 If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
 Do not use this parameter when `filters` include cancer-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.
-* `limit` Integer to specify the number of returned samples/individuals/coverage profiles for each filter. 
+* `limit` Integer to specify the number of returned CNV coverage profiles for each filter. 
 Default is 0 (return all). 
-* `skip` Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. 
+* `skip` Integer to specify the number of skipped CNV coverage profiles for each filter. 
 E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
 Default is NULL (no skip). 
-* `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
-* `individual_id` Identifiers used in Progenetix database for identifying individuals. 
-* `save_file` A logical value determining whether to save the variant data as file 
+* `save_file` A logical value determining whether to save the segment variant data as file 
 instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
 * `filename` A string specifying the path and name of the file to be saved. 
 Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
 
-# Retrive CNV coverage of biosamples from specific groups of interests
+# Retrive CNV coverage of biosamples 
+
+## Relevant parameters 
+
+type, output, filters, codematches, skip, limit
 
 ## Across genomic bins 
 
-Relevant parameters of `pgxLoader` function: type, output, filters, codematches, skip,limit
-
 ```{r}
-cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C9245")
+cnv_matrix <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C9245")
 ```
-
-By default, it returns all available profiles (limit=0), so the query may spend several minutes 
-when the number of retrieved samples is large. It is noted that the number of analysis 
-profiles does not necessarily equal the number of samples.
 
 The data looks like this
 
 ```{r}
-print(dim(cnv.status))
-cnv.status[c(1:3), c(1:5,6213:6215)]
+print(dim(cnv_matrix))
+cnv_matrix[c(1:3), c(1:5,6213:6215)]
 ```
 
-In this dataframe, `analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for
-individual biosample. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `X1.400000.1400000.DUP` is 0.200 in one row, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the corresponding analysis.
-
-Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
-
-```{r}
-cnv.status <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C9245",
-                        codematches = T)
-```
-
-Only 2745 profiles are left.
-
-```{r}
-dim(cnv.status)
-```
+In this dataframe, `analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for individual biosample. It is noted that the number of analysis profiles does not necessarily equal the number of samples. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `X1.400000.1400000.DUP` is 0.200 in one row, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the corresponding analysis.
 
 ## Across chromosomes or the whole genome 
-
-Relevant parameters of `pgxLoader` function: type, output, filters, codematches, skip, limit
 
 ```{r}
 cnv_covergae <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948")
@@ -122,7 +101,10 @@ head(cnv_covergae$whole_genome_coverage)
 
 The first column is the total called coverage, followed by duplication coverage and deletion coverage.
 
+## Parameter `codematches` use
+
 Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
+
 21 samples are excluded from the original 47 samples in this case.
 
 ```{r}
@@ -133,14 +115,31 @@ print(dim(cnv_covergae$chrom_arm_coverage))
 print(dim(cnv_covergae_2$chrom_arm_coverage))
 ```
 
-# Retrieve segment variants by biosampleid
+## Access a subset of samples
 
-Relevant parameters of `pgxLoader` function: type, output, biosample_id, save_file, filename
+By default, it returns all available profiles (limit=0), so the query may take a while 
+when the number of retrieved samples is large. You can use the parameters `limit` and 
+`skip` to access a subset of samples.
+
+```{r}
+cnv_matrix_2 <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C9245",
+                          skip = 0, limit=1000)
+# the dimention of subset 
+print(dim(cnv_matrix_2))
+# the dimention of original set
+print(dim(cnv_matrix))
+```
+
+# Retrieve segment variants 
 
 Because of the time-out problem, the segment variant data can only be accessed by 
-individual biosample id instead of filters.
+biosample id instead of filters.
 
-## Get biosamples id from biosample information
+## Relevant parameters 
+
+type, output, biosample_id, save_file, filename
+
+## Get biosample id 
 
 The biosample information is also obtained by `pgxLoader` and the vignette about metadata
 query see [Introduction_1_loadmetadata](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_1_loadmetadata.html)

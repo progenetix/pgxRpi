@@ -2,11 +2,10 @@
 title: "Introduction_4_process_pgxseg"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Introduction_4_process_pgxseg}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: 
+  rmarkdown::html_document:
+        toc: true
+        toc_float: true
 ---
 
 ```{r, include = FALSE}
@@ -22,9 +21,9 @@ knitr::opts_chunk$set(
 library(pgxRpi)
 ```
 
-## `pgxSegprocess` function in this package
+## `pgxSegprocess` function 
 
-This function extracts segments, CNV frequency, and metadata from "pgxseg" files and supports survival data visualization  
+This function extracts segments, CNV frequency, and metadata from local "pgxseg" files and supports survival data visualization  
 
 * `file` A string specifying the path and name of the "pgxseg" file where the data is to be read. 
 * `group_id` A string specifying which id is used for grouping in KM plot or CNV frequency calculation. Default is "group_id".
@@ -35,8 +34,7 @@ This function extracts segments, CNV frequency, and metadata from "pgxseg" files
 * `assembly` A string specifying which genome assembly version should be applied to CNV frequency calculation and plotting. Allowed options are "hg19", "hg38". Default is "hg38".
 * `...` Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot from survminer)
 
-
-# Extract segment data from local pgxseg files
+# Extract segment data 
 
 ```{r}
 # specify the location of file
@@ -52,7 +50,7 @@ The segment data looks like this
 head(seg)
 ```
 
-# Extract meta data from local pgxseg files
+# Extract metadata 
 
 ```{r}
 meta <- pgxSegprocess(file=file_name,return_metadata = T)
@@ -64,8 +62,7 @@ The metadata looks like this
 head(meta)
 ```
 
-
-# Visualize survival data in metadata from local pgxseg files
+# Visualize survival data in metadata 
 
 The KM plot is plotted from samples with available followup state and followup time. The default grouping is "group_id" column in metadata.
 
@@ -85,8 +82,7 @@ You can specify more parameters to modify this plot (see parameter `...` in docu
 pgxSegprocess(file=file_name,show_KM_plot = T,pval=T,palette='npg')
 ```
 
-
-# Return CNV frequency object based on segment data from local pgxseg files
+# Calculate CNV frequency 
 
 The CNV frequency is calculated from segments of samples with the same group_id. The group_id
 is specified in `group_id` parameter. 
@@ -130,7 +126,7 @@ head(frequency$data$`pgx:icdot-C16.9`)
 
 In this matirx, `gain_frequency` and `loss_frequency` indicate the percentage (%) of samples from the corresponding group_id for gains and losses overlapping the genomic interval, respectively.
 
-# Visualize CNV frequency by `pgxFreqplot` function
+## Visualize CNV frequency 
 
 You can visualize the CNV frequency of the interesting group. 
 
@@ -150,7 +146,7 @@ pgxFreqplot(frequency, filters=c("pgx:icdot-C16.9","pgx:icdot-C73.9"),circos = T
 
 The details of `pgxFreqplot` function see the vignette [Introduction_3_loadfrequency](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_3_loadfrequency.html).
 
-# Extract multiple data from local pgxseg files
+# Extract all data 
 
 If you want different types of data such as segment data and metadata, and visualize 
 the survival data at the same time, you can just set the corresponding parameters as TRUE. 
@@ -165,7 +161,6 @@ info <- pgxSegprocess(file=file_name,show_KM_plot = T, return_seg = T,
 ```{r}
 names(info)
 ```
-
 
 # Session Info
 

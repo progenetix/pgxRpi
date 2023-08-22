@@ -2,11 +2,10 @@
 title: "Introduction_1_loadmetadata"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{introduction_1_loadmetadata}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: 
+  rmarkdown::html_document:
+        toc: true
+        toc_float: true
 ---
 
 ```{r, include = FALSE}
@@ -22,20 +21,19 @@ knitr::opts_chunk$set(
 library(pgxRpi)
 ```
 
-## `pgxLoader` function in this package
+## `pgxLoader` function 
 
 This function loads various data from `Progenetix` database.  
 
-The parameters of this function:
+The parameters of this function used in this tutorial:
 
 * `type` A string specifying output data type. Available options are "biosample", "individual",
 "variant" or "frequency". 
-* `output` A string specifying output file format. When the parameter `type` is "variant",
-available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg" ; When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
 * `filters` Identifiers for cancer type, literature, cohorts, and age such as 
-c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). 
-Multiple filters are combined using an OR logic, except for filters associated with age, 
-which use an AND logic when combined with other filters. 
+c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). For more information about filters, see the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
+* `filterLogic` A string specifying logic for combining multiple filters when query metadata. Available options are "AND" and "OR". Default is "AND". An exception is filters associated with age that always use AND logic when combined with any other filter, even if filterLogic = "OR", which affects other filters. 
+* `individual_id` Identifiers used in Progenetix database for identifying individuals. 
+* `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
 * `codematches` A logical value determining whether to exclude samples 
 from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
 If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
@@ -46,16 +44,17 @@ Default is 0 (return all).
 * `skip` Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. 
 E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
 Default is NULL (no skip). 
-* `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
-* `individual_id` Identifiers used in Progenetix database for identifying individuals. 
-* `save_file` A logical value determining whether to save the variant data as file 
-instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
-* `filename` A string specifying the path and name of the file to be saved. 
-Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
 
-# Retrieve meatdata of samples from specific groups of interests
+# Retrieve meatdata of samples 
 
-Relevant parameters of `pgxLoader` function: type, filters, skip, limit,codematches,biosample_id, individual_id
+## Relevant parameters 
+
+type, filters, filterLogic, individual_id, biosample_id, codematches, limit, skip
+
+## Search by filters
+
+The following query is to retrieve the metadata in Progenetix of all lung adenocarcinoma samples based on 
+[NCIt code](https://ncit.nci.nih.gov):
 
 ```{r}
 biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512")
@@ -64,22 +63,43 @@ biosamples[c(1700:1705),]
 ```
 
 The data contains many columns representing different aspects of sample information. 
+
+## Search by biosample id and individual id 
+
+```{r}
+biosamples_2 <- pgxLoader(type="biosample", filters = "NCIT:C3512",codematches = TRUE,
+                        biosample_id = c("pgxbs-kftva5zv","pgxbs-kftva5zw"),
+                        individual_id = "pgxind-kftx26ml")
+```
+
+The result only contains samples with the specified filter NCIT:C3512, biosample id and individual id
+
+```{r}
+biosamples_2[biosamples_2$histological_diagnosis_id != "NCIT:C3512",c(1:5)]
+```
+
+## Access a subset of samples
+
 By default, it returns all related samples (limit=0). You can access a subset of them 
 via the parameter `limit` and `skip`. For example, if you want to access the first 1000 samples
 , you can set `limit` = 1000, `skip` = 0. 
 
 ```{r}
-biosamples_2 <- pgxLoader(type="biosample", filters = "NCIT:C3512",skip=0, limit = 1000)
+biosamples_3 <- pgxLoader(type="biosample", filters = "NCIT:C3512",skip=0, limit = 1000)
 # Dimension: Number of samples * features
 print(dim(biosamples))
-print(dim(biosamples_2))
+print(dim(biosamples_3))
 ```
+
+## Query the number of samples in Progenetix
 
 The number of samples in specific group can be queried by  `pgxCount` function.
 
 ```{r}
 pgxCount(filters = "NCIT:C3512")
 ```
+
+## Parameter `codematches` use
 
 The NCIt code of retrieved samples doesn't only contain specified filters but contains child terms. 
 
@@ -90,31 +110,31 @@ unique(biosamples$histological_diagnosis_id)
 Setting `codematches` as TRUE allows this function to only return biosamples with exact match to the filter.
 
 ```{r}
-biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512",codematches = TRUE)
+biosamples_4 <- pgxLoader(type="biosample", filters = "NCIT:C3512",codematches = TRUE)
 
-unique(biosamples$histological_diagnosis_id)
+unique(biosamples_4$histological_diagnosis_id)
 ```
 
-You can also retrieve biosamples by biosample id and corresponding individual id 
+## Parameter `filterLogic` use
+
+This function supports querying samples that belong to multiple filters. For example, If you want to retrieve information about lung adenocarcinoma samples from the literature 
+PMID:24174329, you can specify multiple matching filters and set `filterLogic` to "AND".
 
 ```{r}
-biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512",codematches = TRUE,
-                        biosample_id = c("pgxbs-kftva5zv","pgxbs-kftva5zw"),
-                        individual_id = "pgxind-kftx26ml")
+biosamples_5 <- pgxLoader(type="biosample", filters = c("NCIT:C3512","PMID:24174329"), 
+                          filterLogic = "AND")
 ```
 
-The result only contains samples with the specified filter NCIT:C3512, biosample id and individual id
-
-```{r}
-biosamples[biosamples$histological_diagnosis_id != "NCIT:C3512",c(1:5)]
-```
-
-# Retrieve meatdata of individuals from specific groups of interests 
-
-Relevant parameters of `pgxLoader` function: type, filters, skip, limit,codematches,individual_id
+# Retrieve meatdata of individuals 
 
 If you want to query metadata (e.g. survival data) of individuals where the samples 
-of interest come from, you can either search by filters:
+of interest come from, you can follow the tutorial below.
+
+## Relevant parameters  
+
+type, filters, filterLogic, individual_id, codematches, limit, skip 
+
+## Search by filters
 
 ```{r}
 individuals <- pgxLoader(type='individual',filters='NCIT:C3270',codematches = T)
@@ -123,7 +143,10 @@ print(dim(individuals))
 # data looks like this
 individuals[c(36:40),]
 ```
-or by individual id which you can get from the query of sample
+
+## Search by individual id 
+
+You can get the id from the query of samples
 
 ```{r}
 individual <- pgxLoader(type='individual',individual_id = 'pgxind-kftx26ml')
@@ -131,7 +154,7 @@ individual <- pgxLoader(type='individual',individual_id = 'pgxind-kftx26ml')
 individual
 ```
 
-or by both
+or by both 
 
 ```{r}
 total.individuals <- pgxLoader(type='individual',filters='NCIT:C3270',codematches=T,
@@ -144,9 +167,8 @@ dim(total.individuals)
 
 ### Cancer-specific query
 
-To get metadata from individuals with specific cancer, you can use corresponding disease code as filters. 
-Here we use [NCIt code](https://ncit.nci.nih.gov) of Lung Adenocarcinoma (C3512) as an example and 
-analyse survival difference between older patients ( >= 60 years old) and younger patients ( < 60 years old).
+Here we use metadata of individuals from lung adenocarcinoma as an example to analyse 
+survival difference between older patients ( >= 60 years old) and younger patients ( < 60 years old).
 
 ```{r}
 # load required library
@@ -155,8 +177,12 @@ library(survival)
 library(survminer)
 
 # query
-lungadind_young <- pgxLoader(type='individual',filters=c('NCIT:C3512','age:<P60Y'),codematches = F)
-lungadind_old <- pgxLoader(type='individual',filters=c('NCIT:C3512','age:>=P60Y'),codematches = F)
+
+lungadind_young <- pgxLoader(type='individual',
+                             filters=c('NCIT:C3512','age:<P60Y'),codematches = F)
+
+lungadind_old <- pgxLoader(type='individual',
+                           filters=c('NCIT:C3512','age:>=P60Y'),codematches = F)
 ```
 
 Define function for preprocessing data
@@ -165,7 +191,7 @@ Define function for preprocessing data
 cleanData <- function(data){
   # exclude individuals without available survival information
   data <- data[data$index_disease_followup_time != "None" & 
-                       !data$index_disease_followup_state_label %in% c("","no followup status"),]
+               !data$index_disease_followup_state_label %in% c("","no followup status"),]
   # transform followup state 
   aliveidx <- which(data$index_disease_followup_state_label == "alive (follow-up status)")
   data$index_disease_followup_state_label[aliveidx] <- 0 
@@ -182,7 +208,8 @@ lungadind_young_clean <- cleanData(lungadind_young)
 lungadind_old_clean <- cleanData(lungadind_old)
 lungadind_clean <- rbind(lungadind_young_clean,lungadind_old_clean)
 
-group_id <- rep(c('younger','older'),times=c(dim(lungadind_young_clean)[1],dim(lungadind_old_clean)[1]))
+group_id <- rep(c('younger','older'),
+                times=c(dim(lungadind_young_clean)[1],dim(lungadind_old_clean)[1]))
 followup_state <- as.numeric(lungadind_clean$index_disease_followup_state_label)
 followup_time <- time_length(lungadind_clean$index_disease_followup_time,unit = 'days')
 survival_df <- data.frame(group_id, followup_state, followup_state)
@@ -209,7 +236,8 @@ tcgabrcaind_young_clean <- cleanData(tcgabrcaind_young)
 tcgabrcaind_old_clean <- cleanData(tcgabrcaind_old)
 # survival data construction
 tcgabrcaind_clean <- rbind(tcgabrcaind_young_clean,tcgabrcaind_old_clean)
-group_id <- rep(c('younger','older'),times=c(dim(tcgabrcaind_young_clean)[1],dim(tcgabrcaind_old_clean)[1]))
+group_id <- rep(c('younger','older'),times=
+                  c(dim(tcgabrcaind_young_clean)[1],dim(tcgabrcaind_old_clean)[1]))
 followup_state <- as.numeric(tcgabrcaind_clean$index_disease_followup_state_label)
 followup_time <- time_length(tcgabrcaind_clean$index_disease_followup_time,unit = 'days')
 survival_df <- data.frame(group_id, followup_state, followup_state)

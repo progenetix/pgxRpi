@@ -275,6 +275,7 @@ getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
                plot.size=c(11.8,min(3*nr,8.2)),
                col.gain="#FFC633",
                col.loss="#33A0FF",
+               chr_sep_color = "grey95",
                plot.unit="mbp",
                percentLines=TRUE,
                continuous=TRUE,
@@ -894,7 +895,7 @@ updateFreqParameters <- function(freq.del,freq.amp,op){
 ## getArmandChromStop
 ## convert.unit
 
-chromPattern <- function(pos.unit,op) {
+chromPattern <- function(pos.unit,op){
     #Use cytoband data information to get stopping points of chromosomes:
     chromstop <- getArmandChromStop(op$assembly,pos.unit)$chromstop
     scale.fac <- convert.unit(unit1=op$plot.unit,unit2=pos.unit)    #Scaling factor according to plot.unit
@@ -907,7 +908,7 @@ chromPattern <- function(pos.unit,op) {
     #rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col = "white")
     for (i in 1:(length(chrom.mark)-1)) {
         if(i%%2==0){
-            rect(chrom.mark[i], par("usr")[3], chrom.mark[i+1], par("usr")[4], col = "grey95")#, border=NA)
+            rect(chrom.mark[i], par("usr")[3], chrom.mark[i+1], par("usr")[4], col = op$chr_sep_color)#, border=NA)
         }
     }
 }
@@ -985,12 +986,15 @@ addChromlines <- function(chromosomes,xaxis,unit,ind=NULL,cex,op){
         chromstop <- getArmandChromStop(op$assembly,unit)$chromstop
         scale.fac <- convert.unit(unit1=op$plot.unit,unit2=unit)    #Scaling factor according to plot.unit
         chrom.mark <- c(1,cumsum(chromstop))*scale.fac
-        #Drop chrom24 if no observations for this chrom in data/segments:
+        #Drop chrom23 24 if no observations for this chrom in data/segments:
         if(any(chromosomes==24)){
-            chromosomes <- 1:24
+          chromosomes <- 1:24
+        }else if(any(chromosomes==23)){
+          chromosomes <- 1:23
+          chrom.mark <- chrom.mark[-length(chrom.mark)]
         }else{
-            chromosomes <- 1:23
-            chrom.mark <- chrom.mark[-length(chrom.mark)]
+          chromosomes <- 1:22
+          chrom.mark <- chrom.mark[-c(length(chrom.mark)-1,length(chrom.mark))]
         }
     }else{
         chrom.mark <- separateChrom(chromosomes)
