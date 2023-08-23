@@ -3,11 +3,9 @@ title: "Introduction_4_process_pgxseg"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
 output: 
-  rmarkdown::html_document:
+  BiocStyle::html_document:
         toc: true
         toc_float: true
-  github_document:
-        html_preview: FALSE
 ---
 
 ```{r, include = FALSE}
