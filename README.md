@@ -15,6 +15,6 @@ For accessing CNV variant data, get started from this vignette Introduction_2_lo
 
 For accessing CNV frequency data, get started from this vignette Introduction_3_loadfrequency.
 
-FOr processing local pgxseg files, get started from this vignette Introduction_4_process_pgxseg.
+For processing local pgxseg files, get started from this vignette Introduction_4_process_pgxseg.
 
 When you face problems, try to reinstall the latest version. If reinstallation doesn't help, please contact us.
