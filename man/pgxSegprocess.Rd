@@ -40,5 +40,5 @@ This function extracts segments, CNV frequency, and metadata from local "pgxseg"
 supports survival data visualization
 }
 \examples{
-info <- pgxSegprocess(file=file_name,show_KM_plot = T, return_seg = T, return_metadata = T, return_frequency = T)
+info <- pgxSegprocess(file=file_name,show_KM_plot = TRUE, return_seg = TRUE, return_metadata = TRUE, return_frequency = TRUE)
 }

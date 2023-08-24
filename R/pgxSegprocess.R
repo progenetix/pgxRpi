@@ -16,7 +16,7 @@
 #' @return Segments data, CNV frequency object, meta data or KM plots from local "pgxseg" files
 #' @export
 #' @examples
-#' info <- pgxSegprocess(file=file_name,show_KM_plot = T, return_seg = T, return_metadata = T, return_frequency = T)
+#' info <- pgxSegprocess(file=file_name,show_KM_plot = TRUE, return_seg = TRUE, return_metadata = TRUE, return_frequency = TRUE)
 pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_metadata=FALSE,return_seg=FALSE,return_frequency=FALSE,assembly='hg38',...){
     if(!any(show_KM_plot, return_metadata, return_seg, return_frequency)){return()}
     full.data <- readLines(file)
