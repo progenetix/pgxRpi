@@ -16,10 +16,14 @@ Description: The package serves as a comprehensive Beacon+ API wrapper. It is de
 biocViews: CopyNumberVariation, DataImport, Software
 License: Artistic-2.0
 Encoding: UTF-8
+LazyData: FALSE
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2
 Imports:
     utils,
+    methods,
+    grDevices,
+    graphics,
 	circlize,
 	rjson,
 	dplyr,
@@ -28,9 +32,7 @@ Imports:
   	survival,
   	survminer,
   	ggplot2,
-    plyr,
-    grDevices,
-    graphics
+    plyr
 Depends: 
     R (>= 4.2)
 Suggests: 

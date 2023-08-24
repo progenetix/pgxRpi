@@ -12,6 +12,7 @@
 #' @param assembly A string specifying which genome assembly version should be applied to CNV frequency calculation and plotting. Allowed options are "hg19", "hg38". Default is "hg38".
 #' @param ... Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot from survminer)
 #' @importFrom utils URLencode modifyList read.table write.table
+#' @importFrom methods show
 #' @return Segments data, CNV frequency object, meta data or KM plots from local "pgxseg" files
 #' @export
 #' @examples
