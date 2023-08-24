@@ -16,7 +16,6 @@ Description: The package serves as a comprehensive Beacon+ API wrapper. It is de
 biocViews: CopyNumberVariation, DataImport, Software
 License: Artistic-2.0
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2
 Imports:
