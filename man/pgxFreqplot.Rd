@@ -45,3 +45,9 @@ The binned CNV frequency plot
 \description{
 Thie function plots the frequency of deletions and amplifications
 }
+\examples{
+## get frequency data
+freq <- pgxLoader(type="frequency", output ='pgxfreq', filters="NCIT:C3512")
+## visualize
+pgxFreqplot(freq)
+}

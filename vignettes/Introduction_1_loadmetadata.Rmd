@@ -3,17 +3,22 @@ title: "Introduction_1_loadmetadata"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
 output: 
-  rmarkdown::html_document:
-        toc: true
-        toc_float: true
+  BiocStyle::html_document:
+  toc: true
+vignette: >
+  %\VignetteIndexEntry{Introduction_1_loadmetadata}
+  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+    collapse = TRUE,
+    comment = "#>"
 )
 ```
+
+This vignette details how to access metadata of samples or their corresponding individuals from Progenetix database.
 
 # Load library 
 
@@ -137,7 +142,7 @@ type, filters, filterLogic, individual_id, codematches, limit, skip
 ## Search by filters
 
 ```{r}
-individuals <- pgxLoader(type='individual',filters='NCIT:C3270',codematches = T)
+individuals <- pgxLoader(type='individual',filters='NCIT:C3270',codematches = TRUE)
 # Dimension: Number of individuals * features
 print(dim(individuals))
 # data looks like this
@@ -157,7 +162,8 @@ individual
 or by both 
 
 ```{r}
-total.individuals <- pgxLoader(type='individual',filters='NCIT:C3270',codematches=T,
+total.individuals <- pgxLoader(type='individual',filters='NCIT:C3270',
+                               codematches=TRUE,
                                individual_id = 'pgxind-kftx26ml')
 
 dim(total.individuals)
@@ -179,10 +185,12 @@ library(survminer)
 # query
 
 lungadind_young <- pgxLoader(type='individual',
-                             filters=c('NCIT:C3512','age:<P60Y'),codematches = F)
+                             filters=c('NCIT:C3512','age:<P60Y'),
+                             codematches = FALSE)
 
 lungadind_old <- pgxLoader(type='individual',
-                           filters=c('NCIT:C3512','age:>=P60Y'),codematches = F)
+                           filters=c('NCIT:C3512','age:>=P60Y'),
+                           codematches = FALSE)
 ```
 
 Define function for preprocessing data
@@ -219,7 +227,7 @@ Fit the survival data and visualise
 
 ```{r, fig.width=7, fig.height=5}
 sfit <- survfit(Surv(followup_time, followup_state)~group_id, data=survival_df)
-ggsurvplot(sfit,data=survival_df,pval = T)
+ggsurvplot(sfit,data=survival_df,pval = TRUE)
 ```
 
 ### Cohort-specific query
@@ -244,7 +252,7 @@ survival_df <- data.frame(group_id, followup_state, followup_state)
 # fit
 sfit <- survfit(Surv(followup_time, followup_state)~group_id, data=survival_df)
 # visualise
-ggsurvplot(sfit,data=survival_df,pval = T)
+ggsurvplot(sfit,data=survival_df,pval = TRUE)
 ```
 
 # Session Info

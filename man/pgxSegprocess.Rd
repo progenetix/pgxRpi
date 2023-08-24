@@ -7,10 +7,10 @@
 pgxSegprocess(
   file,
   group_id = "group_id",
-  show_KM_plot = F,
-  return_metadata = F,
-  return_seg = F,
-  return_frequency = F,
+  show_KM_plot = FALSE,
+  return_metadata = FALSE,
+  return_seg = FALSE,
+  return_frequency = FALSE,
   assembly = "hg38",
   ...
 )
@@ -38,4 +38,7 @@ Segments data, CNV frequency object, meta data or KM plots from local "pgxseg" f
 \description{
 This function extracts segments, CNV frequency, and metadata from local "pgxseg" files and
 supports survival data visualization
+}
+\examples{
+info <- pgxSegprocess(file=file_name,show_KM_plot = T, return_seg = T, return_metadata = T, return_frequency = T)
 }

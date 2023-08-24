@@ -16,3 +16,6 @@ Count of samples in the given filter
 This function returns the number of samples for every filter in
 Progenetix database.
 }
+\examples{
+pgxCount(filters = "NCIT:C3512")
+}

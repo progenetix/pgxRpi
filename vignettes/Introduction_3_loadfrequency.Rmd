@@ -3,17 +3,22 @@ title: "Introduction_3_loadfrequency"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
 output: 
-  rmarkdown::html_document:
-        toc: true
-        toc_float: true
+  BiocStyle::html_document:
+  toc: true
+vignette: >
+  %\VignetteIndexEntry{Introduction_3_loadfrequency}
+  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+    collapse = TRUE,
+    comment = "#>"
 )
 ```
+
+This vignette provides instructions for accessing and visualizing CNV frequency data from Progenetix database.
 
 # Load library 
 
@@ -114,7 +119,7 @@ freq_pgxmatrix$data[['NCIT:C3059']][,c(1:4,3108:3110)]
 
 In the data frame with "pgxmatrix" format, `filters` is the same as that in the "pgxfreq" format. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). For example, if the column `X1.400000.1400000.DUP` is 8.457, it means that 8.457% samples from the corresponding filter having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
 
-Note: it is different from CNV status matrix introduced in [Introduction_2_loadvariants](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_2_loadvariants.html). Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV status matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in the individual sample.
+Note: it is different from CNV status matrix introduced in Introduction_2_loadvariants. Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV status matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in the individual sample.
 
 You can also access the total data frame for analyzing multiple frequency sets.
 

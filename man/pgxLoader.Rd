@@ -58,3 +58,11 @@ Data from Progenetix database
 \description{
 This function loads various data from \code{Progenetix} database.
 }
+\examples{
+## query metadata
+biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512")
+## query segment variants
+seg <- pgxLoader(type="variant", output = "pgxseg", biosample_id = "pgxbs-kftvgx4y")
+## query CNV frequency
+freq <- pgxLoader(type="frequency", output ='pgxfreq', filters="NCIT:C3512")
+}

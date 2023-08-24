@@ -3,17 +3,22 @@ title: "Introduction_2_loadvariants"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
 output: 
-  rmarkdown::html_document:
-        toc: true
-        toc_float: true
+  BiocStyle::html_document:
+  toc: true
+vignette: >
+  %\VignetteIndexEntry{Introduction_2_loadvariants}
+  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+    collapse = TRUE,
+    comment = "#>"
 )
 ```
+
+This vignette details how to access variant data from Progenetix database.
 
 # Load library 
 
@@ -109,7 +114,7 @@ Setting `codematches = True` can exclude profiles with group_id belonging to chi
 
 ```{r}
 cnv_covergae_2 <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948",
-                            codematches = T)
+                            codematches = TRUE)
 
 print(dim(cnv_covergae$chrom_arm_coverage))
 print(dim(cnv_covergae_2$chrom_arm_coverage))
@@ -122,7 +127,8 @@ when the number of retrieved samples is large. You can use the parameters `limit
 `skip` to access a subset of samples.
 
 ```{r}
-cnv_matrix_2 <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C9245",
+cnv_matrix_2 <- pgxLoader(type="variant", output="pgxmatrix", 
+                          filters = "NCIT:C9245",
                           skip = 0, limit=1000)
 # the dimention of subset 
 print(dim(cnv_matrix_2))
@@ -142,7 +148,7 @@ type, output, biosample_id, save_file, filename
 ## Get biosample id 
 
 The biosample information is also obtained by `pgxLoader` and the vignette about metadata
-query see [Introduction_1_loadmetadata](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_1_loadmetadata.html)
+query see Introduction_1_loadmetadata.
 
 ```{r}
 biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512",codematches = TRUE)

@@ -17,3 +17,7 @@ A list object with the same format of input but only containing selected filters
 \description{
 This function helps select filters of interests from input object.
 }
+\examples{
+total_freq <- pgxLoader(type="frequency", output ='pgxmatrix', filters=c("NCIT:C3512","NCIT:C3059","NCIT:C3716","NCIT:C4917"))
+subset_freq <-  pgxFreqselect(data=total_freq, filters = c("NCIT:C3512","NCIT:C3059"))
+}

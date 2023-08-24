@@ -10,7 +10,7 @@ transform_id <- function(id){
 }
 
 read_variant_pgxseg <- function(url){
-    result <- read.table(url, header = T, sep="\t")
+    result <- read.table(url, header = TRUE, sep="\t")
     colnames(result)[2] <- 'chromosome'
     col <- c("start","end","log2")
     suppressWarnings(result[,col] <- sapply(result[,col], as.numeric))
@@ -27,71 +27,71 @@ read_variant_pgxseg <- function(url){
 read_variant_pgxseg_meta <- function(url){
     meta <- readLines(url)
     idx <- length(grep("#",meta))
-    return(meta[c(1:idx)])
+    return(meta[seq_len(idx)])
 }
 
 pgidCheck <- function(id){
   
-  res.id <- c()
- 
-  ncit.idx <- grep('NCIT',id)
-  icdom.idx <- grep('icdom',id)
-  icdot.idx <- grep('icdot',id)
-  uberon.idx <- grep('UBERON',id)
-  # this query doesn't work for individual GSM id and age filters
-  geogsm.idx <- grep('geo:GSM',id)
-  age.idx <- grep('age:',id)
-  pass.idx <- c(geogsm.idx,age.idx)
-  if (length(pass.idx > 0)){
-    remain.id <- id[-pass.idx]
-  } else{
-    remain.id <- id
-  }
+    res.id <- c()
+   
+    ncit.idx <- grep('NCIT',id)
+    icdom.idx <- grep('icdom',id)
+    icdot.idx <- grep('icdot',id)
+    uberon.idx <- grep('UBERON',id)
+    # this query doesn't work for individual GSM id and age filters
+    geogsm.idx <- grep('geo:GSM',id)
+    age.idx <- grep('age:',id)
+    pass.idx <- c(geogsm.idx,age.idx)
+    if (length(pass.idx > 0)){
+      remain.id <- id[-pass.idx]
+    } else{
+      remain.id <- id
+    }
+    
+    if (length(ncit.idx) > 0){
+      url <- "https://progenetix.org/services/collations?filters=NCIT"
+      res <- rjson::fromJSON(file = url)
+      res.id <- c(res.id,unlist(lapply(res$response$results, function(x){x$id})))
+      remain.id <- remain.id [!remain.id%in% id[ncit.idx]]
+    }
+    
+    if (length(icdom.idx) > 0){
+      url <- "https://progenetix.org/services/collations?filters=icdom"
+      res <- rjson::fromJSON(file = url)
+      res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
+      remain.id <- remain.id [!remain.id%in% id[icdom.idx]]
+    }
   
-  if (length(ncit.idx) > 0){
-    url <- "https://progenetix.org/services/collations?filters=NCIT"
-    res <- rjson::fromJSON(file = url)
-    res.id <- c(res.id,unlist(lapply(res$response$results, function(x){x$id})))
-    remain.id <- remain.id [!remain.id%in% id[ncit.idx]]
-  }
+    if (length(icdot.idx) > 0){
+      url <- "https://progenetix.org/services/collations?filters=icdot"
+      res <- rjson::fromJSON(file = url)
+      res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
+      remain.id <- remain.id [!remain.id%in% id[icdot.idx]]
+    }
   
-  if (length(icdom.idx) > 0){
-    url <- "https://progenetix.org/services/collations?filters=icdom"
-    res <- rjson::fromJSON(file = url)
-    res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
-    remain.id <- remain.id [!remain.id%in% id[icdom.idx]]
-  }
-
-  if (length(icdot.idx) > 0){
-    url <- "https://progenetix.org/services/collations?filters=icdot"
-    res <- rjson::fromJSON(file = url)
-    res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
-    remain.id <- remain.id [!remain.id%in% id[icdot.idx]]
-  }
-
-  if (length(uberon.idx) > 0){
-    url <- "https://progenetix.org/services/collations?filters=UBERON"
-    res <- rjson::fromJSON(file = url)
-    res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
-    remain.id <- remain.id [!remain.id%in% id[uberon.idx]]
-  }
+    if (length(uberon.idx) > 0){
+      url <- "https://progenetix.org/services/collations?filters=UBERON"
+      res <- rjson::fromJSON(file = url)
+      res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
+      remain.id <- remain.id [!remain.id%in% id[uberon.idx]]
+    }
+    
   
-
-  if (length(remain.id) > 0){
-    url <- paste0("https://progenetix.org/services/collations?filters=",transform_id(remain.id))
-    encoded_url <- URLencode(url)
-    res <- rjson::fromJSON(file = encoded_url)
-    res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
-  }
-  
-  return(id %in% c(res.id,id[pass.idx]))
+    if (length(remain.id) > 0){
+      url <- paste0("https://progenetix.org/services/collations?filters=",transform_id(remain.id))
+      encoded_url <- URLencode(url)
+      res <- rjson::fromJSON(file = encoded_url)
+      res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
+    }
+    
+    return(id %in% c(res.id,id[pass.idx]))
 }
 
 pgxFreqLoader <- function(output, codematches, filters) {
     # check if filters exists
     idcheck <- pgidCheck(filters)
     if (!all(idcheck)){
-        cat("WARNING: No results for filters", filters[!idcheck], "in progenetix database.\n")
+        warning("\n No results for filters ", filters[!idcheck], " in progenetix database.\n")
         filters <- filters[idcheck]
     }
     # start query
@@ -106,7 +106,7 @@ pgxFreqLoader <- function(output, codematches, filters) {
 
     encoded_url <- URLencode(url)
 
-    meta <- readLines(encoded_url)[c(1:(length(filters)+1))]
+    meta <- readLines(encoded_url)[seq_len(length(filters))+1]
     meta_lst <- unlist(strsplit(meta,split = ';'))
     label <- meta_lst[grep("label",meta_lst)]
     label<- gsub('.*=','',label)
@@ -114,7 +114,7 @@ pgxFreqLoader <- function(output, codematches, filters) {
     count <- as.numeric(gsub('.*=','',count))
     meta <- data.frame(code = c(filters,'total'), label=c(label,''), sample_count=c(count,sum(count)))
     
-    pg.data  <- read.table(encoded_url, header=T, sep="\t", na="NA")
+    pg.data  <- read.table(encoded_url, header=TRUE, sep="\t")
     colnames(pg.data)[1] <- 'filters'
     
     data_lst <- list()
@@ -139,52 +139,53 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
     }
 
     if (!(is.null(filters))){
-      # check if filters exists
-      idcheck <- pgidCheck(filters)
-      if (!all(idcheck)){
-        cat("WARNING: No results for filters", filters[!idcheck], "in progenetix database.\n")
-        filters <- filters[idcheck]
-      }
+        # check if filters exists
+        idcheck <- pgidCheck(filters)
+        if (!all(idcheck)){
+            warning("\n No results for filters ", filters[!idcheck], " in progenetix database.\n")
+            filters <- filters[idcheck]
+        }
+        
+        if (filterLogic == "AND"){
+            filters <- transform_id(filters)
+            url <- paste0("http://progenetix.org/beacon/",query_key,"/?filters=",filters,"&output=datatable")
+            url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
+            url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
+            encoded_url <- URLencode(url)
+            attempt::try_catch(
+              res_1 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),
+              .e= function(e){
+                warning("\n Query fails for the filters ", filters,"\n")
+              })
+         
+        } else if (filterLogic == "OR"){
+          # pick age filter
+          age.idx <- grep('age:',filters)
+          trans.filters <- filters
+          if (length(age.idx)>0){
+              age.filter <- filters[age.idx]
+              trans.filters <- filters[-age.idx]
+              trans.filters <- sapply(trans.filters, FUN=function(x){transform_id(c(x,age.filter))})
+          } 
 
-      if (filterLogic == "AND"){
-        filters <- transform_id(filters)
-        url <- paste0("http://progenetix.org/beacon/",query_key,"/?filters=",filters,"&output=datatable")
-        url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
-        url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
-        encoded_url <- URLencode(url)
-        attempt::try_catch(res_1 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
-                cat(paste("ERROR: Query fails for the filters", filters,"\n"))
-                })
-
-      } else if (filterLogic == "OR"){
-            # pick age filter
-            age.idx <- grep('age:',filters)
-            trans.filters <- filters
-            if (length(age.idx)>0){
-                age.filter <- filters[age.idx]
-                trans.filters <- filters[-age.idx]
-                trans.filters <- sapply(trans.filters, FUN=function(x){transform_id(c(x,age.filter))})
-            } 
-
-            res_1 <- list()
-            for (i in c(1:length(trans.filters))){
-                if_next <- FALSE
-                url <- paste0("http://progenetix.org/beacon/",query_key,"/?filters=",trans.filters[i],"&output=datatable")
-                url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
-                url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
-                encoded_url <- URLencode(url)
+          res_1 <- list()
+          for (i in seq_len(length(trans.filters))){
+              url <- paste0("http://progenetix.org/beacon/",query_key,"/?filters=",trans.filters[i],"&output=datatable")
+              url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
+              url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
+              encoded_url <- URLencode(url)
       
-                attempt::try_catch(res_1[[i]] <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
-                    cat(paste("WARNING: Query fails for the filter", trans.filters[i],"\n"))
-                    if_next <<- TRUE})
+              attempt::try_catch(
+                res_1[[i]] <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),
+                .e= function(e){
+                  warning("\n Query fails for the filter ", trans.filters[i],"\n")
+                })
+          }
 
-                if (if_next){ next }
-            }
-
-            res_1 <- do.call(rbind, res_1)
-
+          res_1 <- do.call(rbind, res_1)
+          
         } else{
-                stop("filterLogic is invalid ('AND' or 'OR')")
+          stop("filterLogic is invalid ('AND' or 'OR')")
         }
     }
 
@@ -193,18 +194,17 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
         len <- length(biosample_id)
         count <- ceiling(len/50)
         res_2 <- list()
-        for (i in c(1:count)){
-            if_next <- FALSE
-            j = i*50
+        for (i in seq_len(count)){
+            j <- i*50
             if (j > len){
                 j<-len
             }
             filter <- transform_id(biosample_id[c(((i-1)*50+1):j)])
             url <- paste0("http://progenetix.org/beacon/",query_key,"/?biosampleIds=",filter,"&output=datatable")
             encoded_url <- URLencode(url)
-            attempt::try_catch(res_2[[i]] <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
-                if_next <<- TRUE})
-            if (if_next){ next }
+            attempt::try_catch(res_2[[i]] <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),.e= function(e){
+                warning("\n Query fails for biosample_id ", filter, "\n")
+            })           
         }
         res_2 <- do.call(rbind, res_2)
     }
@@ -213,18 +213,17 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
         len <- length(individual_id)
         count <- ceiling(len/50)
         res_3 <- list()
-        for (i in c(1:count)){
-            if_next <- FALSE
-            j = i*50
+        for (i in seq_len(count)){
+            j <- i*50
             if (j > len){
                 j<-len
             }
             filter <- transform_id(individual_id[c(((i-1)*50+1):j)])
             url <- paste0("http://progenetix.org/beacon/",query_key,"/?individualIds=",filter,"&output=datatable")
             encoded_url <- URLencode(url)
-            attempt::try_catch(res_3[[i]] <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T),.e= function(e){
-                if_next <<- TRUE})
-            if (if_next){ next }
+            attempt::try_catch(res_3[[i]] <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),.e= function(e){
+                warning("\n Query fails for individual_id ", filter, "\n")
+            })
         }
         res_3 <- do.call(rbind, res_3)
     }
@@ -233,15 +232,15 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
     res <- c()
     if (exists('res_1')){
-      res <- res_1 
+        res <- res_1 
     } 
     
     if (exists('res_2')){
-      res <- plyr::rbind.fill(res, res_2)
+        res <- plyr::rbind.fill(res, res_2)
     }
 
     if (exists('res_3')){
-      res <- plyr::rbind.fill(res, res_3)
+        res <- plyr::rbind.fill(res, res_3)
     }
 
     rownames(res) <- seq(dim(res)[1])
@@ -256,7 +255,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
     
         res <- res[idx,]
         if (dim(res)[1] == 0){
-            cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")
+            warning("\n the option `codematches=TRUE` filters out all samples \n")
         }
     }
     
@@ -265,13 +264,16 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 }
 
 pgxVariantLoader <- function(biosample_id, output, save_file, filename){ 
-    if (save_file & is.null(output)) stop("The parameter 'output' is invalid when 'save_file=TRUE' (available: \"seg\" or \"pgxseg\")") 
+    if (save_file & is.null(output)){
+      stop("The parameter 'output' is invalid when 'save_file=TRUE' (available: \"seg\" or \"pgxseg\")") 
+    } 
              
     len <- length(biosample_id)
     count <- ceiling(len/50)
-    for (i in c(1:count)){
-        if_next <- FALSE
-        j = i*50
+    res <- list()
+    meta <- c()
+    for (i in seq_len(count)){
+        j <- i*50
         if (j > len){
             j<-len
         }
@@ -281,17 +283,29 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename){
         if (!(is.null(output))){
             url <- paste0(url, "&output=pgxseg")
             encoded_url <- URLencode(url)
-            attempt::try_catch(temp <- read_variant_pgxseg(encoded_url), .e = function(e){if_next <<- TRUE}, .w = function(w){if_next <<- TRUE})
-            if (if_next){ next }
+            attempt::try_catch(res[[i]] <- read_variant_pgxseg(encoded_url), .e = function(e){
+                warning("\n Query fails for biosample_id ", filter, "\n")
+            })
         }else{
             encoded_url <- URLencode(url)
-            attempt::try_catch(temp <- rjson::fromJSON(file = encoded_url), .e = function(e){if_next <<- TRUE}, .w = function(w){if_next <<- TRUE})
-            if (if_next){  next }
-            temp <- lapply(temp$response$resultSets[[1]]$results,unlist)
-            if (length(temp) == 0){
-              cat("No variants retrieved")
-              return(NULL)
+            attempt::try_catch(res[[i]] <- rjson::fromJSON(file = encoded_url), .e = function(e){
+                 warning("\n Query fails for biosample_id ", filter, "\n")
+            })
+            
+            if (length(res) < i){
+                res[[i]] <- NA
+                next
+            } 
+            
+            res[[i]] <- lapply(res[[i]]$response$resultSets[[1]]$results,unlist)
+                          
+            if (length(res[[i]]) == 0){
+                warning("\n Query fails for biosample_id ", filter, "\n")
+                res[[i]] <- NA
+                next
             }
+            
+            temp <- res[[i]]              
             temp <- lapply(temp,function(x){
                 var_meta <- x[c('variation.location.sequence_id','variantInternalId','variation.relative_copy_class','variation.updated')]
                 id_ind <-  which(names(x) =='caseLevelData.id')
@@ -299,7 +313,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename){
                 for (i in id_ind){
                     temp_row <- rbind(temp_row,c(x[i],x[i-1],x[i-2]))}
                 var_meta <- matrix(rep(var_meta,dim(temp_row)[1]),nrow=dim(temp_row)[1],
-                                   byrow = T)
+                                   byrow = TRUE)
                 temp_row <- as.data.frame(cbind(temp_row,var_meta))
                 colnames(temp_row) <- c("variant_id","biosample_id","analysis_id",
                                         "reference_genome","variant","variant_status","updated_time")
@@ -324,33 +338,38 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename){
             temp$chr[temp$chr == 23] <- 'X'
             temp$chr[temp$chr == 24] <- 'Y'
             temp <- temp[,c(1,2,3,5,8,9,10,4,6,7)]
+            res[[i]] <- temp
         }
 
-        if (!(exists("res"))){
-            res <- temp
-            if (save_file){
-                if (output == 'pgxseg'){
-                    meta <- read_variant_pgxseg_meta(encoded_url)
-                }} 
-            }else{
-                res <- rbind(res, temp)
-                if (save_file){
-                    if (output == 'pgxseg'){
-                    meta <- c(meta, meta[-c(1,2)])
-                }}
+        if (save_file){
+            if (output == 'pgxseg'){
+                if (length(meta) == 0){
+                     meta <- read_variant_pgxseg_meta(encoded_url)
+                }else{
+                     meta <- c(meta, meta[-c(1,2)])
+                }
             }
         }
 
-        if (!(exists("res"))){
-            cat("No variants retrieved")
-            return(NULL)
-        }
+    }
 
-        if (!(is.null(output))){
-            if (output == 'seg'){
-                res <- res[,c(1,2,3,4,6,5)]
-            }
+    res[is.na(res)] <- NULL
+
+    if (length(res) == 0){
+            warning("\n No variants retrieved \n")
+            return()
+    }
+
+    res <- do.call(rbind, res)
+
+
+
+
+    if (!(is.null(output))){
+        if (output == 'seg'){
+            res <- res[,c(1,2,3,4,6,5)]
         }
+    }
     
     # quality check
     res <- res[res$biosample_id %in% biosample_id,]
@@ -365,7 +384,8 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename){
             if (is.null(filename))  filename <- "variants.seg"  
             write.table(res, file=filename, sep='\t',row.names = FALSE,col.names = TRUE, quote = FALSE)
         } 
-        return(cat("The file is saved"))
+        message("\n The file is saved \n")
+        return()
     }
 
     return(res)
@@ -383,15 +403,15 @@ pgxcallsetLoader <- function(filters,limit,skip,codematches){
     meta <-  gsub("#meta=>\"","",meta[7])
     meta <-  gsub("\"","",meta)
     if (length(grep('WARNING',meta)) == 1 & limit != 0){
-        cat(paste("\n", meta, "\n"))
+        warning("\n", meta, "\n")
     }
 
-    pg.data  <- read.table(encoded_url, header=T, sep="\t", na="NA")
+    pg.data  <- read.table(encoded_url, header=TRUE, sep="\t")
   
     if (codematches){
         pg.data <- pg.data[pg.data$group_id %in% filters,]
         if (dim(pg.data)[1] == 0){
-            cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")
+            warning("\n the option `codematches=TRUE` filters out all samples \n")
     }}
   
   return(pg.data)
@@ -400,10 +420,10 @@ pgxcallsetLoader <- function(filters,limit,skip,codematches){
 
 pgxCovLoader <- function(filters,codematches,skip,limit){
     if (codematches){
-        biosample_id <- pgxmetaLoader(type = 'biosample', biosample_id = NULL,individual_id = NULL,filters = filters,codematches = T,skip=NULL,limit=0,filterLogic="AND")
+        biosample_id <- pgxmetaLoader(type = 'biosample', biosample_id = NULL,individual_id = NULL,filters = filters,codematches = TRUE,skip=NULL,limit=0,filterLogic="AND")
         biosample_id <- biosample_id$biosample_id    
         if (length(biosample_id) == 0){
-            cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")
+            warning("\n the option `codematches=TRUE` filters out all samples \n")
             return()
         }
     }
@@ -420,7 +440,7 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
     if (codematches){
         sel_sample_idx <- sample %in% biosample_id 
         if (sum(sel_sample_idx) == 0 & length(sample) > 0){
-            cat("\n WARNING: the option `codematches=TRUE` filters out all samples \n")
+            warning("\n the option `codematches=TRUE` filters out all samples \n")
             return()
         }
     } else{
@@ -466,15 +486,21 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
     chrom_idx <- match(chrom_list, rownames(data_2[[1]]))
   
     data_3 <- lapply(data_2, function(x){
-        val <- c(x$dupfraction[chrom_arm_idx],x$delfraction[chrom_arm_idx],x$dupfraction[chrom_idx],x$delfraction[chrom_idx])
-        names <- c(paste0(chrom_arm_list,'.dup'),paste0(chrom_arm_list,'.del'),paste0(chrom_list,'.dup'),paste0(chrom_list,'.del'))
+        val <- c(x$dupfraction[chrom_arm_idx],
+                 x$delfraction[chrom_arm_idx],
+                 x$dupfraction[chrom_idx],
+                 x$delfraction[chrom_idx])
+        names <- c(paste0(chrom_arm_list,'.dup'),
+                   paste0(chrom_arm_list,'.del'),
+                   paste0(chrom_list,'.dup'),
+                   paste0(chrom_list,'.del'))
         return(  t(data.frame(val,row.names =  names)))
     }) 
   
     data_3 <- Reduce(rbind,data_3)
     rownames(data_3) <- make.unique(sel.sample)
   
-    arm_frac <- data_3[,c(1:96)]
+    arm_frac <- data_3[,seq_len(96)]
     chrom_frac <- data_3[,c(97:144)]
 
     result <- list()

@@ -3,17 +3,22 @@ title: "Introduction_4_process_pgxseg"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
 output: 
-  html_document:
-        toc: true
-        toc_float: true
+  BiocStyle::html_document:
+  toc: true
+vignette: >
+  %\VignetteIndexEntry{Introduction_4_process_pgxseg}
+  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+    collapse = TRUE,
+    comment = "#>"
 )
 ```
+
+The ".pgxseg" data format is used within Progenetix to store variant data encompassing CNV (Copy Number Variation) and SNV (Single Nucleotide Variant), along with the metadata of associated samples. This vignette describes how to manipulate local ".pgxseg" files using this package.
 
 # Load library 
 
@@ -41,7 +46,7 @@ This function extracts segments, CNV frequency, and metadata from local "pgxseg"
 file_name <- system.file("extdata", "example.pgxseg",package = 'pgxRpi')
 
 # extract segment data
-seg <- pgxSegprocess(file=file_name,return_seg = T)
+seg <- pgxSegprocess(file=file_name,return_seg = TRUE)
 ```
 
 The segment data looks like this
@@ -53,7 +58,7 @@ head(seg)
 # Extract metadata 
 
 ```{r}
-meta <- pgxSegprocess(file=file_name,return_metadata = T)
+meta <- pgxSegprocess(file=file_name,return_metadata = TRUE)
 ```
 
 The metadata looks like this
@@ -67,19 +72,19 @@ head(meta)
 The KM plot is plotted from samples with available followup state and followup time. The default grouping is "group_id" column in metadata.
 
 ```{r, fig.width=7, fig.height=5}
-pgxSegprocess(file=file_name,show_KM_plot = T)
+pgxSegprocess(file=file_name,show_KM_plot = TRUE)
 ```
 
 You can try different grouping by `group_id` parameter
 
 ```{r, fig.width=7, fig.height=5}
-pgxSegprocess(file=file_name,show_KM_plot = T,group_id = 'histological_diagnosis_id')
+pgxSegprocess(file=file_name,show_KM_plot = TRUE,group_id = 'histological_diagnosis_id')
 ```
 
 You can specify more parameters to modify this plot (see parameter `...` in documentation)
 
 ```{r, fig.width=7, fig.height=5}
-pgxSegprocess(file=file_name,show_KM_plot = T,pval=T,palette='npg')
+pgxSegprocess(file=file_name,show_KM_plot = TRUE,pval=TRUE,palette='npg')
 ```
 
 # Calculate CNV frequency 
@@ -89,13 +94,13 @@ is specified in `group_id` parameter.
 
 ```{r}
 # Default is "group_id" in metadata
-frequency <- pgxSegprocess(file=file_name,return_frequency = T) 
+frequency <- pgxSegprocess(file=file_name,return_frequency = TRUE) 
 # Use different ids for grouping
-frequency_2 <- pgxSegprocess(file=file_name,return_frequency = T, 
+frequency_2 <- pgxSegprocess(file=file_name,return_frequency = TRUE, 
                              group_id ='icdo_morphology_id')
 ```
 
-The returned object is same as the CNV frequency object with "pgxfreq" format returned by `pgxLoader` function (format details see the vignette [Introduction_3_loadfrequency](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_3_loadfrequency.html). It contains two slots 'meta' and 'data'.
+The returned object is same as the CNV frequency object with "pgxfreq" format returned by `pgxLoader` function (format details see the vignette Introduction_3_loadfrequency. It contains two slots 'meta' and 'data'.
 
 The 'meta' slot looks like this
 
@@ -141,10 +146,10 @@ pgxFreqplot(frequency, filters="pgx:icdot-C16.9",chrom = c(1,8,14), layout = c(3
 Circos plot supports multiple group visualization
 
 ```{r,fig.width=6, fig.height=6}
-pgxFreqplot(frequency, filters=c("pgx:icdot-C16.9","pgx:icdot-C73.9"),circos = T)
+pgxFreqplot(frequency, filters=c("pgx:icdot-C16.9","pgx:icdot-C73.9"),circos = TRUE)
 ```
 
-The details of `pgxFreqplot` function see the vignette [Introduction_3_loadfrequency](https://htmlpreview.github.io/?https://github.com/progenetix/pgxRpi/blob/main/vignettes/Introduction_3_loadfrequency.html).
+The details of `pgxFreqplot` function see the vignette Introduction_3_loadfrequency.
 
 # Extract all data 
 
@@ -154,8 +159,8 @@ The returned data is an object including all specified data. It is noted that in
 the CNV frequency and KM plot use the same group_id.
 
 ```{r, fig.width=7, fig.height=5}
-info <- pgxSegprocess(file=file_name,show_KM_plot = T, return_seg = T, 
-                      return_metadata = T, return_frequency = T)
+info <- pgxSegprocess(file=file_name,show_KM_plot = TRUE, return_seg = TRUE, 
+                      return_metadata = TRUE, return_frequency = TRUE)
 ```
 
 ```{r}

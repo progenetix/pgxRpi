@@ -1,37 +1,47 @@
 Package: pgxRpi
 Title: Access The API of Progenetix Database in R
-Version: 0.0.0.9000
+Version: 0.99.0
 Authors@R: 
     c(person(given = "Hangjia",
            family = "Zhao",
            role = c("aut", "cre"),
-           email = "hangjia.zhao@uzh.ch"),
+           email = "hangjia.zhao@uzh.ch",
+           comment = c(ORCID = "0000-0001-8376-5751")),
 	   person(given = "Michael",
            family = "Baudis",
            role = c("aut"),
-           email = "michael.baudis@mls.uzh.ch"))
-Description: It is an API wrapper package to retrieve data from Progenetix database.
-License: Apache License (>= 2)
+           email = "michael.baudis@mls.uzh.ch",
+           comment = c(ORCID = "0000-0002-9903-4248")))
+Description: The package serves as a comprehensive Beacon+ API wrapper. It is designed to seamlessly fetching data sourced from the Progenetix database. With this package, users can easily access and visualize data from Progenetix.  
+biocViews: CopyNumberVariation, DataImport, Software
+License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2
 Imports:
-	data.table (>= 1.9.4),
+    utils,
 	circlize,
 	rjson,
 	dplyr,
   	attempt,
-  	curl,
   	lubridate,
   	survival,
   	survminer,
   	ggplot2,
-    plyr
+    plyr,
+    grDevices,
+    graphics
 Depends: 
-    R (>= 3.10)
+    R (>= 4.2)
 Suggests: 
+    BiocStyle,
     rmarkdown,
     knitr,
-    testthat
-VignetteBuilder: knitr
+    testthat,
+    httr,
+    RColorBrewer,
+    pheatmap
+BugReports: https://github.com/progenetix/pgxRpi/issues
+URL: https://github.com/progenetix/pgxRpi
+VignetteBuilder: rmarkdown

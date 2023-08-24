@@ -1,5 +1,5 @@
 .DS_Store
 .Rhistory
-/vignettes/.DS_Store
-/vignettes/.Rhistory
-/archive_function
+
+vignette/*.html
+vignette/*.pdf
