@@ -17,7 +17,7 @@
 #' @export
 #' @examples
 #' file_path <- system.file("extdata", "example.pgxseg",package = 'pgxRpi')
-#' info <- pgxSegprocess(file=file_path,show_KM_plot = TRUE, return_seg = TRUE, return_metadata = TRUE, return_frequency = TRUE)
+#' info <- pgxSegprocess(file=file_path,show_KM_plot = TRUE, return_seg = TRUE, return_metadata = TRUE)
 pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_metadata=FALSE,return_seg=FALSE,return_frequency=FALSE,assembly='hg38',...){
     if(!any(show_KM_plot, return_metadata, return_seg, return_frequency)){return()}
     full.data <- readLines(file)
