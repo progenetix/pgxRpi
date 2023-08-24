@@ -3,7 +3,9 @@
 \docType{data}
 \name{hg38_bins}
 \alias{hg38_bins}
-\title{A dataframe containing location information for 1MB-size bins within the hg38 genome. This dataset is generated based on the accessed cytoband data.}
+\title{A dataframe containing location information for 1MB-size bins within the hg38 genome.
+This dataset is generated based on the accessed cytoband data and used for
+CNV frequency calculation from local pgxseg files.}
 \format{
 An object of class \code{data.frame} with 3106 rows and 6 columns.
 }
@@ -11,6 +13,8 @@ An object of class \code{data.frame} with 3106 rows and 6 columns.
 hg38_bins
 }
 \description{
-A dataframe containing location information for 1MB-size bins within the hg38 genome. This dataset is generated based on the accessed cytoband data.
+A dataframe containing location information for 1MB-size bins within the hg38 genome.
+This dataset is generated based on the accessed cytoband data and used for
+CNV frequency calculation from local pgxseg files.
 }
 \keyword{datasets}

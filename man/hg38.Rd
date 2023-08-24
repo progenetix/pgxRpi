@@ -3,7 +3,8 @@
 \docType{data}
 \name{hg38}
 \alias{hg38}
-\title{A dataframe containing cytoband annotation details extracted from the hg38 gennome.}
+\title{A dataframe containing cytoband annotation details extracted from the hg38 gennome.
+It is used for CNV frequency visualization.}
 \format{
 An object of class \code{data.frame} with 862 rows and 5 columns.
 }
@@ -15,5 +16,6 @@ hg38
 }
 \description{
 A dataframe containing cytoband annotation details extracted from the hg38 gennome.
+It is used for CNV frequency visualization.
 }
 \keyword{datasets}
