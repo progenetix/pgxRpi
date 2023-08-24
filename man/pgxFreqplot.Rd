@@ -47,8 +47,7 @@ Thie function plots the frequency of deletions and amplifications
 }
 \examples{
 ## load necessary data (this step can be skipped in real implementation)
-genome <- "hg38"
-data(genome)
+data("hg38")
 ## get frequency data
 freq <- pgxLoader(type="frequency", output ='pgxfreq', filters="NCIT:C3512")
 ## visualize
