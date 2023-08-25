@@ -1,6 +1,6 @@
 # pgxRpi
 
-Welcome to our API wrapper package, leveraging the capabilities of [Beacon v2](https://docs.genomebeacons.org/) specification. With this package, we've crafted functions that simplify the process of accessing oncogenomic data from [Progenetix](https://progenetix.org/) database. Our aim is to enhance your experience by streamlining the retrieval of valuable information.
+Welcome to our R wrapper package for Progenetix REST API that leverages the capabilities of [Beacon v2](https://docs.genomebeacons.org/) specification. Please note that a stable internet connection is required for the query functionality. This package is aimed to simplify the process of accessing oncogenomic data from [Progenetix](https://progenetix.org/) database. 
 
 You can install this package from GitHub using:
 
