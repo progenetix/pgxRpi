@@ -1,6 +1,6 @@
 # pgxRpi
 
-This is an API wrapper package to access data from Progenetix database.
+Welcome to our API wrapper package, leveraging the capabilities of [Beacon v2](https://docs.genomebeacons.org/) specification. With this package, we've crafted functions that simplify the process of accessing oncogenomic data from [Progenetix](https://progenetix.org/) database. Our aim is to enhance your experience by streamlining the retrieval of valuable information.
 
 You can install this package from GitHub using:
 
@@ -17,4 +17,4 @@ For accessing CNV frequency data, get started from this vignette Introduction_3_
 
 For processing local pgxseg files, get started from this vignette Introduction_4_process_pgxseg.
 
-When you face problems, try to reinstall the latest version. If reinstallation doesn't help, please contact us.
+If you encounter problems, try to reinstall the latest version. If reinstallation doesn't help, please contact us.

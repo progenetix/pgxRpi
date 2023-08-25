@@ -12,7 +12,7 @@ Authors@R:
            role = c("aut"),
            email = "michael.baudis@mls.uzh.ch",
            comment = c(ORCID = "0000-0002-9903-4248")))
-Description: The package serves as a comprehensive Beacon+ API wrapper. It is designed to seamlessly fetching data sourced from the Progenetix database. With this package, users can easily access and visualize data from Progenetix.  
+Description: The package functions as an API wrapper built upon the Beacon v2 protocol. Its purpose is to provide a seamless way for retrieving genomic data from Progenetix database—an open resource dedicated to curated oncogenomic profiles. Empowered by this package, users can effortlessly access and visualize data from Progenetix.
 biocViews: CopyNumberVariation, DataImport, Software
 License: Artistic-2.0
 Encoding: UTF-8
