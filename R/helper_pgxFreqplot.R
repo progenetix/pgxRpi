@@ -333,6 +333,7 @@ getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
     op <- modifyList(op,list(...))
 
     #Set assembly to refer to stored data instead of character string:
+    data(list=c(op$assembly))
     op$assembly <- get(op$assembly)
 
     #Placement of labels and axis annotation:

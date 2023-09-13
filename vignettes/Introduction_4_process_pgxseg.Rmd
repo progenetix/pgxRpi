@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The ".pgxseg" data format is used within Progenetix to store variant data encompassing CNV (Copy Number Variation) and SNV (Single Nucleotide Variant), along with the metadata of associated samples. This vignette describes how to manipulate local ".pgxseg" files using this package.
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. Progenetix uses the ".pgxseg" data format to store variant data, which encompasses CNV (Copy Number Variation) and SNV (Single Nucleotide Variant), as well as the metadata of associated samples. This vignette describes how to work with local ".pgxseg" files using this package. For more details about the ".pgxseg" file format, please refer to the the [documentation](https://docs.progenetix.org/file-formats/?h=.pgxseg#pgxseg-sample-variant-files).
 
 # Load library 
 

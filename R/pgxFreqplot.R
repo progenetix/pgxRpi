@@ -22,6 +22,7 @@
 #' @return The binned CNV frequency plot
 #' @importFrom grDevices dev.cur dev.new devAskNewPage
 #' @importFrom graphics abline axis mtext par polygon rect text title
+#' @importFrom utils data
 #' @export
 #' @examples
 #' ## load necessary data (this step can be skipped in real implementation)

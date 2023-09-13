@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette details how to access metadata of samples or their corresponding individuals from Progenetix database.
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing and utilizing metadata for samples or their corresponding individuals within the Progenetix database.
 
 # Load library 
 

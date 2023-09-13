@@ -1,4 +1,5 @@
 extract.bin.feature <- function(data,genome='hg38', overlap = 1000){
+    data(list=c(paste0(genome,'_bins')))
     bins <- get(paste0(genome,'_bins'))
     exclude.sexchr <- !c('X','Y') %in% unique(data[,2])
     if (all(exclude.sexchr)){

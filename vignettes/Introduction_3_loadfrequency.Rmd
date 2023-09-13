@@ -18,7 +18,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette provides instructions for accessing and visualizing CNV frequency data from Progenetix database.
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette offers a comprehensive guide on accessing and visualizing CNV frequency data within the Progenetix database. CNV frequency is pre-calculated based on CNV segment data in Progenetix and reflects the CNV pattern in a cohort. It is defined as the percentage of samples showing a CNV for a genomic region (1MB-sized genomic bins in this case) over the total number of samples in a cohort specified by filters.
+
 
 # Load library 
 
