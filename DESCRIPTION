@@ -1,6 +1,6 @@
 Package: pgxRpi
 Title: R wrapper for Progenetix 
-Version: 0.99.0
+Version: 0.99.1
 Authors@R: 
     c(person(given = "Hangjia",
            family = "Zhao",
@@ -45,4 +45,4 @@ Suggests:
     pheatmap
 BugReports: https://github.com/progenetix/pgxRpi/issues
 URL: https://github.com/progenetix/pgxRpi
-VignetteBuilder: rmarkdown
+VignetteBuilder: knitr

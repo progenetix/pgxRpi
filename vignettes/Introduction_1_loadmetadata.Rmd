@@ -7,7 +7,7 @@ output:
   toc: true
 vignette: >
   %\VignetteIndexEntry{Introduction_1_loadmetadata}
-  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -220,7 +220,7 @@ group_id <- rep(c('younger','older'),
                 times=c(dim(lungadind_young_clean)[1],dim(lungadind_old_clean)[1]))
 followup_state <- as.numeric(lungadind_clean$index_disease_followup_state_label)
 followup_time <- time_length(lungadind_clean$index_disease_followup_time,unit = 'days')
-survival_df <- data.frame(group_id, followup_state, followup_state)
+survival_df <- data.frame(group_id, followup_time, followup_state)
 ```
 
 Fit the survival data and visualise
@@ -248,7 +248,7 @@ group_id <- rep(c('younger','older'),times=
                   c(dim(tcgabrcaind_young_clean)[1],dim(tcgabrcaind_old_clean)[1]))
 followup_state <- as.numeric(tcgabrcaind_clean$index_disease_followup_state_label)
 followup_time <- time_length(tcgabrcaind_clean$index_disease_followup_time,unit = 'days')
-survival_df <- data.frame(group_id, followup_state, followup_state)
+survival_df <- data.frame(group_id, followup_time, followup_state)
 # fit
 sfit <- survfit(Surv(followup_time, followup_state)~group_id, data=survival_df)
 # visualise

@@ -12,6 +12,9 @@ An object of class \code{data.frame} with 3114 rows and 6 columns.
 \usage{
 hg19_bins
 }
+\value{
+genomic bin locations of hg19 genome
+}
 \description{
 A dataframe containing location information for 1MB-size bins within the hg19 genome.
 This dataset is generated based on the accessed cytoband data and used for

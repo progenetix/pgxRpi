@@ -12,6 +12,9 @@ An object of class \code{data.frame} with 3106 rows and 6 columns.
 \usage{
 hg38_bins
 }
+\value{
+genomic bin locations of hg38 genome
+}
 \description{
 A dataframe containing location information for 1MB-size bins within the hg38 genome.
 This dataset is generated based on the accessed cytoband data and used for

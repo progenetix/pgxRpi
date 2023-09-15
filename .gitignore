@@ -1,5 +1,8 @@
 .DS_Store
 .Rhistory
-
+vignettes/.DS_Storevignettes/.Rhistory
+inst/.DS_Store
 vignette/*.html
 vignette/*.pdf
+/doc/
+/Meta/

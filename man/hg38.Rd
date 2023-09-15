@@ -14,6 +14,9 @@ An object of class \code{data.frame} with 862 rows and 5 columns.
 \usage{
 hg38
 }
+\value{
+cytoband of hg38 genome
+}
 \description{
 A dataframe containing cytoband annotation details extracted from the hg38 gennome.
 It is used for CNV frequency visualization.

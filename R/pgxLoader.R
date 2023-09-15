@@ -24,7 +24,7 @@
 #' @param filename A string specifying the path and name of the file to be saved. 
 #' Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" 
 #' in current work directory.
-#' @importFrom utils URLencode modifyList read.table write.table 
+#' @importFrom utils URLencode modifyList read.table write.table
 #' @return Data from Progenetix database
 #' @export
 #' @examples
