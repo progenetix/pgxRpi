@@ -195,7 +195,7 @@ paths (specified by `filename`). The export is only available for variants data 
 
 The following command creates a '.pgxseg' file with the name "variants.pgxseg" in "~/Downloads/" folder. 
 
-```{r}
+```{r eval=FALSE}
 pgxLoader(type='variant', output='pgxseg', biosample_id=biosample_id, save_file=TRUE, 
           filename="~/Downloads/variants.pgxseg")
 ```
@@ -207,7 +207,7 @@ for visualization.
 
 The following command creates a special '.seg' file with the name "variants.seg" in "~/Downloads/" folder. 
 
-```{r}
+```{r eval=FALSE}
 pgxLoader(type='variant', output='seg', biosample_id=biosample_id, save_file=TRUE, 
           filename="~/Downloads/variants.seg")
 ```
