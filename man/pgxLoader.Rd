@@ -15,7 +15,8 @@ pgxLoader(
   biosample_id = NULL,
   individual_id = NULL,
   save_file = FALSE,
-  filename = NULL
+  filename = NULL,
+  domain = "http://progenetix.org"
 )
 }
 \arguments{
@@ -51,6 +52,8 @@ instead of direct return. Only used when the parameter \code{type} is "variant" 
 \item{filename}{A string specifying the path and name of the file to be saved.
 Only used if the parameter \code{save_file} is TRUE. Default is "variants.seg/pgxseg"
 in current work directory.}
+
+\item{domain}{A string specifying the domain of database. Default is "http://progenetix.org".}
 }
 \value{
 Data from Progenetix database

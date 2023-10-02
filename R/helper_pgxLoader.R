@@ -30,7 +30,7 @@ read_variant_pgxseg_meta <- function(url){
     return(meta[seq_len(idx)])
 }
 
-pgidCheck <- function(id){
+pgidCheck <- function(id,domain){
   
     res.id <- c()
    
@@ -48,38 +48,39 @@ pgidCheck <- function(id){
       remain.id <- id
     }
     
+    url <- paste0(domain,"/services/collations?filters=")
+    
     if (length(ncit.idx) > 0){
-      url <- "https://progenetix.org/services/collations?filters=NCIT"
-      res <- rjson::fromJSON(file = url)
+      encoded_url <- URLencode(paste0(url,"NCIT"))
+      res <- rjson::fromJSON(file = encoded_url)
       res.id <- c(res.id,unlist(lapply(res$response$results, function(x){x$id})))
       remain.id <- remain.id [!remain.id%in% id[ncit.idx]]
     }
     
     if (length(icdom.idx) > 0){
-      url <- "https://progenetix.org/services/collations?filters=icdom"
-      res <- rjson::fromJSON(file = url)
+      encoded_url <- URLencode(paste0(url,"icdom"))
+      res <- rjson::fromJSON(file = encoded_url)
       res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
       remain.id <- remain.id [!remain.id%in% id[icdom.idx]]
     }
   
     if (length(icdot.idx) > 0){
-      url <- "https://progenetix.org/services/collations?filters=icdot"
-      res <- rjson::fromJSON(file = url)
+      encoded_url <- URLencode(paste0(url,"icdot"))
+      res <- rjson::fromJSON(file =encoded_url)
       res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
       remain.id <- remain.id [!remain.id%in% id[icdot.idx]]
     }
   
     if (length(uberon.idx) > 0){
-      url <- "https://progenetix.org/services/collations?filters=UBERON"
-      res <- rjson::fromJSON(file = url)
+      encoded_url <- URLencode(paste0(url,"UBERON"))
+      res <- rjson::fromJSON(file =encoded_url)
       res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
       remain.id <- remain.id [!remain.id%in% id[uberon.idx]]
     }
     
   
     if (length(remain.id) > 0){
-      url <- paste0("https://progenetix.org/services/collations?filters=",transform_id(remain.id))
-      encoded_url <- URLencode(url)
+      encoded_url <- URLencode(paste0(url,transform_id(remain.id)))
       res <- rjson::fromJSON(file = encoded_url)
       res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
     }
@@ -87,15 +88,15 @@ pgidCheck <- function(id){
     return(id %in% c(res.id,id[pass.idx]))
 }
 
-pgxFreqLoader <- function(output, codematches, filters) {
+pgxFreqLoader <- function(output, codematches, filters, domain) {
     # check if filters exists
-    idcheck <- pgidCheck(filters)
+    idcheck <- pgidCheck(filters,domain)
     if (!all(idcheck)){
         warning("\n No results for filters ", filters[!idcheck], " in progenetix database.\n")
         filters <- filters[idcheck]
     }
     # start query
-    url <- paste0("http://www.progenetix.org/services/intervalFrequencies/?output=",output)
+    url <- paste0(domain,"/services/intervalFrequencies/?output=",output)
   
     filter <- transform_id(filters)
     url  <- paste0(url,'&filters=',filter)
@@ -127,7 +128,7 @@ pgxFreqLoader <- function(output, codematches, filters) {
     return(result)
 }
 
-pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematches, skip, limit, filterLogic){
+pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematches, skip, limit, filterLogic, domain){
     if (type == "biosample"){
         query_key <- "biosamples"
     }
@@ -140,7 +141,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
     if (!(is.null(filters))){
         # check if filters exists
-        idcheck <- pgidCheck(filters)
+        idcheck <- pgidCheck(filters,domain)
         if (!all(idcheck)){
             warning("\n No results for filters ", filters[!idcheck], " in progenetix database.\n")
             filters <- filters[idcheck]
@@ -148,7 +149,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
         
         if (filterLogic == "AND"){
             filters <- transform_id(filters)
-            url <- paste0("http://progenetix.org/beacon/",query_key,"/?filters=",filters,"&output=datatable")
+            url <- paste0(domain,"/beacon/",query_key,"/?filters=",filters,"&output=datatable")
             url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
             url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
             encoded_url <- URLencode(url)
@@ -170,7 +171,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
           res_1 <- list()
           for (i in seq_len(length(trans.filters))){
-              url <- paste0("http://progenetix.org/beacon/",query_key,"/?filters=",trans.filters[i],"&output=datatable")
+              url <- paste0(domain,"/beacon/",query_key,"/?filters=",trans.filters[i],"&output=datatable")
               url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
               url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
               encoded_url <- URLencode(url)
@@ -200,7 +201,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
                 j<-len
             }
             filter <- transform_id(biosample_id[c(((i-1)*50+1):j)])
-            url <- paste0("http://progenetix.org/beacon/",query_key,"/?biosampleIds=",filter,"&output=datatable")
+            url <- paste0(domain,"/beacon/",query_key,"/?biosampleIds=",filter,"&output=datatable")
             encoded_url <- URLencode(url)
             attempt::try_catch(res_2[[i]] <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),.e= function(e){
                 warning("\n Query fails for biosample_id ", filter, "\n")
@@ -219,7 +220,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
                 j<-len
             }
             filter <- transform_id(individual_id[c(((i-1)*50+1):j)])
-            url <- paste0("http://progenetix.org/beacon/",query_key,"/?individualIds=",filter,"&output=datatable")
+            url <- paste0(domain,"/beacon/",query_key,"/?individualIds=",filter,"&output=datatable")
             encoded_url <- URLencode(url)
             attempt::try_catch(res_3[[i]] <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),.e= function(e){
                 warning("\n Query fails for individual_id ", filter, "\n")
@@ -263,7 +264,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
     return(res)
 }
 
-pgxVariantLoader <- function(biosample_id, output, save_file, filename){ 
+pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain){ 
     if (save_file & is.null(output)){
       stop("The parameter 'output' is invalid when 'save_file=TRUE' (available: \"seg\" or \"pgxseg\")") 
     } 
@@ -278,7 +279,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename){
             j<-len
         }
         filter <- transform_id(biosample_id[c(((i-1)*50+1):j)])
-        url <- paste0("http://progenetix.org/beacon/variants/?biosampleIds=",
+        url <- paste0(domain,"/beacon/variants/?biosampleIds=",
                       filter,"&limit=0")
         if (!(is.null(output))){
             url <- paste0(url, "&output=pgxseg")
@@ -392,9 +393,9 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename){
 }
 
 
-pgxcallsetLoader <- function(filters,limit,skip,codematches){
+pgxcallsetLoader <- function(filters,limit,skip,codematches,domain){
     # start query
-    url  <- paste0("http://www.progenetix.org/beacon/analyses/?output=pgxmatrix",'&filters=',filters)
+    url  <- paste0(domain,"/beacon/analyses/?output=pgxmatrix",'&filters=',filters)
     url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
     url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
     
@@ -418,9 +419,9 @@ pgxcallsetLoader <- function(filters,limit,skip,codematches){
 }
 
 
-pgxCovLoader <- function(filters,codematches,skip,limit){
+pgxCovLoader <- function(filters,codematches,skip,limit,domain){
     if (codematches){
-        biosample_id <- pgxmetaLoader(type = 'biosample', biosample_id = NULL,individual_id = NULL,filters = filters,codematches = TRUE,skip=NULL,limit=0,filterLogic="AND")
+        biosample_id <- pgxmetaLoader(type = 'biosample', biosample_id = NULL,individual_id = NULL,filters = filters,codematches = TRUE,skip=NULL,limit=0,filterLogic="AND",domain=domain)
         biosample_id <- biosample_id$biosample_id    
         if (length(biosample_id) == 0){
             warning("\n the option `codematches=TRUE` filters out all samples \n")
@@ -428,7 +429,7 @@ pgxCovLoader <- function(filters,codematches,skip,limit){
         }
     }
   
-    url <- paste0('https://progenetix.org/beacon/analyses/?output=cnvstats&filters=',filters)
+    url <- paste0(domain,'/beacon/analyses/?output=cnvstats&filters=',filters)
     url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
     url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
     encoded_url <- URLencode(url)

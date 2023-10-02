@@ -4,10 +4,12 @@
 \alias{pgxCount}
 \title{Count samples in one collation of a given filter}
 \usage{
-pgxCount(filters = NULL)
+pgxCount(filters = NULL, domain = "http://progenetix.org")
 }
 \arguments{
 \item{filters}{A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","icdom-98353")}
+
+\item{domain}{A string specifying the domain of database. Default is "http://progenetix.org".}
 }
 \value{
 Count of samples in the given filter
