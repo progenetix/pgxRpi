@@ -23,24 +23,17 @@
 #' @importFrom grDevices dev.cur dev.new devAskNewPage
 #' @importFrom graphics abline axis mtext par polygon rect text title
 #' @importFrom utils data
+#' @importFrom methods is
 #' @export
 #' @examples
 #' ## load necessary data (this step can be skipped in real implementation)
-#' data("hg38")
+#' data("hg38_cytoband")
 #' ## get frequency data
 #' freq <- pgxLoader(type="frequency", output ='pgxfreq', filters="NCIT:C3512")
 #' ## visualize
 #' pgxFreqplot(freq)
 
 pgxFreqplot <- function(data,chrom=NULL,layout=c(1,1),filters=NULL,circos = FALSE,highlight=NULL,assembly = 'hg38'){
-    if (is.null(filters)){
-        filters <- names(data$data)[1]
-    }
-
-    if (any(!(filters %in% names(data$data))) & any(is.na(match(filters,seq(length(data$data)))))){
-        stop("The filter is not contained in data: ", filters[!(filters %in% names(data$data))])
-    }
-
     if (circos){
         return(cplotpgxFreq(data,filters,highlight,assembly))
     }
@@ -57,42 +50,56 @@ pgxFreqplot <- function(data,chrom=NULL,layout=c(1,1),filters=NULL,circos = FALS
 
 
 cplotpgxFreq  <- function(data,filters,highlight,assembly){
-    if (all(names(data) %in% c("data","meta"))){
-        data_pgxfreq <- data$data[filters]
-        id_name <-  names(data_pgxfreq)
+    if (is.null(filters)) filters <- 1
+    data_list <- list()
+    # input is pgxfreq
+    if (is(data, "CompressedGRangesList")){
+        meta <- S4Vectors::mcols(data)
+        id_name <- rownames(meta[filters,])
+        for (i in id_name){
+          ind_data <- data[[i]]
+          data_list[[i]] <- data.frame(chr=paste0('chr',as.character(GenomicRanges::seqnames(ind_data))),
+                                       start=GenomicRanges::start(ind_data),
+                                       end=GenomicRanges::end(ind_data),
+                                       gain=S4Vectors::mcols(ind_data)$gain_frequency,
+                                       loss=S4Vectors::mcols(ind_data)$loss_frequency)
+        } 
+    } else if (is(data, "RangedSummarizedExperiment")){
+        meta <- SummarizedExperiment::colData(data)
+        id_name <- rownames(meta[filters,])
+        range.info <- unique(GenomicRanges::granges(SummarizedExperiment::rowRanges(data)))
+        for (i in id_name){
+            gain.freq <- SummarizedExperiment::assay(data)[which(SummarizedExperiment::rowData(data)$type == "DUP"),i]
+            loss.freq <- SummarizedExperiment::assay(data)[which(SummarizedExperiment::rowData(data)$type == "DEL"),i]
+            data_list[[i]] <-  data.frame(chr=paste0('chr',as.character(GenomicRanges::seqnames(range.info))),
+                                             start=GenomicRanges::start(range.info),
+                                             end=GenomicRanges::end(range.info),
+                                             gain=gain.freq,
+                                             loss=-loss.freq)
+        }
     } else{
-        if(length(colnames(data)) == 0) stop("\n The input is invalid \n")
-        if(any(colnames(data)[c(5,6)] != c('gain_frequency','loss_frequency'))){
-            stop("\n The input is invalid \n")
+        stop("\n The input is invalid \n")
     }
  
-    data_pgxfreq <- list()
-    id_name <- unique(data[,1])
-    for (i in id_name){
-        data_pgxfreq[[i]] <- data[data[,1] %in% i,]
-    }
-    }
 
   # Identify highlight location
     if (!is.null(highlight)){
-        h_chr <- paste0('chr',data_pgxfreq[[1]][highlight,2])
-        h_start <- data_pgxfreq[[1]][highlight,3]
+        h_chr <- data_list[[1]][['chr']][highlight]
+        h_start <- data_list[[1]][['start']][highlight]
     }
 
 
   # set text size and color
-    cex_text <- ifelse(length(data_pgxfreq) == 1, 0.8, 0.6)
+    cex_text <- ifelse(length(data_list) == 1, 0.8, 0.6)
     col.gain <-'#FFC633'
     col.loss <- '#33A0FF'
     bar.col.gain <- col.gain
     bar.col.loss <- col.loss
 
       # plot
-    for (i in seq(length(id_name))){
+    for (i in seq_len(length(id_name))){
         id <- id_name[i]
-        data_cir <- data_pgxfreq[[id]][,c(2,3,4,5,6)]
-        data_cir[,5] <- -data_cir[,5]
-        data_cir[,1] <- paste0('chr',data_cir[,1])
+        data_cir <- data_list[[id]]
         # Initialize
         if (i == 1){
             circlize::circos.clear()
@@ -100,7 +107,7 @@ cplotpgxFreq  <- function(data,filters,highlight,assembly){
             circlize::circos.initializeWithIdeogram(species = assembly)
         }
         circlize::circos.genomicTrack(data_cir, ylim = c(-100, 100),
-                                      numeric.column = c("gain_frequency", "loss_frequency"),
+                                      numeric.column = c("gain", "loss"),
                                       panel.fun = function(region, value, ...){
                                           value1 <- unlist(value[1])
                                           value2 <- unlist(value[2])

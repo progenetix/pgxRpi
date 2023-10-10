@@ -47,7 +47,7 @@ Thie function plots the frequency of deletions and amplifications
 }
 \examples{
 ## load necessary data (this step can be skipped in real implementation)
-data("hg38")
+data("hg38_cytoband")
 ## get frequency data
 freq <- pgxLoader(type="frequency", output ='pgxfreq', filters="NCIT:C3512")
 ## visualize

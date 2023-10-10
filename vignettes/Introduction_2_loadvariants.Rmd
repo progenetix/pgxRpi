@@ -74,7 +74,7 @@ print(dim(cnv_matrix))
 cnv_matrix[c(1:3), c(1:5,6213:6215)]
 ```
 
-In this dataframe, `analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for individual biosample. It is noted that the number of analysis profiles does not necessarily equal the number of samples. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `X1.400000.1400000.DUP` is 0.200 in one row, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the corresponding analysis.
+In this dataframe, `analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for individual biosample. It is noted that the number of analysis profiles does not necessarily equal the number of samples. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `chr1.400000.1400000.DUP` is 0.200 in one row, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the corresponding analysis.
 
 ## Across chromosomes or the whole genome 
 

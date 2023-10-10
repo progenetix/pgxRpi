@@ -1,28 +1,36 @@
 ####################################################################
-## Author: Gro Nilsen, Knut Liestøl and Ole Christian Lingjærde.
-## Maintainer: Gro Nilsen <gronilse@ifi.uio.no>
+# The code in this script refers to code in copynumber package with minor modification
+# Reference: 
+## Publication: Nilsen and Liestøl et al. (2012), BMC Genomics
+## Package: 10.18129/B9.bioc.copynumber  
 ## License: Artistic 2.0
-## Part of the copynumber package with minor modification
-## Reference: Nilsen and Liestøl et al. (2012), BMC Genomics
+# Modification:
+## function: genomeFreq, chromosomeFreq, getFreqPlotParameters
 ####################################################################
 
-genomeFreq <- function(data,pos.unit="bp",id=1,highlight,assembly,...){
-    if (all(names(data) %in% c("data","meta"))){
-      data_pgxfreq <- data$data[[id]]
+genomeFreq <- function(data,pos.unit="bp",id,highlight,assembly,...){
+    if (is.null(id)) id <- 1
+      # input is pgxfreq
+    if (is(data,"CompressedGRangesList")){
+        range.info <- data[[id]]
+        gain.freq <- S4Vectors::mcols(range.info)$gain_frequency
+        loss.freq <- S4Vectors::mcols(range.info)$loss_frequency
+        meta <- S4Vectors::mcols(data)
+      # input is data.frame
+    } else if (is(data,"RangedSummarizedExperiment")){
+        range.info <- unique(GenomicRanges::granges(SummarizedExperiment::rowRanges(data)))
+        gain.freq <- SummarizedExperiment::assay(data)[which(SummarizedExperiment::rowData(data)$type == "DUP"),id]
+        loss.freq <- SummarizedExperiment::assay(data)[which(SummarizedExperiment::rowData(data)$type == "DEL"),id]
+        meta <- SummarizedExperiment::colData(data)
     } else{
-      if (length(colnames(data)) == 0) stop("\n The input is invalid \n")
-      if (any(colnames(data)[c(5,6)] != c('gain_frequency','loss_frequency'))) stop("\n The input is invalid \n")
-      if(length(unique(data[,1])) > 1) stop("\n The input is invalid (more than one sample id) \n")
-      data_pgxfreq <- data
+        stop("\n The input is invalid \n")
     }
 
     nr <- 1
     nc <- 1
     op <- getFreqPlotParameters(type="genome",nc=nc,nr=nr,assembly=assembly,...)
-    data_pgxfreq[,2] <- gsub("X", "23", data_pgxfreq[,2])
-    data_pgxfreq[,2] <- gsub("Y", "24", data_pgxfreq[,2])
-    op$xlim <- getGlobal.xlim(op=op,pos.unit=pos.unit,chrom=as.numeric(unique(data_pgxfreq[,2])))
-    x <- adjustPos(position=data_pgxfreq[,4],chromosomes=as.numeric(data_pgxfreq[,2]),pos.unit=pos.unit,type="genome",op=op)
+    op$xlim <- getGlobal.xlim(op=op,pos.unit=pos.unit,chrom=as.numeric(GenomicRanges::seqnames(range.info)))
+    x <- adjustPos(position=GenomicRanges::end(range.info),chromosomes=as.numeric(GenomicRanges::seqnames(range.info)),pos.unit=pos.unit,type="genome",op=op)
     xleft <- x$xleft
     xright <- x$xright
     if(dev.cur()<=1){       #to make Sweave work
@@ -42,51 +50,60 @@ genomeFreq <- function(data,pos.unit="bp",id=1,highlight,assembly,...){
   
     par(fig=fig,new=new,oma=c(0,0,1,0),mar=op$mar)
   
-    op <- updateFreqParameters(data_pgxfreq$loss_frequency,data_pgxfreq$gain_frequency,op)
+    op <- updateFreqParameters(loss.freq,gain.freq,op)
     plot(1,1,type="n",ylim=op$ylim,xlim=op$xlim,xaxs="i",main="",frame.plot=TRUE,yaxt="n",xaxt="n",ylab="",xlab="")
     chromPattern(pos.unit,op)
   
     # edit title
-    if (all(names(data) %in% c("data","meta"))){
-      id_name <- names(data$data[id])
-      meta <- data$meta[data$meta[,1] == id_name,]
-      if (meta[2] == ''){
-        op$main <- paste(id_name," (", meta[3], " samples)", sep="")
-      } else{
-        op$main <- paste(id_name, ": ",meta[2], " (", meta[3], " samples)", sep="")}
+ 
+    id_name <- rownames(meta[id,])
+    plot_meta <- meta[id_name,]
+    if (plot_meta[[2]] == ''){
+      op$main <- paste0(id_name," (", plot_meta[[3]], " samples)")
+    } else{
+      op$main <- paste0(id_name, ": ",plot_meta[[2]], " (", plot_meta[[3]], " samples)")
     }
+    
   
     title(main=op$main,line=op$main.line,cex.main=op$cex.main)
   
     if (!is.null(highlight)){
-      op$col.gain <- rep(op$col.gain, dim(data_pgxfreq)[1])
+      op$col.gain <- rep(op$col.gain, length(range.info))
       op$col.gain[highlight] <- 'red'
-        op$col.loss <- rep(op$col.loss, dim(data_pgxfreq)[1])
+        op$col.loss <- rep(op$col.loss, length(range.info))
         op$col.loss[highlight] <- 'red'
     }
   
     #Add axes, labels and percentage lines:
     addToFreqPlot(op,type="genome")
-    rect(xleft=xleft,ybottom=0,xright=xright,ytop=data_pgxfreq$gain_frequency,col=op$col.gain,border=op$col.gain)
-    rect(xleft=xleft,ybottom=0,xright=xright,ytop=-data_pgxfreq$loss_frequency,col=op$col.loss,border=op$col.loss)
+    rect(xleft=xleft,ybottom=0,xright=xright,ytop=gain.freq,col=op$col.gain,border=op$col.gain)
+    rect(xleft=xleft,ybottom=0,xright=xright,ytop=-loss.freq,col=op$col.loss,border=op$col.loss)
     abline(h=0,lty=1,col="grey82",lwd=1.5)
   
     op$chrom.lty <- 1
-    addChromlines(as.numeric(data_pgxfreq[,2]),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
-    addArmlines(as.numeric(data_pgxfreq[,2]),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
+    addChromlines(as.numeric(GenomicRanges::seqnames(range.info)),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
+    addArmlines(as.numeric(GenomicRanges::seqnames(range.info)),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
 }
 
-chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id=1,highlight,assembly,...){
-    if (all(names(data) %in% c("data","meta"))){
-      data_pgxfreq <- data$data[[id]]
+chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,highlight,assembly,...){
+    if (is.null(id)) id <- 1
+    # input is pgxfreq
+    if (is(data, "CompressedGRangesList")){
+        range.info <- data[[id]]
+        gain.freq <- S4Vectors::mcols(range.info)$gain_frequency
+        loss.freq <- S4Vectors::mcols(range.info)$loss_frequency
+        meta <- S4Vectors::mcols(data)
+    # input is data.frame
+    } else if (is(data, "RangedSummarizedExperiment")){
+        range.info <- unique(GenomicRanges::granges(SummarizedExperiment::rowRanges(data)))
+        gain.freq <- SummarizedExperiment::assay(data)[which(SummarizedExperiment::rowData(data)$type == "DUP"),id]
+        loss.freq <- SummarizedExperiment::assay(data)[which(SummarizedExperiment::rowData(data)$type == "DEL"),id]
+        meta <- SummarizedExperiment::colData(data)
     } else{
-      if(length(colnames(data)) == 0) stop("\n The input is invalid \n")
-      if(any(colnames(data)[c(5,6)] != c('gain_frequency','loss_frequency'))) stop("\n The input is invalid \n")
-      if(length(unique(data[,1])) > 1) stop("\n The input is invalid (more than one sample id) \n")
-      data_pgxfreq <- data
+        stop("\n The input is invalid \n")
     }
   
-    nProbe <- nrow(data_pgxfreq)
+    nProbe <- length(range.info)
     nChrom <- length(chrom)
   
     #Grid layout
@@ -104,11 +121,10 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id=1,highlight,assemb
     }
     mar <- c(0.2,0.2,0.3,0.2)
   
-    data_pgxfreq[,2] <- gsub("X", "23", data_pgxfreq[,2])
-    data_pgxfreq[,2] <- gsub("Y", "24", data_pgxfreq[,2])
+
     #Adjust positions to be plotted along xaxis; i.e. scale according to plot.unit, and get left and right pos for freq.rectangles to be plotted (either continuous
     #or 1 probe long):
-    x <- adjustPos(position=data_pgxfreq[,4],chromosomes=as.numeric(data_pgxfreq[,2]),
+    x <- adjustPos(position=GenomicRanges::end(range.info),chromosomes=as.numeric(GenomicRanges::seqnames(range.info)),
                    pos.unit=pos.unit,type="chromosome",op=op)
     xleft <- x$xleft
     xright <- x$xright
@@ -130,8 +146,8 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id=1,highlight,assemb
   
   
     #Find default ylimits and at.y (tickmarks):
-    use <- which(as.numeric(data_pgxfreq[,2]) %in% chrom)
-    op <- updateFreqParameters(data_pgxfreq$loss_frequency[use],data_pgxfreq$gain_frequency[use],op)
+    use <- which(as.numeric(GenomicRanges::seqnames(range.info)) %in% chrom)
+    op <- updateFreqParameters(loss.freq[use],gain.freq[use],op)
   
     #Make separate plots for each chromosome:
   
@@ -148,9 +164,9 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id=1,highlight,assemb
       k <- chrom[c]
   
       #Pick out frequencies for this chromsome
-      ind.c <- which(as.numeric(data_pgxfreq[,2]) ==k)
-      freqamp.c <- data_pgxfreq$gain_frequency[ind.c]
-      freqdel.c <- data_pgxfreq$loss_frequency[ind.c]
+      ind.c <- which(as.numeric(GenomicRanges::seqnames(range.info)) ==k)
+      freqamp.c <- gain.freq[ind.c]
+      freqdel.c <- loss.freq[ind.c]
   
       xlim <- c(0,max(xright[ind.c]))
   
@@ -193,8 +209,8 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id=1,highlight,assemb
       #Plot frequencies as rectangles
       # check if highlight exists
       if (length(which(highlight %in% ind.c)) > 0){
-        op$col.gain <- rep(op$col.gain, dim(data_pgxfreq)[1])
-        op$col.loss <- rep(op$col.loss, dim(data_pgxfreq)[1])
+        op$col.gain <- rep(op$col.gain, length(range.info))
+        op$col.loss <- rep(op$col.loss, length(range.info))
         op$col.gain[highlight] <- 'red'
           op$col.loss[highlight] <- 'red'
             rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=freqamp.c,
@@ -215,15 +231,14 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id=1,highlight,assemb
       abline(v=0)
   
       # edit title
-      if (all(names(data) %in% c("data","meta"))){
-        id_name <- names(data$data[id])
-        meta <- data$meta[data$meta[,1] == id_name,]
-        if (meta[2] == ''){
-          op$title <- paste(id_name," (", meta[3], " samples)", sep="")
-        } else{
-          op$title <- paste(id_name, ": ",meta[2], " (", meta[3], " samples)", sep="")}
+      id_name <-  rownames(meta[id,])
+      plot_meta <- meta[id_name,]
+      if (plot_meta[[2]] == ''){
+        op$title <- paste0(id_name," (", plot_meta[[3]], " samples)")
+      } else{
+        op$title <- paste0(id_name, ": ",plot_meta[[2]], " (", plot_meta[[3]], " samples)")
       }
-  
+      
   
       #If page is full; start plotting on new page
       if(c%%(nr*nc)==0 && c!=nChrom){
@@ -333,8 +348,8 @@ getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
     op <- modifyList(op,list(...))
 
     #Set assembly to refer to stored data instead of character string:
-    data(list=c(op$assembly))
-    op$assembly <- get(op$assembly)
+    data(list=c(paste0(op$assembly,'_cytoband')))
+    op$assembly <- get(paste0(op$assembly,'_cytoband'))
 
     #Placement of labels and axis annotation:
     if(is.null(op$mgp)){

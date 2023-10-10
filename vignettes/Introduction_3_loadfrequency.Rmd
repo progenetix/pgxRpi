@@ -25,6 +25,8 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(pgxRpi)
+library(SummarizedExperiment)
+library(GenomicRanges)
 ```
 
 ## `pgxLoader` function 
@@ -56,36 +58,27 @@ type, output, filters, codematches
 ```{r}
 freq_pgxfreq <- pgxLoader(type="frequency", output ='pgxfreq',
                          filters=c("NCIT:C4038","pgx:icdom-85003"))
+
+freq_pgxfreq
 ```
 
-The `meta` slot of this object looks like this
+The returned data is stored in [*GRangesList*](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html) container which consists of multiple *GRanges* objects.
+Each *GRanges* object stores CNV frequency from samples pecified by a particular filter. 
+Within each GRanges object, you can find annotation columns "gain_frequency" and "loss_frequency" in each row, which express the percentage values across samples (%) for gains and losses that overlap the corresponding genomic interval.
+
+These genomic intervals are derived from the partitioning of the entire genome (GRCh38). Most of these bins have a size of 1MB, except for a few bins located near the telomeres. In total, there are 3106 intervals encompassing the genome.
+
+To access the CNV frequency data from specific filters, you could access like this
 
 ```{r}
-freq_pgxfreq$meta
+freq_pgxfreq[["NCIT:C4038"]]
 ```
 
-The `data` slot contains a list of the CNV frequency data frames named by the corresponding 
-filters. The data frame with the name 'total' is the concatenated data frames from all 
-filters.
+To get metadata such as count of samples used to calculate frequency, use `mcols`:
 
 ```{r}
-names(freq_pgxfreq$data)
+mcols(freq_pgxfreq)
 ```
-
-You can access the data frame with "pgxfreq" format of one filter from this list.  
-
-```{r}
-print(dim(freq_pgxfreq$data[['NCIT:C4038']]))
-head(freq_pgxfreq$data[['NCIT:C4038']])
-```
-
-In the pgxfreq format, the whole genome (GRCh38) is partitioned into 3106 intervals or bins (the size 
-of most bins is 1MB except a few bins close to telomeres).
-
-* `filters`: identifiers for grouping. 
-* `reference_name`, `start` and `end` specify interval location in chromosome.
-* `gain_frequency` and `loss_frequency` indicate the percent values across samples (%) for gains and 
-losses overlapping the interval, respectively.
 
 The parameter `codematches` determines whether the calculation of CNV frequency excludes samples from child terms.
 
@@ -103,48 +96,29 @@ load data with the specified code
 
 ```{r}
 freq_pgxmatrix <- pgxLoader(type='frequency',output = 'pgxmatrix',filters=code)
+freq_pgxmatrix
 ```
 
-The `meta` slot of this object looks like this
+The returned data is stored in [*RangedSummarizedExperiment*](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html) object, which is a matrix-like container where rows represent ranges of interest (as a GRanges object) and columns represent filters. 
+
+To access the CNV frequency matrix, use `assay` accesssor
 
 ```{r}
-freq_pgxmatrix$meta
+head(assay(freq_pgxmatrix))
 ```
 
-The `data` slot contains a list of the nine CNV frequency data frames. One of these nine
-data frames looks like this
+The matrix has 6212 rows (genomic regions) and 8 columns (filters). The rows comprised 3106 intervals with “gain status” plus 3106 intervals with “loss status”. 
+
+The value is the percentage of samples from the corresponding filter having one or more CNV events in the 
+specific genomic intervals. You could get the interval information by `rowRanges`
 
 ```{r}
-freq_pgxmatrix$data[['NCIT:C3059']][,c(1:4,3108:3110)]
+rowRanges(freq_pgxmatrix)
 ```
 
-In the data frame with "pgxmatrix" format, `filters` is the same as that in the "pgxfreq" format. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). For example, if the column `X1.400000.1400000.DUP` is 8.457, it means that 8.457% samples from the corresponding filter having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
+For example, if the value in the second row and first column is 8.457, it means that 8.457% samples from the corresponding filter NCIT:C3059 having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
 
 Note: it is different from CNV status matrix introduced in Introduction_2_loadvariants. Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV status matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in the individual sample.
-
-You can also access the total data frame for analyzing multiple frequency sets.
-
-```{r}
-freq_pgxmatrix$data[['total']][,c(1:4,3108:3110)]
-```
-
-## Select ids of interests from original object 
-
-It is realized by `pgxFreqselect` function.
-
-This function can select filters of interests from input object and return a new object 
-with selected filters.
-
-The parameters of this function:
-
-* `data`: CNV frequency data returned by `pgxLoader` function. 
-* `filters`: identifiers of interests such as c("NCIT:C7376","pgx:icdom-98353").
-
-```{r}
-freq_sel <- pgxFreqselect(data=freq_pgxmatrix, 
-                          filters = c("NCIT:C4917","NCIT:C3512","NCIT:C3493"))
-freq_sel$data$total[,c(1:5)]
-```
 
 # Visualization of CNV frequency data using 'pgxfreq' format
 
@@ -154,9 +128,7 @@ This function provides CNV frequency plots by genome or chromosomes as you reque
 
 The parameters of this function:
 
-* `data`: frequency object returned by `pgxLoader` function or individual frequency matrix with 'pgxfreq' format. 
-In the returned object by `pgxLoader`, the frequency matrices in `data` slot must be stored as `pgxfreq` format, 
-which can be specified by `output` parameter of `pgxLoader` function.   
+* `data`: frequency object returned by `pgxLoader` function. 
 * `chrom`: a vector with chromosomes to be plotted. If NULL, return the plot by genome. If specified the frequencies are plotted with one panel for each chromosome. Default is NULL.
 * `layout`: number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1). 
 * `filters`: Index or string value to indicate which filter to be plotted. The length of filters is limited to one if the parameter `circos` is False. Default is the first filter.
@@ -167,20 +139,17 @@ return a circos plot with multiple group ids for display and comparison. Default
 
 ## CNV frequency plot by genome 
 
-### Input is an object.
+### Input is `pgxfreq` object.
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxfreq, filters='pgx:icdom-85003')
+pgxFreqplot(freq_pgxfreq, filters="pgx:icdom-85003")
 ```
 
-### Input is individual frequency data. 
+### Input is `pgxmatrix` object. 
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxfreq$data[["NCIT:C4038"]])
+pgxFreqplot(freq_pgxmatrix, filters = "NCIT:C3512")
 ```
-
-By default, the supported genome for plotting is GRCh38. You
-can set the `assembly` parameter to 'hg19' if the plotting genome is GRCh37.
 
 ## CNV frequency plot by chromosomes
 
@@ -209,10 +178,10 @@ You could first find the genomic bin where CCND1 (chr11:69641156-69654474) is lo
 ```{r}
 # Extract the CNV frequency data frame of samples from 'icdom-85003' from 
 # the previously returned object
-freq_IDC <- freq_pgxfreq$data$`pgx:icdom-85003`
+freq_IDC <- freq_pgxfreq[['pgx:icdom-85003']]
 # search the genomic bin where CCND1 is located
-bin <- which(freq_IDC$reference_name == 11 & freq_IDC$start <= 69641156 &  
-             freq_IDC$end >= 69654474)
+bin <- which(seqnames(freq_IDC) == 11 & start(freq_IDC) <= 69641156 &  
+             end(freq_IDC) >= 69654474)
 freq_IDC[bin,]
 ```
 
@@ -230,81 +199,6 @@ multiple bins by a vector of indices.
 
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(freq_pgxfreq,filters = 'pgx:icdom-85003',highlight = c(1:100))
-```
-
-# Clustering of CNV frequency data using 'pgxmatrix' format
-
-## Hierarchical clustering
-
-Use hierarchical clustering to cluster the tumor types which are picked before by NCIt code.
-
-```{r}
-# extract CNV frequency data from `total` slot
-freq_mat <- freq_pgxmatrix$data[['total']][,2:dim(freq_pgxmatrix$data[['total']])[2]]
-rownames(freq_mat) <- freq_pgxmatrix$data[['total']]$filters
-# do clustering
-dist_mat <- dist(freq_mat, method = 'euclidean')
-hclust_res <- hclust(dist_mat, method = "ward.D")
-```
-
-The clustering result is shown below. 
-
-```{r}
-hcd <- as.dendrogram(hclust_res)
-plot(hcd, type = "rectangle", ylab = "Height")
-# Based on the plot, the number of clusters is set to 4.
-cut<- cutree(hclust_res, k = 4)
-rect.hclust(hclust_res , k = 4, border = 2:6)
-```
-
-## Merge frequency matrix
-
-Merge the frequency matrix by calculating the difference between gain frequency 
-and loss frequency per interval (gain-loss)
-
-```{r}
-diff_mat <- freq_mat[,1:3106]-freq_mat[,3107:6212]
-```
-
-Sort the merged matrix by clustering membership 
-
-```{r}
-sort_idx <- order(cut)
-cut <- cut[sort_idx]
-diff_mat <- diff_mat[sort_idx,]
-```
-
-## Get metadata (label, sample number)
-
-From the `meta` slot of the object
-
-```{r}
-meta <- freq_pgxmatrix$meta[sort_idx,]
-```
-
-## Plot heatmap
-
-Plot a heatmap to show the merged matrix. The color in the rowside shows cluster membership calculated by the original frequency matrix   
-
-```{r fig.width=10, fig.height=5}
-library("RColorBrewer")
-library('pheatmap')
-rownames(diff_mat) <- paste(meta[,1], paste0("(",meta[,3],")"),meta[,2])
-
-parlength <- 100
-myBreaks <- c(seq(min(diff_mat), 0, length.out=ceiling(parlength/2) + 1), 
-              seq(max(diff_mat)/parlength, max(diff_mat), length.out=floor(parlength/2)))
-
-annotation_row <- data.frame(cluster=factor(cut))
-annotation_col <- data.frame(chr=factor(substring(colnames(diff_mat),1,
-                                                  last=regexpr("\\.", colnames(diff_mat))-1),
-                                        levels = c(gsub('^','X',seq(1,22)), 'X','Y')))
-rownames(annotation_col) <- colnames(diff_mat)
-rownames(annotation_row) <- rownames(diff_mat)
-
-pheatmap(as.matrix(diff_mat), scale = "none",cluster_cols = FALSE, cluster_rows = FALSE,
-         width = 8,height = 10,cellwidth=0.1,breaks=myBreaks,show_colnames=FALSE ,
-         annotation_row = annotation_row,annotation_col = annotation_col,annotation_legend=TRUE)
 ```
 
 # Session Info

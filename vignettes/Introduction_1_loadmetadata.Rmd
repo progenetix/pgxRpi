@@ -58,8 +58,9 @@ type, filters, filterLogic, individual_id, biosample_id, codematches, limit, ski
 
 ## Search by filters
 
-The following query is to retrieve the metadata in Progenetix of all lung adenocarcinoma samples based on 
-[NCIt code](https://ncit.nci.nih.gov):
+Filters are a significant enhancement to the [Beacon](https://www.ga4gh.org/product/beacon-api/) query API, providing a mechanism for specifying rules to select records based on their field values. To learn more about how to utilize filters in Progenetix, please refer to the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
+
+The following query is designed to retrieve metadata in Progenetix related to all samples of lung adenocarcinoma, utilizing a specific type of filter based on an [NCIt code](https://ncit.nci.nih.gov) as an ontology identifier.
 
 ```{r}
 biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512")
@@ -70,6 +71,9 @@ biosamples[c(1700:1705),]
 The data contains many columns representing different aspects of sample information. 
 
 ## Search by biosample id and individual id 
+
+In Progenetix, biosample id and individual id serve as unique identifiers for biosamples and the corresponding individuals. You can obtain these IDs through metadata search with filters as described above, or through [website](https://progenetix.org/search) interface query.
+
 
 ```{r}
 biosamples_2 <- pgxLoader(type="biosample", filters = "NCIT:C3512",codematches = TRUE,
@@ -167,92 +171,6 @@ total.individuals <- pgxLoader(type='individual',filters='NCIT:C3270',
                                individual_id = 'pgxind-kftx26ml')
 
 dim(total.individuals)
-```
-
-## Survival data use case
-
-### Cancer-specific query
-
-Here we use metadata of individuals from lung adenocarcinoma as an example to analyse 
-survival difference between older patients ( >= 60 years old) and younger patients ( < 60 years old).
-
-```{r}
-# load required library
-library(lubridate)
-library(survival)
-library(survminer)
-
-# query
-
-lungadind_young <- pgxLoader(type='individual',
-                             filters=c('NCIT:C3512','age:<P60Y'),
-                             codematches = FALSE)
-
-lungadind_old <- pgxLoader(type='individual',
-                           filters=c('NCIT:C3512','age:>=P60Y'),
-                           codematches = FALSE)
-```
-
-Define function for preprocessing data
-
-```{r}
-cleanData <- function(data){
-  # exclude individuals without available survival information
-  data <- data[data$index_disease_followup_time != "None" & 
-               !data$index_disease_followup_state_label %in% c("","no followup status"),]
-  # transform followup state 
-  aliveidx <- which(data$index_disease_followup_state_label == "alive (follow-up status)")
-  data$index_disease_followup_state_label[aliveidx] <- 0 
-  deadidx <- which(data$index_disease_followup_state_label == "dead (follow-up status)")
-  data$index_disease_followup_state_label[deadidx] <- 1
-  return(data)
-}
-```
-
-Preprocess data and construct survival data frame
-
-```{r}
-lungadind_young_clean <- cleanData(lungadind_young)
-lungadind_old_clean <- cleanData(lungadind_old)
-lungadind_clean <- rbind(lungadind_young_clean,lungadind_old_clean)
-
-group_id <- rep(c('younger','older'),
-                times=c(dim(lungadind_young_clean)[1],dim(lungadind_old_clean)[1]))
-followup_state <- as.numeric(lungadind_clean$index_disease_followup_state_label)
-followup_time <- time_length(lungadind_clean$index_disease_followup_time,unit = 'days')
-survival_df <- data.frame(group_id, followup_time, followup_state)
-```
-
-Fit the survival data and visualise
-
-```{r, fig.width=7, fig.height=5}
-sfit <- survfit(Surv(followup_time, followup_state)~group_id, data=survival_df)
-ggsurvplot(sfit,data=survival_df,pval = TRUE)
-```
-
-### Cohort-specific query
-
-To get metadata from individuals with specific cohort, you need to use corresponding filters. 
-Here we use TCGA-BRCA cohort from TCGA as an example and do the same survival analysis as above.
-
-```{r, fig.width=7, fig.height=5}
-# query
-tcgabrcaind_young <- pgxLoader(type='individual',filters=c('pgx:TCGA.BRCA','age:<P60Y'))
-tcgabrcaind_old <- pgxLoader(type='individual',filters=c('pgx:TCGA.BRCA','age:>=P60Y'))
-# preprocess
-tcgabrcaind_young_clean <- cleanData(tcgabrcaind_young)
-tcgabrcaind_old_clean <- cleanData(tcgabrcaind_old)
-# survival data construction
-tcgabrcaind_clean <- rbind(tcgabrcaind_young_clean,tcgabrcaind_old_clean)
-group_id <- rep(c('younger','older'),times=
-                  c(dim(tcgabrcaind_young_clean)[1],dim(tcgabrcaind_old_clean)[1]))
-followup_state <- as.numeric(tcgabrcaind_clean$index_disease_followup_state_label)
-followup_time <- time_length(tcgabrcaind_clean$index_disease_followup_time,unit = 'days')
-survival_df <- data.frame(group_id, followup_time, followup_state)
-# fit
-sfit <- survfit(Surv(followup_time, followup_state)~group_id, data=survival_df)
-# visualise
-ggsurvplot(sfit,data=survival_df,pval = TRUE)
 ```
 
 # Session Info

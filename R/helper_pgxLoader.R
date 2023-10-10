@@ -1,11 +1,5 @@
 transform_id <- function(id){
-    if (length(id) > 1) {
-        filter <- id[1]
-        for (tag in id[2:length(id)]) {
-            filter  <-paste(filter, tag, sep=',')
-        } }else{
-            filter <- id
-        }
+    filter <- paste(id,collapse = ",")
     return(filter)
 }
 
@@ -30,14 +24,21 @@ read_variant_pgxseg_meta <- function(url){
     return(meta[seq_len(idx)])
 }
 
+disease_code_check <- function(id, remain.id, url){
+  total.id <- c()
+  for (code in c('NCIT','icdom','icdot','UBERON')){
+    idx <- grep(code,id)
+    if (length(idx) > 0){
+      encoded_url <- URLencode(paste0(url,code))
+      res <- rjson::fromJSON(file = encoded_url)
+      total.id <- c(total.id,unlist(lapply(res$response$results, function(x){x$id})))
+      remain.id <- remain.id [!remain.id %in% id[idx]]
+    }
+  }
+  return(list(total=total.id,remain=remain.id))
+}
+
 pgidCheck <- function(id,domain){
-  
-    res.id <- c()
-   
-    ncit.idx <- grep('NCIT',id)
-    icdom.idx <- grep('icdom',id)
-    icdot.idx <- grep('icdot',id)
-    uberon.idx <- grep('UBERON',id)
     # this query doesn't work for individual GSM id and age filters
     geogsm.idx <- grep('geo:GSM',id)
     age.idx <- grep('age:',id)
@@ -50,42 +51,18 @@ pgidCheck <- function(id,domain){
     
     url <- paste0(domain,"/services/collations?filters=")
     
-    if (length(ncit.idx) > 0){
-      encoded_url <- URLencode(paste0(url,"NCIT"))
-      res <- rjson::fromJSON(file = encoded_url)
-      res.id <- c(res.id,unlist(lapply(res$response$results, function(x){x$id})))
-      remain.id <- remain.id [!remain.id%in% id[ncit.idx]]
-    }
-    
-    if (length(icdom.idx) > 0){
-      encoded_url <- URLencode(paste0(url,"icdom"))
-      res <- rjson::fromJSON(file = encoded_url)
-      res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
-      remain.id <- remain.id [!remain.id%in% id[icdom.idx]]
-    }
-  
-    if (length(icdot.idx) > 0){
-      encoded_url <- URLencode(paste0(url,"icdot"))
-      res <- rjson::fromJSON(file =encoded_url)
-      res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
-      remain.id <- remain.id [!remain.id%in% id[icdot.idx]]
-    }
-  
-    if (length(uberon.idx) > 0){
-      encoded_url <- URLencode(paste0(url,"UBERON"))
-      res <- rjson::fromJSON(file =encoded_url)
-      res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
-      remain.id <- remain.id [!remain.id%in% id[uberon.idx]]
-    }
-    
-  
+    # check if disease_code associated filters exist in Progenetix
+    check.res <- disease_code_check(id, remain.id, url)
+    remain.id <- check.res$remain
+    total.id <- check.res$total
+    # check if non disease_code associated filters exist in Progenetix
     if (length(remain.id) > 0){
       encoded_url <- URLencode(paste0(url,transform_id(remain.id)))
       res <- rjson::fromJSON(file = encoded_url)
-      res.id <- c(res.id, unlist(lapply(res$response$results, function(x){x$id})))
+      total.id <- c(total.id, unlist(lapply(res$response$results, function(x){x$id})))
     }
     
-    return(id %in% c(res.id,id[pass.idx]))
+    return(id %in% c(total.id,id[pass.idx]))
 }
 
 pgxFreqLoader <- function(output, codematches, filters, domain) {
@@ -106,26 +83,44 @@ pgxFreqLoader <- function(output, codematches, filters, domain) {
     }
 
     encoded_url <- URLencode(url)
-
+    # access metadata from JSON output
     meta <- readLines(encoded_url)[seq_len(length(filters))+1]
     meta_lst <- unlist(strsplit(meta,split = ';'))
     label <- meta_lst[grep("label",meta_lst)]
     label<- gsub('.*=','',label)
     count <- meta_lst[grep("sample_count",meta_lst)]
     count <- as.numeric(gsub('.*=','',count))
-    meta <- data.frame(code = c(filters,'total'), label=c(label,''), sample_count=c(count,sum(count)))
-    
+    meta <- data.frame(filter = filters, label, sample_count=count)
+    # access data 
     pg.data  <- read.table(encoded_url, header=TRUE, sep="\t")
     colnames(pg.data)[1] <- 'filters'
-    
-    data_lst <- list()
-    for (i in filters){
-        data_lst[[i]] <- pg.data[pg.data$filters == i,]
+    if (output == 'pgxfreq'){
+      colnames(pg.data)[2] <- 'chr'
+      data_lst <- GenomicRanges::makeGRangesListFromDataFrame(pg.data,split.field = 'filters',keep.extra.columns=TRUE)
+      S4Vectors::mcols(data_lst) <- meta
+    } else if (output == "pgxmatrix"){
+      frequency <- as.data.frame(t(pg.data[,-1]))
+      rowRanges <- rownames(frequency)
+      rowRanges <- lapply(rowRanges,function(x){
+        range_str <- unlist(strsplit(x,split = '\\.'))
+        chr <- range_str[1]
+        chr <- gsub("X","",chr)
+        if (chr == "") chr <- 'X'
+        return(data.frame(chr=chr,start=range_str[2],end = range_str[3],type=range_str[4]))
+      })
+      rowRanges <- do.call(rbind, rowRanges)
+      rowRanges <- GenomicRanges::GRanges(rowRanges)
+      names(rowRanges) <- seq_len(dim(frequency)[1])
+      
+      colnames(frequency) <- pg.data[,1]
+      rownames(frequency) <- seq_len(dim(frequency)[1])
+      
+      colData <- meta
+      data_lst <- SummarizedExperiment::SummarizedExperiment(assays=list(frequency=frequency),
+                           rowRanges=rowRanges, colData=meta)
     }
-    data_lst[['total']] <- pg.data
-    result <- list(meta = meta, data = data_lst)
-  
-    return(result)
+    
+    return(data_lst)
 }
 
 pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematches, skip, limit, filterLogic, domain){
@@ -408,14 +403,20 @@ pgxcallsetLoader <- function(filters,limit,skip,codematches,domain){
     }
 
     pg.data  <- read.table(encoded_url, header=TRUE, sep="\t")
-  
+    # remove automatic prefix X 
+    colnames(pg.data) <- gsub("X","",colnames(pg.data))
+    # add chr prefix to avoid colnames with numeric start
+    colnames(pg.data) <- paste0("chr",colnames(pg.data) )
+    # recover X chr    
+    colnames(pg.data) <- gsub("chr\\.","chrX\\.",colnames(pg.data))
+
     if (codematches){
         pg.data <- pg.data[pg.data$group_id %in% filters,]
         if (dim(pg.data)[1] == 0){
             warning("\n the option `codematches=TRUE` filters out all samples \n")
     }}
   
-  return(pg.data)
+    return(pg.data)
 }
 
 
@@ -491,10 +492,10 @@ pgxCovLoader <- function(filters,codematches,skip,limit,domain){
                  x$delfraction[chrom_arm_idx],
                  x$dupfraction[chrom_idx],
                  x$delfraction[chrom_idx])
-        names <- c(paste0(chrom_arm_list,'.dup'),
-                   paste0(chrom_arm_list,'.del'),
-                   paste0(chrom_list,'.dup'),
-                   paste0(chrom_list,'.del'))
+        names <- c(paste0('chr',chrom_arm_list,'.dup'),
+                   paste0('chr',chrom_arm_list,'.del'),
+                   paste0('chr',chrom_list,'.dup'),
+                   paste0('chr',chrom_list,'.del'))
         return(  t(data.frame(val,row.names =  names)))
     }) 
   

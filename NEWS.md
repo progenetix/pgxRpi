@@ -2,3 +2,9 @@
 
 - Submitted to Bioconductor
 
+## Version: 0.99.5 (2023-10-10)
+
+- Updated data structure for frequency data, transitioning from a simple list to Bioconductor containers.
+- Removed sections on survival analysis and frequency clustering analysis from the vignettes to align with the package's scope.
+
+

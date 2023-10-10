@@ -97,6 +97,8 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
             frequency[['data']] <- list()
             frequency[['meta']] <- c()
             total_sample_count <- 0
+            freq_data <- list()
+            freq_meta <- list()
             for (id in unique(meta[,group_id])){
                 plot.samples <- meta[,1][meta[,group_id] %in% id]
                 # select samples from samples in pgxseg data
@@ -118,18 +120,17 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
                     freq.seg$loss_frequency <- loss.freq
                 }
         
-                frequency$data[[id]] <- freq.seg
+                freq_data[[id]] <- freq.seg
                 group_label <- sub("_id", "_label",group_id)
-                frequency$meta <- rbind(frequency$meta, data.frame(group_id = id, 
-                                                                   group_label=ifelse(group_label %in% colnames(meta),unique(meta[,group_label][meta[,group_id] == id]),NA),
-                                                                   sample_count=nsamples))
-                total_sample_count <-  total_sample_count+nsamples
+                freq_meta[[id]] <-  data.frame(group_id = id, group_label=ifelse(group_label %in% colnames(meta),unique(meta[,group_label][meta[,group_id] == id]),NA),
+                                              sample_count=nsamples)
             }
-            frequency$meta <- rbind(frequency$meta, data.frame(group_id = 'total', 
-                                                         group_label='',
-                                                         sample_count=total_sample_count))
-            frequency$data[['total']] <- do.call(rbind,frequency$data)
-
+            
+            freq_meta <- do.call(rbind,freq_meta)
+            freq_data <- do.call(rbind,freq_data)
+            
+            frequency <- GenomicRanges::makeGRangesListFromDataFrame(freq_data,split.field = 'group_id',keep.extra.columns=TRUE)
+            S4Vectors::mcols(frequency) <- freq_meta
         }
     }
   
