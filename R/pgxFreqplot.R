@@ -1,10 +1,8 @@
 #' Plot CNV frequency data
 #'
-#' Thie function plots the frequency of deletions and amplifications
+#' Thie function plots the frequency of deletions and duplications
 #'
-#' @param data Frequency object returned by `pgxLoader` function or individual frequency matrix with 'pgxfreq' format.
-#' In the returned object by `pgxLoader`, the frequency matrices in `data` slot must be stored as 'pgxfreq' format,
-#' which can be specified by `output` parameter of `pgxLoader` function.
+#' @param data The frequency object returned by `pgxLoader` function.
 #' @param chrom A vector with chromosomes to be plotted. If NULL, return the plot
 #' by genome. If specified the frequencies are plotted with one panel for each
 #' chromosome. Default is NULL.

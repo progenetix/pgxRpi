@@ -15,9 +15,7 @@ pgxFreqplot(
 )
 }
 \arguments{
-\item{data}{Frequency object returned by \code{pgxLoader} function or individual frequency matrix with 'pgxfreq' format.
-In the returned object by \code{pgxLoader}, the frequency matrices in \code{data} slot must be stored as 'pgxfreq' format,
-which can be specified by \code{output} parameter of \code{pgxLoader} function.}
+\item{data}{The frequency object returned by \code{pgxLoader} function.}
 
 \item{chrom}{A vector with chromosomes to be plotted. If NULL, return the plot
 by genome. If specified the frequencies are plotted with one panel for each
@@ -43,7 +41,7 @@ Allowed options are "hg19", "hg38". Default is "hg38" (genome version used in Pr
 The binned CNV frequency plot
 }
 \description{
-Thie function plots the frequency of deletions and amplifications
+Thie function plots the frequency of deletions and duplications
 }
 \examples{
 ## load necessary data (this step can be skipped in real implementation)
