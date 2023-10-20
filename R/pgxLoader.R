@@ -2,8 +2,8 @@
 #'
 #' This function loads various data from `Progenetix` database.   
 #'
-#' @param type A string specifying output data type. Available options are "biosample", "individual",
-#' "variant" or "frequency". The first two options return corresponding metadata, "variant" returns CNV variant data, and "frequency" returns precomputed CNV frequency based on data in Progenetix. 
+#' @param type A string specifying output data type. Available options are "b" (biosample), "i" (individual),
+#' "v" (variant) or "f" (frequency). The first two options return corresponding metadata, "v" returns CNV variant data, and "f" returns precomputed CNV frequency based on data in Progenetix. 
 #' @param output A string specifying output data format. When the parameter `type` is "variant",
 #' available options are NULL, "pgxseg", "seg", "coverage", or "pgxmatrix"; When the parameter `type` is "frequency",
 #' available options are "pgxfreq" or "pgxmatrix".
@@ -26,6 +26,7 @@
 #' in current work directory.
 #' @param domain A string specifying the domain of database. Default is "http://progenetix.org".
 #' @importFrom utils URLencode modifyList read.table write.table
+#' @importFrom httr GET content
 #' @return Data from Progenetix database
 #' @export
 #' @examples
@@ -50,67 +51,62 @@ pgxLoader <- function(
     filename=NULL,
     domain="http://progenetix.org"){
     
-    if (!(any(type %in% c("biosample", "variant","frequency","individual")))){
-        stop("\n The parameter 'type' is invalid (available: \"biosample\", \"individual\", \"variant\", or \"frequency\")")
+    # check type
+    if (is.null(type) || !is.character(type)) stop("\n The parameter 'type' is invalid. \n")
+  
+    type <- match.arg(type, c("biosample", "variant","frequency","individual"))
+    
+    # check output
+    if (!is.null(output)){
+        output <-  switch(type,
+                          variant=match.arg(output, c("pgxseg", "pgxmatrix", "seg",  "coverage")),
+                          frequency=match.arg(output, c("pgxfreq" , "pgxmatrix")),
+                          biosample=NULL,
+                          individual=NULL)
+      
+        # adapt to different variant formats 
+        if (type == "variant"){
+            type <- switch(output,
+                           pgxmatrix = 'callset',
+                           coverage = 'coverage',
+                           seg="variant",
+                           pgxseg="variant")
+        }
     }
     
-
-    if (!is.null(output)){
-        if (type == 'variant'){
-            if (output=='pgxmatrix'){
-                type <- 'callset'
-            } else if (output=='coverage'){
-                type <- 'coverage'
-            } else if (!output %in% c('pgxseg','seg')){
-                stop("\n The parameter 'output' is invalid (available: NULL, \"pgxseg\", \"pgxmatrix\", \"seg\", or \"coverage\")")
-            }
-        }
-        if (type == 'frequency'){
-            if (!output %in% c('pgxfreq','pgxmatrix')){
-                stop("\n The parameter 'output' is invalid (available: \"pgxfreq\" or \"pgxmatrix\")")
-            }
-        }
-    }    
-  
-      
+    # for filter-based data  
     if (type %in% c('callset', 'coverage','frequency')){
-        if (!is.null(biosample_id)){
-            warning("\n The parameter 'biosample_id' is not used in this query. Only 'filters' are accepted. \n")
-        }
-        if (!is.null(individual_id)){
-            warning("\n The parameter 'individual_id' is not used in this query. Only 'filters' are accepted. \n")
-        }
-        if (length(filters) < 1){
-            stop("\n The parameter 'filters' is missing. At least one valid filter has to be provided")
-        }
-
+        checkMissingParameters(filters,"'filters'")
+        # issue warnings for possible inappropriate query
+        checkUnusedParameters(biosample_id, "'biosample_id'", "'filters'")
+        checkUnusedParameters(individual_id, "'individual_id'", "'filters'")
+        # special calling data
         if (type %in% c('callset', 'coverage')){
             if (length(filters) > 1) stop("\n The parameter 'filters' is invalid. This query only supports one filter")
         }
 
         if (type == "frequency"){
-            if (is.null(output)) stop("\n The parameter 'output' is missing.  It must be set as 'pgxfreq' or 'pgxmatrix'")  
+            checkMissingParameters(output,"'output'")
         }
     }
-      
+    
+    # for other data  
     if (type == "individual"){
-        if (!is.null(biosample_id)){
-            warning("\n The parameter 'biosample_id' is not used in this query. Only 'individual_id' or 'filters' are accepted. \n")
-        }
+        checkMissingParameters(c(filters,individual_id), c("'filters'","'individual_id'"))
+        checkUnusedParameters(biosample_id, "'biosample_id'", c("'filters'","'individual_id'"))
+    }
+    
+    if (type == "biosample"){
+      checkMissingParameters(c(filters,individual_id,biosample_id), c("'filters'","'individual_id'","'biosample_id'"))
     }
   
     if (type == "variant"){
-        if (is.null(biosample_id)){
-            stop("\n The parameter 'biosample_id' is missing. At least one valid biosample id has to be provided")
-        }
-        if (!is.null(filters)){
-            warning("\n The parameter 'filters' is not used in this query. Only 'biosample_id' is accepted. \n")
-        }
-        if (!is.null(individual_id)){
-            warning("\n The parameter 'individual_id' is not used in this query. Only 'biosample_id' is accepted. \n")
-        }
+        checkMissingParameters(biosample_id,"'biosample_id'")
+        checkUnusedParameters(filters, "'filters'", "'biosample_id'")
+        checkUnusedParameters(individual_id, "'individual_id'", "'biosample_id'")
     }
-
+    
+    options(timeout=500)
     switch(type,
            biosample = pgxmetaLoader(type=type,biosample_id= biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,filterLogic=filterLogic,domain=domain),
            individual= pgxmetaLoader(type=type,biosample_id= biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,filterLogic=filterLogic,domain=domain),

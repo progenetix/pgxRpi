@@ -9,7 +9,7 @@ install.packages("devtools")
 devtools::install_github("progenetix/pgxRpi")
 ```
 
-For accessing metadata of biosamples or individuals, get started from the vignette Introduction_1_loadmetadata.
+For accessing metadata of biosamples/individuals, or learning more about filters, get started from the vignette Introduction_1_loadmetadata.
 
 For accessing CNV variant data, get started from this vignette Introduction_2_loadvariants.
 

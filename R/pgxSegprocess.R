@@ -35,7 +35,7 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
     if (!group_id %in% colnames(meta)){
         stop('group_id: ',group_id,' is not in metadata')
     }
-    if (show_KM_plot == TRUE){
+    if (show_KM_plot){
         # remove samples without survival data
         meta.sel.df <- meta[!is.na(meta$followup_time) & meta$followup_state_id != 'EFO:0030039',]
         attempt::stop_if(.x= dim(meta.sel.df)[1] == 0, msg="\n No available survival data \n")
@@ -65,7 +65,7 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
         show(ggp$plot)
     }
    
-    if (return_metadata == TRUE | return_frequency == TRUE){
+    if (return_metadata | return_frequency){
         meta$followup_time <- ifelse(length(meta$followup_time) == 0,NA,
                                      round(lubridate::time_length(meta$followup_time,unit='day')))
         meta <- dplyr::mutate(meta,followup_state_label = NA,.after = followup_state_id)
@@ -75,7 +75,7 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
         meta <- dplyr::rename(meta,'followup_time(days)' = followup_time)
     }
   
-    if (return_seg == TRUE | return_frequency == TRUE){
+    if (return_seg  | return_frequency){
         seg <- read.table(file,sep='\t',header=TRUE)
         # sort chr and start per sample
         seg <- lapply(unique(seg[,1]),FUN = function(x){
@@ -89,7 +89,7 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
         })
         seg <- do.call(rbind,seg)
         rownames(seg) <- seq_len(dim(seg)[1])
-        if (return_frequency == TRUE){
+        if (return_frequency){
             bin.data <- extract.bin.feature(seg,genome=assembly)
             bin.dup.data <- bin.data[['dup']]
             bin.del.data <- bin.data[['del']]
@@ -135,15 +135,15 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
     }
   
     result <- list()
-    if (return_seg == TRUE){
+    if (return_seg){
         result[['seg']] <- seg
     } 
   
-    if (return_metadata == TRUE){
+    if (return_metadata){
         result[['meta']] <- meta
     } 
   
-    if (return_frequency == TRUE){
+    if (return_frequency){
         result[['frequency']] <- frequency
     }
   

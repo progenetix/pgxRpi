@@ -7,4 +7,8 @@
 - Updated data structure for frequency data, transitioning from a simple list to Bioconductor containers.
 - Removed sections on survival analysis and frequency clustering analysis from the vignettes to align with the package's scope.
 
+## Version: 0.99.7 (2023-10-20)
+
+- Add `pgxFilter` function to expose all available filters.
+
 

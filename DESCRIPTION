@@ -1,6 +1,6 @@
 Package: pgxRpi
 Title: R wrapper for Progenetix 
-Version: 0.99.6
+Version: 0.99.7
 Authors@R: 
     c(person(given = "Hangjia",
            family = "Zhao",
@@ -29,7 +29,7 @@ Imports:
     grDevices,
     graphics,
 	circlize,
-	rjson,
+	httr,
 	dplyr,
   	attempt,
   	lubridate,
@@ -46,10 +46,7 @@ Suggests:
     BiocStyle,
     rmarkdown,
     knitr,
-    testthat,
-    httr,
-    RColorBrewer,
-    pheatmap
+    testthat
 BugReports: https://github.com/progenetix/pgxRpi/issues
 URL: https://github.com/progenetix/pgxRpi
 VignetteBuilder: knitr

@@ -1,3 +1,17 @@
+checkUnusedParameters <- function(param, param_name, rightparam_name) {
+  if (!is.null(param)) {
+    rightparam <- paste(rightparam_name,collapse = " and ")
+    warning("\n The parameter ", param_name, " is not used in this query. Only ",rightparam," are accepted. \n")
+  }
+}
+
+checkMissingParameters <- function(param, param_name){
+  if (length(param) < 1) {
+    param_name <- paste(param_name,collapse = " or ")
+    stop("\n The parameter ",param_name," is missing. \n")
+  }
+}
+
 transform_id <- function(id){
     filter <- paste(id,collapse = ",")
     return(filter)
@@ -26,11 +40,11 @@ read_variant_pgxseg_meta <- function(url){
 
 disease_code_check <- function(id, remain.id, url){
   total.id <- c()
-  for (code in c('NCIT','icdom','icdot','UBERON')){
+  for (code in c('NCIT','pgx:icdom','pgx:icdot','UBERON')){
     idx <- grep(code,id)
     if (length(idx) > 0){
       encoded_url <- URLencode(paste0(url,code))
-      res <- rjson::fromJSON(file = encoded_url)
+      res <- content(GET(encoded_url))
       total.id <- c(total.id,unlist(lapply(res$response$results, function(x){x$id})))
       remain.id <- remain.id [!remain.id %in% id[idx]]
     }
@@ -58,7 +72,7 @@ pgidCheck <- function(id,domain){
     # check if non disease_code associated filters exist in Progenetix
     if (length(remain.id) > 0){
       encoded_url <- URLencode(paste0(url,transform_id(remain.id)))
-      res <- rjson::fromJSON(file = encoded_url)
+      res <- content(GET(encoded_url))
       total.id <- c(total.id, unlist(lapply(res$response$results, function(x){x$id})))
     }
     
@@ -224,7 +238,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
         res_3 <- do.call(rbind, res_3)
     }
 
-    attempt::stop_if(.x= !(exists('res_1') | exists('res_2')| exists('res_3')) , msg='No data retrieved')
+    if(!(exists('res_1') | exists('res_2')| exists('res_3'))) stop("No data retrieved")
 
     res <- c()
     if (exists('res_1')){
@@ -238,7 +252,9 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
     if (exists('res_3')){
         res <- plyr::rbind.fill(res, res_3)
     }
-
+    
+    if (dim(res)[1] == 0) stop("No data retrieved")
+    
     rownames(res) <- seq(dim(res)[1])
     if (codematches){
         if (type == "biosample"){
@@ -259,44 +275,35 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
     return(res)
 }
 
-pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain){ 
+pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain){
     if (save_file & is.null(output)){
       stop("The parameter 'output' is invalid when 'save_file=TRUE' (available: \"seg\" or \"pgxseg\")") 
     } 
              
-    len <- length(biosample_id)
-    count <- ceiling(len/50)
     res <- list()
     meta <- c()
-    for (i in seq_len(count)){
-        j <- i*50
-        if (j > len){
-            j<-len
-        }
-        filter <- transform_id(biosample_id[c(((i-1)*50+1):j)])
-        url <- paste0(domain,"/beacon/variants/?biosampleIds=",
-                      filter,"&limit=0")
+    for (i in seq_len(length(biosample_id))){
+        url <- paste0(domain,"/beacon/biosamples/",biosample_id[i],"/g_variants")
         if (!(is.null(output))){
-            url <- paste0(url, "&output=pgxseg")
+            url <- paste0(url, "/?output=pgxseg")
             encoded_url <- URLencode(url)
             attempt::try_catch(res[[i]] <- read_variant_pgxseg(encoded_url), .e = function(e){
-                warning("\n Query fails for biosample_id ", filter, "\n")
+                warning("\n Query fails for biosample_id ", biosample_id[i], "\n")
             })
         }else{
             encoded_url <- URLencode(url)
-            attempt::try_catch(res[[i]] <- rjson::fromJSON(file = encoded_url), .e = function(e){
-                 warning("\n Query fails for biosample_id ", filter, "\n")
+            attempt::try_catch(res[[i]] <- content(GET(encoded_url)), .e = function(e){
+                 warning("\n Query fails for biosample_id ", biosample_id[i], "\n")
             })
-            
+            # when query failed  
             if (length(res) < i){
                 res[[i]] <- NA
                 next
             } 
             
             res[[i]] <- lapply(res[[i]]$response$resultSets[[1]]$results,unlist)
-                          
+            # when no variants for this id              
             if (length(res[[i]]) == 0){
-                warning("\n Query fails for biosample_id ", filter, "\n")
                 res[[i]] <- NA
                 next
             }
@@ -358,9 +365,6 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain){
 
     res <- do.call(rbind, res)
 
-
-
-
     if (!(is.null(output))){
         if (output == 'seg'){
             res <- res[,c(1,2,3,4,6,5)]
@@ -406,7 +410,7 @@ pgxcallsetLoader <- function(filters,limit,skip,codematches,domain){
     # remove automatic prefix X 
     colnames(pg.data) <- gsub("X","",colnames(pg.data))
     # add chr prefix to avoid colnames with numeric start
-    colnames(pg.data) <- paste0("chr",colnames(pg.data) )
+    colnames(pg.data)[4:ncol(pg.data)] <- paste0("chr",colnames(pg.data)[4:ncol(pg.data)])
     # recover X chr    
     colnames(pg.data) <- gsub("chr\\.","chrX\\.",colnames(pg.data))
 
@@ -434,7 +438,7 @@ pgxCovLoader <- function(filters,codematches,skip,limit,domain){
     url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
     url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
     encoded_url <- URLencode(url)
-    data <- rjson::fromJSON(file = encoded_url)
+    data <- content(GET(encoded_url))
     sample <- unlist(lapply(data$response$resultSets[[1]]$results, function(x){
         return(x$biosampleId)
     }))

@@ -32,8 +32,7 @@ This function loads various data from `Progenetix` database.
 
 The parameters of this function used in this tutorial:
 
-* `type` A string specifying output data type. Available options are "biosample", "individual",
-"variant" or "frequency". 
+* `type` A string specifying output data type. Available options are "b" (biosample), "i" (individual), "v" (variant) or "f" (frequency).   
 * `filters` Identifiers for cancer type, literature, cohorts, and age such as 
 c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). For more information about filters, see the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
 * `filterLogic` A string specifying logic for combining multiple filters when query metadata. Available options are "AND" and "OR". Default is "AND". An exception is filters associated with age that always use AND logic when combined with any other filter, even if filterLogic = "OR", which affects other filters. 
@@ -60,10 +59,22 @@ type, filters, filterLogic, individual_id, biosample_id, codematches, limit, ski
 
 Filters are a significant enhancement to the [Beacon](https://www.ga4gh.org/product/beacon-api/) query API, providing a mechanism for specifying rules to select records based on their field values. To learn more about how to utilize filters in Progenetix, please refer to the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
 
+The `pgxFilter` function helps access available filters used in Progenetix. Here is the example use:
+
+```{r}
+# access all filters
+all_filters <- pgxFilter()
+# get all prefix
+all_prefix <- pgxFilter(return_all_prefix = TRUE)
+# access specific filters based on prefix
+ncit_filters <- pgxFilter(prefix="NCIT")
+head(ncit_filters)
+```
+
 The following query is designed to retrieve metadata in Progenetix related to all samples of lung adenocarcinoma, utilizing a specific type of filter based on an [NCIt code](https://ncit.nci.nih.gov) as an ontology identifier.
 
 ```{r}
-biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512")
+biosamples <- pgxLoader(type="b", filters = "NCIT:C3512")
 # data looks like this
 biosamples[c(1700:1705),]
 ```
@@ -76,7 +87,7 @@ In Progenetix, biosample id and individual id serve as unique identifiers for bi
 
 
 ```{r}
-biosamples_2 <- pgxLoader(type="biosample", filters = "NCIT:C3512",codematches = TRUE,
+biosamples_2 <- pgxLoader(type="b", filters = "NCIT:C3512",codematches = TRUE,
                         biosample_id = c("pgxbs-kftva5zv","pgxbs-kftva5zw"),
                         individual_id = "pgxind-kftx26ml")
 ```
@@ -94,7 +105,7 @@ via the parameter `limit` and `skip`. For example, if you want to access the fir
 , you can set `limit` = 1000, `skip` = 0. 
 
 ```{r}
-biosamples_3 <- pgxLoader(type="biosample", filters = "NCIT:C3512",skip=0, limit = 1000)
+biosamples_3 <- pgxLoader(type="b", filters = "NCIT:C3512",skip=0, limit = 1000)
 # Dimension: Number of samples * features
 print(dim(biosamples))
 print(dim(biosamples_3))
@@ -119,7 +130,7 @@ unique(biosamples$histological_diagnosis_id)
 Setting `codematches` as TRUE allows this function to only return biosamples with exact match to the filter.
 
 ```{r}
-biosamples_4 <- pgxLoader(type="biosample", filters = "NCIT:C3512",codematches = TRUE)
+biosamples_4 <- pgxLoader(type="b", filters = "NCIT:C3512",codematches = TRUE)
 
 unique(biosamples_4$histological_diagnosis_id)
 ```
@@ -130,7 +141,7 @@ This function supports querying samples that belong to multiple filters. For exa
 PMID:24174329, you can specify multiple matching filters and set `filterLogic` to "AND".
 
 ```{r}
-biosamples_5 <- pgxLoader(type="biosample", filters = c("NCIT:C3512","PMID:24174329"), 
+biosamples_5 <- pgxLoader(type="b", filters = c("NCIT:C3512","PMID:24174329"), 
                           filterLogic = "AND")
 ```
 
@@ -146,7 +157,7 @@ type, filters, filterLogic, individual_id, codematches, limit, skip
 ## Search by filters
 
 ```{r}
-individuals <- pgxLoader(type='individual',filters='NCIT:C3270',codematches = TRUE)
+individuals <- pgxLoader(type='i',filters='NCIT:C3270',codematches = TRUE)
 # Dimension: Number of individuals * features
 print(dim(individuals))
 # data looks like this
@@ -158,7 +169,7 @@ individuals[c(36:40),]
 You can get the id from the query of samples
 
 ```{r}
-individual <- pgxLoader(type='individual',individual_id = 'pgxind-kftx26ml')
+individual <- pgxLoader(type='i',individual_id = 'pgxind-kftx26ml')
 
 individual
 ```
@@ -166,7 +177,7 @@ individual
 or by both 
 
 ```{r}
-total.individuals <- pgxLoader(type='individual',filters='NCIT:C3270',
+total.individuals <- pgxLoader(type='i',filters='NCIT:C3270',
                                codematches=TRUE,
                                individual_id = 'pgxind-kftx26ml')
 
