@@ -22,7 +22,8 @@ pgxCount <- function(filters=NULL,domain="http://progenetix.org"){
     encoded_url <- URLencode(url)
     info <-  content(GET(url))
     res <- lapply(info$response$results, function(x){
-        data.frame(filters=x$id,label=x$label,total_count=x$count,exact_match_count=x$codeMatches)
+        if (is.null(x$label)) x$label <- NA
+        df <- data.frame(filters=x$id,label=x$label,total_count=x$count,exact_match_count=x$codeMatches)
     })
     
     res <- Reduce(rbind,res)

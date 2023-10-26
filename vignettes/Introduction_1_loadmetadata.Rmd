@@ -87,15 +87,11 @@ In Progenetix, biosample id and individual id serve as unique identifiers for bi
 
 
 ```{r}
-biosamples_2 <- pgxLoader(type="b", filters = "NCIT:C3512",codematches = TRUE,
+biosamples_2 <- pgxLoader(type="b", filters = "NCIT:C3512",
                         biosample_id = c("pgxbs-kftva5zv","pgxbs-kftva5zw"),
                         individual_id = "pgxind-kftx26ml")
-```
 
-The result only contains samples with the specified filter NCIT:C3512, biosample id and individual id
-
-```{r}
-biosamples_2[biosamples_2$histological_diagnosis_id != "NCIT:C3512",c(1:5)]
+biosamples_2[biosamples_2$biosample_id == "pgxbs-kftva5zv",c(1:7)]
 ```
 
 ## Access a subset of samples
@@ -152,34 +148,34 @@ of interest come from, you can follow the tutorial below.
 
 ## Relevant parameters  
 
-type, filters, filterLogic, individual_id, codematches, limit, skip 
+type, filters, filterLogic, individual_id, biosample_id, codematches, limit, skip 
 
 ## Search by filters
 
 ```{r}
-individuals <- pgxLoader(type='i',filters='NCIT:C3270',codematches = TRUE)
+individuals <- pgxLoader(type='i',filters='NCIT:C3270')
 # Dimension: Number of individuals * features
 print(dim(individuals))
 # data looks like this
 individuals[c(36:40),]
 ```
 
-## Search by individual id 
+## Search by biosample id and individual id 
 
 You can get the id from the query of samples
 
 ```{r}
-individual <- pgxLoader(type='i',individual_id = 'pgxind-kftx26ml')
+individual <- pgxLoader(type='i',individual_id = 'pgxind-kftx26ml', biosample_id="pgxbs-kftvh94d")
 
 individual
 ```
 
-or by both 
+or by all available identifiers 
 
 ```{r}
 total.individuals <- pgxLoader(type='i',filters='NCIT:C3270',
-                               codematches=TRUE,
-                               individual_id = 'pgxind-kftx26ml')
+                               individual_id = 'pgxind-kftx26ml',
+                               biosample_id="pgxbs-kftvh94d")
 
 dim(total.individuals)
 ```

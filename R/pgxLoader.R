@@ -74,26 +74,21 @@ pgxLoader <- function(
         }
     }
     
-    # for filter-based data  
-    if (type %in% c('callset', 'coverage','frequency')){
-        checkMissingParameters(filters,"'filters'")
-        # issue warnings for possible inappropriate query
-        checkUnusedParameters(biosample_id, "'biosample_id'", "'filters'")
-        checkUnusedParameters(individual_id, "'individual_id'", "'filters'")
-        # special calling data
-        if (type %in% c('callset', 'coverage')){
-            if (length(filters) > 1) stop("\n The parameter 'filters' is invalid. This query only supports one filter")
-        }
-
-        if (type == "frequency"){
-            checkMissingParameters(output,"'output'")
-        }
+ 
+    if (type %in% c('callset', 'coverage')){
+        if (length(filters) > 1) stop("\n The parameter 'filters' is invalid. This query only supports one filter")
     }
     
-    # for other data  
+    if (type == "frequency"){
+      checkMissingParameters(filters,"'filters'")
+      checkMissingParameters(output,"'output'")
+      checkUnusedParameters(biosample_id, "'biosample_id'", "'filters'")
+      checkUnusedParameters(individual_id, "'individual_id'", "'filters'")
+    }
+    
+
     if (type == "individual"){
-        checkMissingParameters(c(filters,individual_id), c("'filters'","'individual_id'"))
-        checkUnusedParameters(biosample_id, "'biosample_id'", c("'filters'","'individual_id'"))
+        checkMissingParameters(c(filters,individual_id,biosample_id), c("'filters'","'individual_id'","'biosample_id'"))
     }
     
     if (type == "biosample"){
@@ -112,7 +107,7 @@ pgxLoader <- function(
            individual= pgxmetaLoader(type=type,biosample_id= biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,filterLogic=filterLogic,domain=domain),
            variant= pgxVariantLoader(biosample_id = biosample_id,output=output,save_file=save_file, filename = filename,domain=domain),
            frequency =pgxFreqLoader(output = output, codematches = codematches, filters=filters,domain=domain),
-           callset=pgxcallsetLoader(filters = filters,limit=limit, skip=skip,codematches = codematches,domain=domain),
-           coverage = pgxCovLoader(filters = filters, codematches = codematches,skip=skip,limit=limit,domain=domain))
+           callset=pgxcallsetLoader(biosample_id = biosample_id, individual_id=individual_id, filters = filters,limit=limit, skip=skip,codematches = codematches,domain=domain),
+           coverage = pgxCovLoader(biosample_id = biosample_id, individual_id=individual_id, filters = filters, codematches = codematches,skip=skip,limit=limit,domain=domain))
 } 
 

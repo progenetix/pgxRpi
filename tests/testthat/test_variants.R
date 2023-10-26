@@ -1,13 +1,20 @@
 context("Retrieve variants")
 require(httr)
 require(dplyr)
-#url_e1 <- "http://progenetix.org/cgi/bycon/beaconServer/variants.py?biosampleIds=1"
-#url_e2 <- "https://progenetix.org/cgi/bycon/beaconServer/variants.py?biosampleIds=pgxbs-kftvh98e"
-url <- "http://progenetix.org/beacon/variants/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
-url_2 <- "http://progenetix.org/beacon/biosamples/pgxbs-kftvh94d/g_variants"
+url <- "http://progenetix.org/beacon/biosamples/pgxbs-kftvh94d/g_variants"
+url_2 <- "https://progenetix.org/services/pgxsegvariants/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
+
+url_3 <- "https://progenetix.org/services/samplematrix/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
+url_4 <- "https://progenetix.org/services/samplematrix/?individualIds=pgxind-kftx3565,pgxind-kftx5g4v"
+url_5 <- "https://progenetix.org/services/samplematrix/?filters=pgx:icdom-88503"
+
+url_6 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
+url_7 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&individualIds=pgxind-kftx3565,pgxind-kftx5g4v"
+url_8 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&filters=pgx:icdom-88503"
+
 test_that("retrieve variants with JSON",{
-        cat(paste("\n trying:",url_2,"\n"))
-        result <-  content(GET(url_2))
+        cat(paste("\n trying:",url,"\n"))
+        result <-  content(GET(url))
         expect_equal(result$responseSummary$exists,TRUE)
         table <- lapply(result$response$resultSets[[1]]$results,unlist)
         table <- as.data.frame(bind_rows(table))
@@ -16,11 +23,65 @@ test_that("retrieve variants with JSON",{
 
 
 test_that("retrieve variants with pgxseg",{
-    url <- paste0(url,"&output=pgxseg")
-    cat(paste("\n trying:",url,"\n"))
-    r <- GET(url)
+    cat(paste("\n trying:",url_2,"\n"))
+    r <- GET(url_2)
     expect_equal(http_type(r), "text/plain")
-    expect_no_error(result <- read.table(url, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
+    expect_no_error(result <- read.table(url_2, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
     expect_gt(nrow(result),0)
     expect_gt(ncol(result),0)
 })
+
+test_that("retrieve pgxmatrix variant with biosample id",{
+    cat(paste("\n trying:",url_3,"\n"))
+    r <- GET(url_3)
+    expect_equal(http_type(r), "text/plain")
+    expect_no_error(result <- read.table(url_3, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
+    expect_gt(nrow(result),0)
+    expect_gt(ncol(result),0)
+})
+
+test_that("retrieve pgxmatrix variant with individual id",{
+    cat(paste("\n trying:",url_4,"\n"))
+    r <- GET(url_4)
+    expect_equal(http_type(r), "text/plain")
+    expect_no_error(result <- read.table(url_4, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
+    expect_gt(nrow(result),0)
+    expect_gt(ncol(result),0)
+})
+
+test_that("retrieve pgxmatrix variant with filters",{
+    cat(paste("\n trying:",url_5,"\n"))
+    r <- GET(url_5)
+    expect_equal(http_type(r), "text/plain")
+    expect_no_error(result <- read.table(url_5, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
+    expect_gt(nrow(result),0)
+    expect_gt(ncol(result),0)
+})
+
+test_that("retrieve coverage variant with biosample id",{
+    cat(paste("\n trying:",url_6,"\n")) 
+    result <-  content(GET(url_6))
+    expect_equal(result$responseSummary$exists,TRUE)
+    table <- lapply(result$response$resultSets[[1]]$results,unlist)
+    table <- as.data.frame(bind_rows(table))
+    expect_gt(nrow(table),0)
+})
+
+test_that("retrieve coverage variant with individual id",{
+    cat(paste("\n trying:",url_7,"\n"))
+    result <-  content(GET(url_7))
+    expect_equal(result$responseSummary$exists,TRUE)
+    table <- lapply(result$response$resultSets[[1]]$results,unlist)
+    table <- as.data.frame(bind_rows(table))
+    expect_gt(nrow(table),0)
+})
+
+test_that("retrieve coverage variant with filters",{
+    cat(paste("\n trying:",url_8,"\n"))
+    result <-  content(GET(url_8))
+    expect_equal(result$responseSummary$exists,TRUE)
+    table <- lapply(result$response$resultSets[[1]]$results,unlist)
+    table <- as.data.frame(bind_rows(table))
+    expect_gt(nrow(table),0)
+})
+

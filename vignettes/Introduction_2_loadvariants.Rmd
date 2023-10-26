@@ -38,6 +38,7 @@ available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg".
 * `filters` Identifiers for cancer type, literature, cohorts, and age such as 
 c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y").
 For more information about filters, see the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
+* `individual_id` Identifiers used in Progenetix database for identifying individuals. 
 * `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
 * `codematches` A logical value determining whether to exclude samples 
 from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
@@ -58,12 +59,12 @@ Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg"
 
 ## Relevant parameters 
 
-type, output, filters, codematches, skip, limit
+type, output, filters, individual_id, biosample_id, codematches, skip, limit
 
 ## Across genomic bins 
 
 ```{r}
-cnv_matrix <- pgxLoader(type="v", output="pgxmatrix", filters = "NCIT:C9245")
+cnv_matrix <- pgxLoader(type="v", output="pgxmatrix", filters = "NCIT:C2948")
 ```
 
 The data looks like this
@@ -127,12 +128,24 @@ when the number of retrieved samples is large. You can use the parameters `limit
 
 ```{r}
 cnv_matrix_2 <- pgxLoader(type="v", output="pgxmatrix", 
-                          filters = "NCIT:C9245",
-                          skip = 0, limit=1000)
+                          filters = "NCIT:C2948",
+                          skip = 0, limit=10)
 # the dimention of subset 
 print(dim(cnv_matrix_2))
 # the dimention of original set
 print(dim(cnv_matrix))
+```
+
+## Access by biosample id and individual id
+
+```{r}
+cnv_ind_matrix <- pgxLoader(type="v", output="pgxmatrix", 
+                          biosample_id = "pgxbs-kftva604",
+                          individual_id = "pgxind-kftx5g4t")
+
+cnv_ind_cov <- pgxLoader(type="v", output="coverage", 
+                          biosample_id = "pgxbs-kftva604",
+                          individual_id = "pgxind-kftx5g4t")
 ```
 
 # Retrieve segment variants 
@@ -150,7 +163,7 @@ The biosample information is also obtained by `pgxLoader` and the vignette about
 query see Introduction_1_loadmetadata.
 
 ```{r}
-biosamples <- pgxLoader(type="b", filters = "NCIT:C4017",codematches = TRUE, limit=10)
+biosamples <- pgxLoader(type="b", filters = "PMID:20229506", limit=2)
 
 biosample_id <- biosamples$biosample_id
 ```
