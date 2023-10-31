@@ -2,8 +2,8 @@
 #'
 #' This function loads various data from `Progenetix` database.   
 #'
-#' @param type A string specifying output data type. Available options are "b" (biosample), "i" (individual),
-#' "v" (variant) or "f" (frequency). The first two options return corresponding metadata, "v" returns CNV variant data, and "f" returns precomputed CNV frequency based on data in Progenetix. 
+#' @param type A string specifying output data type. Available options are "biosample", "individual",
+#' "variant" or "frequency". The first two options return corresponding metadata, "variant" returns CNV variant data, and "frequency" returns precomputed CNV frequency based on data in Progenetix. 
 #' @param output A string specifying output data format. When the parameter `type` is "variant",
 #' available options are NULL, "pgxseg", "seg", "coverage", or "pgxmatrix"; When the parameter `type` is "frequency",
 #' available options are "pgxfreq" or "pgxmatrix".
@@ -38,8 +38,8 @@
 #' freq <- pgxLoader(type="frequency", output ='pgxfreq', filters="NCIT:C3512")
 
 pgxLoader <- function(
-    type = NULL,
-    output  = NULL, 
+    type=NULL,
+    output=NULL, 
     filters= NULL,
     codematches = FALSE, 
     filterLogic = "AND",
@@ -51,42 +51,40 @@ pgxLoader <- function(
     filename=NULL,
     domain="http://progenetix.org"){
     
-    # check type
-    if (is.null(type) || !is.character(type)) stop("\n The parameter 'type' is invalid. \n")
-  
-    type <- match.arg(type, c("biosample", "variant","frequency","individual"))
+    type <- match.arg(type, c("biosample", "individual","variant","frequency"))
     
-    # check output
-    if (!is.null(output)){
+    if (is.null(output) & type %in% c("variant","frequency")){
         output <-  switch(type,
-                          variant=match.arg(output, c("pgxseg", "pgxmatrix", "seg",  "coverage")),
+                          variant=NULL,
+                          frequency=match.arg(output, c("pgxfreq" , "pgxmatrix")))
+                          
+    } else{
+        output <-  switch(type,
+                          variant=match.arg(output, c("pgxseg", "seg", "pgxmatrix", "coverage")),
                           frequency=match.arg(output, c("pgxfreq" , "pgxmatrix")),
                           biosample=NULL,
                           individual=NULL)
-      
         # adapt to different variant formats 
         if (type == "variant"){
-            type <- switch(output,
-                           pgxmatrix = 'callset',
-                           coverage = 'coverage',
-                           seg="variant",
-                           pgxseg="variant")
+          type <- switch(output,
+                         pgxmatrix = 'callset',
+                         coverage = 'coverage',
+                         seg="variant",
+                         pgxseg="variant")
         }
     }
+
     
- 
     if (type %in% c('callset', 'coverage')){
         if (length(filters) > 1) stop("\n The parameter 'filters' is invalid. This query only supports one filter")
     }
     
     if (type == "frequency"){
       checkMissingParameters(filters,"'filters'")
-      checkMissingParameters(output,"'output'")
       checkUnusedParameters(biosample_id, "'biosample_id'", "'filters'")
       checkUnusedParameters(individual_id, "'individual_id'", "'filters'")
     }
     
-
     if (type == "individual"){
         checkMissingParameters(c(filters,individual_id,biosample_id), c("'filters'","'individual_id'","'biosample_id'"))
     }

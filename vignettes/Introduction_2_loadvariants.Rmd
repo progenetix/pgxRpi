@@ -32,7 +32,7 @@ This function loads various data from `Progenetix` database.
 
 The parameters of this function used in this tutorial:
 
-* `type` A string specifying output data type. Available options are "b" (biosample), "i" (individual), "v" (variant) or "f" (frequency). 
+* `type` A string specifying output data type. Available options are "biosample", "individual", "variant" or "frequency". 
 * `output` A string specifying output file format. When the parameter `type` is "variant",
 available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg".
 * `filters` Identifiers for cancer type, literature, cohorts, and age such as 
@@ -64,7 +64,7 @@ type, output, filters, individual_id, biosample_id, codematches, skip, limit
 ## Across genomic bins 
 
 ```{r}
-cnv_matrix <- pgxLoader(type="v", output="pgxmatrix", filters = "NCIT:C2948")
+cnv_matrix <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C2948")
 ```
 
 The data looks like this
@@ -79,7 +79,7 @@ In this dataframe, `analysis_id` is the identifier for individual analysis, `bio
 ## Across chromosomes or the whole genome 
 
 ```{r}
-cnv_covergae <- pgxLoader(type="v", output="coverage", filters = "NCIT:C2948")
+cnv_covergae <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948")
 ```
 
 It includes CNV coverage across chromosome arms, whole chromosomes, or whole genome.
@@ -113,7 +113,7 @@ Setting `codematches = True` can exclude profiles with group_id belonging to chi
 21 samples are excluded from the original 47 samples in this case.
 
 ```{r}
-cnv_covergae_2 <- pgxLoader(type="v", output="coverage", filters = "NCIT:C2948",
+cnv_covergae_2 <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948",
                             codematches = TRUE)
 
 print(dim(cnv_covergae$chrom_arm_coverage))
@@ -127,7 +127,7 @@ when the number of retrieved samples is large. You can use the parameters `limit
 `skip` to access a subset of samples.
 
 ```{r}
-cnv_matrix_2 <- pgxLoader(type="v", output="pgxmatrix", 
+cnv_matrix_2 <- pgxLoader(type="variant", output="pgxmatrix", 
                           filters = "NCIT:C2948",
                           skip = 0, limit=10)
 # the dimention of subset 
@@ -139,11 +139,11 @@ print(dim(cnv_matrix))
 ## Access by biosample id and individual id
 
 ```{r}
-cnv_ind_matrix <- pgxLoader(type="v", output="pgxmatrix", 
+cnv_ind_matrix <- pgxLoader(type="variant", output="pgxmatrix", 
                           biosample_id = "pgxbs-kftva604",
                           individual_id = "pgxind-kftx5g4t")
 
-cnv_ind_cov <- pgxLoader(type="v", output="coverage", 
+cnv_ind_cov <- pgxLoader(type="variant", output="coverage", 
                           biosample_id = "pgxbs-kftva604",
                           individual_id = "pgxind-kftx5g4t")
 ```
@@ -163,7 +163,7 @@ The biosample information is also obtained by `pgxLoader` and the vignette about
 query see Introduction_1_loadmetadata.
 
 ```{r}
-biosamples <- pgxLoader(type="b", filters = "PMID:20229506", limit=2)
+biosamples <- pgxLoader(type="biosample", filters = "PMID:20229506", limit=2)
 
 biosample_id <- biosamples$biosample_id
 ```
@@ -175,7 +175,7 @@ There are three output formats.
  This format contains variant id and associated biosample id as well as analysis id. The variant is represented as 'DUP' (duplication) or 'DEL' (deletion) in specific chromosome locations. 
 
 ```{r}
-variant_1 <- pgxLoader(type="v", biosample_id = biosample_id)
+variant_1 <- pgxLoader(type="variant", biosample_id = biosample_id)
 head(variant_1)
 ```
 
@@ -184,7 +184,7 @@ head(variant_1)
 This format is '.pgxseg' file format. It contains segment mean values (in `log2` column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)). A few variants are point mutations represented by columns `reference_bases` and `alternate_bases`.
 
 ```{r}
-variant_2 <- pgxLoader(type="v", biosample_id = biosample_id,output = "pgxseg")
+variant_2 <- pgxLoader(type="variant", biosample_id = biosample_id,output = "pgxseg")
 head(variant_2)
 ```
 
@@ -193,7 +193,7 @@ head(variant_2)
 This format is similar to the general '.seg' file format and compatible with IGV tool for visualization. The only difference between this file format and the general '.seg' file format is the fifth column. It represents variant type in this format while in the general '.seg' file format, it represents number of probes or bins covered by the segment. In addition, the point mutation variants are excluded in this file format.
 
 ```{r}
-variant_3 <- pgxLoader(type="v", biosample_id = biosample_id,output = "seg")
+variant_3 <- pgxLoader(type="variant", biosample_id = biosample_id,output = "seg")
 head(variant_3)
 ```
 
@@ -208,7 +208,7 @@ paths (specified by `filename`). The export is only available for variants data 
 The following command creates a '.pgxseg' file with the name "variants.pgxseg" in "~/Downloads/" folder. 
 
 ```{r eval=FALSE}
-pgxLoader(type='v', output='pgxseg', biosample_id=biosample_id, save_file=TRUE, 
+pgxLoader(type="variant", output="pgxseg", biosample_id=biosample_id, save_file=TRUE, 
           filename="~/Downloads/variants.pgxseg")
 ```
 
@@ -220,7 +220,7 @@ for visualization.
 The following command creates a special '.seg' file with the name "variants.seg" in "~/Downloads/" folder. 
 
 ```{r eval=FALSE}
-pgxLoader(type='v', output='seg', biosample_id=biosample_id, save_file=TRUE, 
+pgxLoader(type="variant", output="seg", biosample_id=biosample_id, save_file=TRUE, 
           filename="~/Downloads/variants.seg")
 ```
 

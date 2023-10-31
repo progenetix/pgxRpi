@@ -20,8 +20,8 @@ pgxLoader(
 )
 }
 \arguments{
-\item{type}{A string specifying output data type. Available options are "b" (biosample), "i" (individual),
-"v" (variant) or "f" (frequency). The first two options return corresponding metadata, "v" returns CNV variant data, and "f" returns precomputed CNV frequency based on data in Progenetix.}
+\item{type}{A string specifying output data type. Available options are "biosample", "individual",
+"variant" or "frequency". The first two options return corresponding metadata, "variant" returns CNV variant data, and "frequency" returns precomputed CNV frequency based on data in Progenetix.}
 
 \item{output}{A string specifying output data format. When the parameter \code{type} is "variant",
 available options are NULL, "pgxseg", "seg", "coverage", or "pgxmatrix"; When the parameter \code{type} is "frequency",

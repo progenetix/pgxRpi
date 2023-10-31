@@ -35,7 +35,7 @@ This function loads various data from `Progenetix` database.
 
 The parameters of this function used in this tutorial:
 
-* `type` A string specifying output data type. Available options are "b" (biosample), "i" (individual), "v" (variant) or "f" (frequency). 
+* `type` A string specifying output data type. Available options are "biosample", "individual", "variant" or "frequency". 
 * `output` A string specifying output file format. When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
 * `filters` Identifiers for cancer type, literature, cohorts, and age such as 
 c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y").
@@ -55,7 +55,7 @@ type, output, filters, codematches
 ## The first output format (`output` = "pgxfreq")
 
 ```{r}
-freq_pgxfreq <- pgxLoader(type="f", output ='pgxfreq',
+freq_pgxfreq <- pgxLoader(type="frequency", output ="pgxfreq",
                          filters=c("NCIT:C4038","pgx:icdom-85003"))
 
 freq_pgxfreq
@@ -94,7 +94,7 @@ code <- sub(".",'NCIT:C',code)
 load data with the specified code
 
 ```{r}
-freq_pgxmatrix <- pgxLoader(type='f',output = 'pgxmatrix',filters=code)
+freq_pgxmatrix <- pgxLoader(type="frequency",output ="pgxmatrix",filters=code)
 freq_pgxmatrix
 ```
 
