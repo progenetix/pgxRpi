@@ -363,12 +363,9 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain){
             
             temp <- res[[i]]              
             temp <- lapply(temp,function(x){
-                var_meta <- x[c('variation.subject.sequence_id','variantInternalId','variation.info.cnvValue','variation.copyChange')]
-                id_ind <-  which(names(x) =='caseLevelData.id')
-                temp_row <- c()
-                for (j in id_ind){temp_row <- rbind(temp_row,c(x[j],x[j-1],x[j-2]))}
-                var_meta <- matrix(rep(var_meta,dim(temp_row)[1]),nrow=dim(temp_row)[1],byrow = TRUE)
-                temp_row <- as.data.frame(cbind(temp_row,var_meta))
+                var_meta <- x[c('caseLevelData.id','caseLevelData.biosampleId','caseLevelData.analysisId',
+                                'variation.subject.sequence_id','variantInternalId','caseLevelData.info.cnvValue','variation.copyChange')]
+                temp_row <- as.data.frame(matrix(var_meta,nrow=1,byrow = TRUE))
                 colnames(temp_row) <- c("variant_id","biosample_id","analysis_id",
                                         "reference_genome","variant","variant_log2","variant_copychange")
                 return(temp_row)
