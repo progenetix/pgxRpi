@@ -20,7 +20,10 @@
 pgxFilter <- function(prefix=NULL, return_all_prefix=FALSE, domain="http://progenetix.org"){
     url <- paste0(domain,"/beacon/filtering_terms")
     query  <- content(GET(url))
-    data_lst <- lapply(query$response$filteringTerms,as.data.frame)
+    data_lst <- lapply(query$response$filteringTerms,FUN = function(term){
+      term <- lapply(term,function(x){if(is.null(x)){x <- NA} else{x}})
+      return(as.data.frame(term))})
+    
     data <- do.call(plyr::rbind.fill,data_lst)
     
     if (return_all_prefix){
