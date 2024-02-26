@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing and utilizing metadata for samples or their corresponding individuals within the Progenetix database.
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing and utilizing metadata for samples or their corresponding individuals within the Progenetix database. If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines". This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 # Load library 
 
@@ -48,12 +48,13 @@ Default is 0 (return all).
 * `skip` Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. 
 E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
 Default is NULL (no skip). 
+* `dataset` A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".
 
 # Retrieve meatdata of samples 
 
 ## Relevant parameters 
 
-type, filters, filterLogic, individual_id, biosample_id, codematches, limit, skip
+type, filters, filterLogic, individual_id, biosample_id, codematches, limit, skip, dataset
 
 ## Search by filters
 
@@ -85,14 +86,14 @@ The data contains many columns representing different aspects of sample informat
 
 In Progenetix, biosample id and individual id serve as unique identifiers for biosamples and the corresponding individuals. You can obtain these IDs through metadata search with filters as described above, or through [website](https://progenetix.org/search) interface query.
 
-
 ```{r}
-biosamples_2 <- pgxLoader(type="biosample", filters = "NCIT:C3512",
-                        biosample_id = c("pgxbs-kftva5zv","pgxbs-kftva5zw"),
-                        individual_id = "pgxind-kftx26ml")
+biosamples_2 <- pgxLoader(type="biosample", biosample_id = "pgxbs-kftvgioe",individual_id = "pgxind-kftx28q5")
 
-biosamples_2[biosamples_2$biosample_id == "pgxbs-kftva5zv",c(1:7)]
+metainfo <- c("biosample_id","individual_id","pubmed_id","followup_state_label","followup_time")
+biosamples_2[metainfo]
 ```
+
+It's also possible to query by a combination of filters, biosample id, and individual id.
 
 ## Access a subset of samples
 
@@ -148,7 +149,7 @@ of interest come from, you can follow the tutorial below.
 
 ## Relevant parameters  
 
-type, filters, filterLogic, individual_id, biosample_id, codematches, limit, skip 
+type, filters, filterLogic, individual_id, biosample_id, codematches, limit, skip, dataset 
 
 ## Search by filters
 
@@ -168,16 +169,6 @@ You can get the id from the query of samples
 individual <- pgxLoader(type="individual",individual_id = "pgxind-kftx26ml", biosample_id="pgxbs-kftvh94d")
 
 individual
-```
-
-or by all available identifiers 
-
-```{r}
-total.individuals <- pgxLoader(type="individual",filters="NCIT:C3270",
-                               individual_id = "pgxind-kftx26ml",
-                               biosample_id= "pgxbs-kftvh94d")
-
-dim(total.individuals)
 ```
 
 # Session Info

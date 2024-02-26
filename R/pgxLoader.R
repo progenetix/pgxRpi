@@ -25,6 +25,7 @@
 #' Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" 
 #' in current work directory.
 #' @param domain A string specifying the domain of database. Default is "http://progenetix.org".
+#' @param dataset A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".
 #' @importFrom utils URLencode modifyList read.table write.table
 #' @importFrom httr GET content
 #' @return Data from Progenetix database
@@ -49,9 +50,14 @@ pgxLoader <- function(
     individual_id=NULL,
     save_file=FALSE,
     filename=NULL,
-    domain="http://progenetix.org"){
+    domain="http://progenetix.org",
+    dataset="Progenetix"){
     
     type <- match.arg(type, c("biosample", "individual","variant","frequency"))
+    dataset <- match.arg(dataset, c("Progenetix","cancercelllines","cellz","examplez"))
+    
+    # actual dataset name for cancercelllines
+    if (dataset == "cancercelllines") dataset <- "cellz"
     
     if (is.null(output) & type %in% c("variant","frequency")){
         output <-  switch(type,
@@ -101,11 +107,11 @@ pgxLoader <- function(
     
     options(timeout=500)
     switch(type,
-           biosample = pgxmetaLoader(type=type,biosample_id= biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,filterLogic=filterLogic,domain=domain),
-           individual= pgxmetaLoader(type=type,biosample_id= biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,filterLogic=filterLogic,domain=domain),
-           variant= pgxVariantLoader(biosample_id = biosample_id,output=output,save_file=save_file, filename = filename,domain=domain),
-           frequency =pgxFreqLoader(output = output, codematches = codematches, filters=filters,domain=domain),
-           callset=pgxcallsetLoader(biosample_id = biosample_id, individual_id=individual_id, filters = filters,limit=limit, skip=skip,codematches = codematches,domain=domain),
-           coverage = pgxCovLoader(biosample_id = biosample_id, individual_id=individual_id, filters = filters, codematches = codematches,skip=skip,limit=limit,domain=domain))
+           biosample = pgxmetaLoader(type=type,biosample_id= biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,filterLogic=filterLogic,domain=domain,dataset=dataset),
+           individual= pgxmetaLoader(type=type,biosample_id= biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,filterLogic=filterLogic,domain=domain,dataset=dataset),
+           variant = pgxVariantLoader(biosample_id = biosample_id,output=output,save_file=save_file, filename = filename,domain=domain,dataset=dataset),
+           frequency = pgxFreqLoader(output = output, codematches = codematches, filters=filters,domain=domain,dataset=dataset),
+           callset = pgxcallsetLoader(biosample_id = biosample_id, individual_id=individual_id, filters = filters,limit=limit, skip=skip,codematches = codematches,domain=domain,dataset=dataset),
+           coverage = pgxCovLoader(biosample_id = biosample_id, individual_id=individual_id, filters = filters, codematches = codematches,skip=skip,limit=limit,domain=domain,dataset=dataset))
 } 
 

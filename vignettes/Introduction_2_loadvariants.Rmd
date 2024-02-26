@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing genomic variant data within the Progenetix database.
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing genomic variant data within the Progenetix database. If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines". This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 # Load library 
 
@@ -54,12 +54,13 @@ Default is NULL (no skip).
 instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
 * `filename` A string specifying the path and name of the file to be saved. 
 Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
+* `dataset` A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".
 
 # Retrive CNV coverage of biosamples 
 
 ## Relevant parameters 
 
-type, output, filters, individual_id, biosample_id, codematches, skip, limit
+type, output, filters, individual_id, biosample_id, codematches, skip, limit, dataset
 
 ## Across genomic bins 
 
@@ -155,7 +156,7 @@ biosample id instead of filters.
 
 ## Relevant parameters 
 
-type, output, biosample_id, save_file, filename
+type, output, biosample_id, save_file, filename, dataset
 
 ## Get biosample id 
 
@@ -212,8 +213,8 @@ pgxLoader(type="variant", output="pgxseg", biosample_id=biosample_id, save_file=
           filename="~/Downloads/variants.pgxseg")
 ```
 
-You can upload this '.pgxseg' file to [this link](https://progenetix.org/service-collection/uploader) 
-for visualization.
+To visualize the '.pgxseg' file, you can either upload it to [this link](https://progenetix.org/service-collection/uploader) 
+or use the [byconaut](https://byconaut.progenetix.org/) package for local visualization when dealing with a large number of samples.
 
 ## Upload '.seg' file to IGV
 

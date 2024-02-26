@@ -1,17 +1,17 @@
 context("Retrieve variants")
 require(httr)
 require(dplyr)
-url <- "http://progenetix.org/beacon/biosamples/pgxbs-kftvh94d/g_variants"
-url_2 <- "https://progenetix.org/services/pgxsegvariants/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
+url <- "http://progenetix.org/beacon/biosamples/pgxbs-kftvh94d/g_variants?datasetIds=Progenetix"
+url_2 <- "https://progenetix.org/services/pgxsegvariants/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972&datasetIds=Progenetix"
 
-url_3 <- "https://progenetix.org/services/samplematrix/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
-url_4 <- "https://progenetix.org/services/samplematrix/?individualIds=pgxind-kftx3565,pgxind-kftx5g4v"
-url_5 <- "https://progenetix.org/services/samplematrix/?filters=pgx:icdom-88503"
+url_3 <- "https://progenetix.org/services/samplematrix/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972&datasetIds=Progenetix"
+url_4 <- "https://progenetix.org/services/samplematrix/?individualIds=pgxind-kftx3565,pgxind-kftx5g4v&datasetIds=Progenetix"
+url_5 <- "https://progenetix.org/services/samplematrix/?filters=pgx:icdom-88503&datasetIds=Progenetix"
 
-url_6 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
-url_7 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&individualIds=pgxind-kftx3565,pgxind-kftx5g4v"
-url_8 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&filters=pgx:icdom-88503"
-
+url_6 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972&datasetIds=Progenetix"
+url_7 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&individualIds=pgxind-kftx3565,pgxind-kftx5g4v&datasetIds=Progenetix"
+url_8 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&filters=pgx:icdom-88503&datasetIds=Progenetix"
+url_9 <- "http://progenetix.org/beacon/biosamples/pgxbs-0821E6df/g_variants?datasetIds=cellz"
 test_that("retrieve variants with JSON",{
         cat(paste("\n trying:",url,"\n"))
         result <-  content(GET(url))
@@ -83,5 +83,14 @@ test_that("retrieve coverage variant with filters",{
     table <- lapply(result$response$resultSets[[1]]$results,unlist)
     table <- as.data.frame(bind_rows(table))
     expect_gt(nrow(table),0)
+})
+
+test_that("retrieve variants with JSON in cellz",{
+        cat(paste("\n trying:",url_9,"\n"))
+        result <-  content(GET(url_9))
+        expect_equal(result$responseSummary$exists,TRUE)
+        table <- lapply(result$response$resultSets[[1]]$results,unlist)
+        table <- as.data.frame(bind_rows(table))
+        expect_gt(nrow(table),0)
 })
 

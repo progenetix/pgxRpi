@@ -19,11 +19,10 @@ transform_id <- function(id){
 
 read_variant_pgxseg <- function(url){
     result <- read.table(url, header = TRUE, sep="\t")
-    colnames(result)[2] <- 'chromosome'
     col <- c("start","end","log2")
     suppressWarnings(result[,col] <- sapply(result[,col], as.numeric))
     result <- result[order(result$start),]
-    chr <- result$chromosome
+    chr <- result[,2]
     chr[which(chr == 'X')] <- 23
     chr[which(chr == 'Y')] <- 24
     chr <- as.integer(chr)
@@ -42,7 +41,7 @@ read_cov_json <- function(url,codematches=FALSE,all_biosample_id=NULL){
   if (codematches){
     sel_sample_idx <- sample %in% all_biosample_id 
     if (sum(sel_sample_idx) == 0 & length(sample) > 0){
-      warning("\n the option `codematches=TRUE` filters out all samples accessed by filters \n")
+      warning("\n The option `codematches=TRUE` filters out all samples accessed by filters \n")
       return()
     }
   } else{
@@ -132,7 +131,7 @@ disease_code_check <- function(id, remain.id, url){
   return(list(total=total.id,remain=remain.id))
 }
 
-pgidCheck <- function(id,domain){
+pgidCheck <- function(id,domain,dataset){
     # this query doesn't work for individual GSM id and age filters
     geogsm.idx <- grep('geo:GSM',id)
     age.idx <- grep('age:',id)
@@ -143,7 +142,7 @@ pgidCheck <- function(id,domain){
       remain.id <- id
     }
     
-    url <- paste0(domain,"/services/collations?filters=")
+    url <- paste0(domain,"/services/collations?datasetIds=",dataset,"&filters=")
     
     # check if disease_code associated filters exist in Progenetix
     check.res <- disease_code_check(id, remain.id, url)
@@ -159,15 +158,16 @@ pgidCheck <- function(id,domain){
     return(id %in% c(total.id,id[pass.idx]))
 }
 
-pgxFreqLoader <- function(output, codematches, filters, domain) {
+pgxFreqLoader <- function(output, codematches, filters, domain, dataset) {
     # check if filters exists
-    idcheck <- pgidCheck(filters,domain)
+    idcheck <- pgidCheck(filters,domain,dataset)
     if (!all(idcheck)){
-        warning("\n No results for filters ", filters[!idcheck], " in progenetix database.\n")
+        databasename <- ifelse(dataset=="cellz","cancercelllines","Progenetix")
+        warning("\n No results for filters ", filters[!idcheck], " in ", databasename, " database.","\n")
         filters <- filters[idcheck]
     }
     # start query
-    url <- paste0(domain,"/services/intervalFrequencies/?output=",output)
+    url <- paste0(domain,"/services/intervalFrequencies/?datasetIds=",dataset,"&output=",output)
   
     filter <- transform_id(filters)
     url  <- paste0(url,'&filters=',filter)
@@ -217,18 +217,19 @@ pgxFreqLoader <- function(output, codematches, filters, domain) {
     return(data_lst)
 }
 
-pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematches, skip, limit, filterLogic, domain){
+pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematches, skip, limit, filterLogic, domain, dataset){
     if (!(is.null(filters))){
         # check if filters exists
-        idcheck <- pgidCheck(filters,domain)
+        idcheck <- pgidCheck(filters,domain,dataset)
         if (!all(idcheck)){
-            warning("\n No results for filters ", filters[!idcheck], " in progenetix database.\n")
+            databasename <- ifelse(dataset=="cellz","cancercelllines","Progenetix")
+            warning("\n No results for filters ", filters[!idcheck], " in ", databasename, " database.","\n")
             filters <- filters[idcheck]
         }
         
         if (filterLogic == "AND"){
             filters <- transform_id(filters)
-            url <- paste0(domain,"/services/sampletable/?filters=",filters,"&responseEntityId=",type)
+            url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&filters=",filters,"&responseEntityId=",type)
             url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
             url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
             encoded_url <- URLencode(url)
@@ -250,7 +251,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
           res_1 <- list()
           for (i in seq_len(length(trans.filters))){
-              url <- paste0(domain,"/services/sampletable/?filters=",trans.filters[i],"&responseEntityId=",type)
+              url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&filters=",trans.filters[i],"&responseEntityId=",type)
               url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
               url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
               encoded_url <- URLencode(url)
@@ -272,7 +273,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
     if (!(is.null(biosample_id))){
         filter <- transform_id(biosample_id)
-        url <- paste0(domain,"/services/sampletable/?biosampleIds=",filter,"&responseEntityId=",type)
+        url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&biosampleIds=",filter,"&responseEntityId=",type)
         encoded_url <- URLencode(url)
         attempt::try_catch(res_2 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),.e= function(e){
                 warning("\n Query fails for biosample_id ", filter, "\n")
@@ -281,7 +282,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
     if (!(is.null(individual_id))){
         filter <- transform_id(individual_id)
-        url <- paste0(domain,"/services/sampletable/?individualIds=",filter,"&responseEntityId=",type)
+        url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&individualIds=",filter,"&responseEntityId=",type)
         encoded_url <- URLencode(url)
         attempt::try_catch(res_3 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),.e= function(e){
                 warning("\n Query fails for individual_id ", filter, "\n")
@@ -314,13 +315,13 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
         } else if (type == "individual"){
             idx <- res$histological_diagnosis_id %in% filters | res$individual_id %in% individual_id
             if (!is.null(biosample_id)){
-              warning("\n the option `codematches=TRUE` filters out samples accessed by biosample_id \n")
+              warning("\n The option `codematches=TRUE` filters out samples accessed by biosample_id \n")
             }
         }     
     
         res <- res[idx,]
         if (dim(res)[1] == 0){
-            warning("\n the option `codematches=TRUE` filters out all samples \n")
+            warning("\n The option `codematches=TRUE` filters out all samples \n")
         }
     }
     
@@ -328,7 +329,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
     return(res)
 }
 
-pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain){
+pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, dataset){
     if (save_file & is.null(output)){
       stop("The parameter 'output' is invalid when 'save_file=TRUE' (available: \"seg\" or \"pgxseg\")") 
     } 
@@ -337,13 +338,13 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain){
     meta <- c()
     for (i in seq_len(length(biosample_id))){
         if (!(is.null(output))){
-            url <- paste0(domain,"/services/pgxsegvariants/?biosampleIds=",biosample_id[i])
+            url <- paste0(domain,"/services/pgxsegvariants/?datasetIds=",dataset,"&biosampleIds=",biosample_id[i])
             encoded_url <- URLencode(url)
             attempt::try_catch(res[[i]] <- read_variant_pgxseg(encoded_url), .e = function(e){
                 warning("\n Query fails for biosample_id ", biosample_id[i], "\n")
             })
         }else{
-            url <- paste0(domain,"/beacon/biosamples/",biosample_id[i],"/g_variants")
+            url <- paste0(domain,"/beacon/biosamples/",biosample_id[i],"/g_variants","?datasetIds=",dataset)
             encoded_url <- URLencode(url)
             attempt::try_catch(res[[i]] <- content(GET(encoded_url)), .e = function(e){
                  warning("\n Query fails for biosample_id ", biosample_id[i], "\n")
@@ -436,10 +437,10 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain){
 }
 
 
-pgxcallsetLoader <- function(biosample_id, individual_id, filters,limit,skip,codematches,domain){
+pgxcallsetLoader <- function(biosample_id, individual_id, filters, limit, skip, codematches, domain, dataset){
     pg.data <- list()
     if (!is.null(filters)){
-      url  <- paste0(domain,"/services/samplematrix/",'?filters=',filters)
+      url  <- paste0(domain,"/services/samplematrix/?datasetIds=",dataset,'&filters=',filters)
       url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
       url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
       encoded_url <- URLencode(url)
@@ -448,18 +449,18 @@ pgxcallsetLoader <- function(biosample_id, individual_id, filters,limit,skip,cod
       if (codematches){
         pg.data[[1]] <- pg.data[[1]][pg.data[[1]]$group_id %in% filters,]
         if (ori.dim > 0 & dim(pg.data[[1]])[1] == 0){
-          warning("\n the option `codematches=TRUE` filters out all samples accessed by filters \n")
+          warning("\n The option `codematches=TRUE` filters out all samples accessed by filters \n")
         }}
     } 
     
     if (!is.null(biosample_id)){
-      url  <- paste0(domain,"/services/samplematrix/",'?biosampleIds=',transform_id(biosample_id))
+      url  <- paste0(domain,"/services/samplematrix/?datasetIds=",dataset,"&biosampleIds=",transform_id(biosample_id))
       encoded_url <- URLencode(url)
       pg.data[[2]] <- read.table(encoded_url, header=TRUE, sep="\t")
     }  
     
     if (!is.null(individual_id)){
-      url  <- paste0(domain,"/services/samplematrix/",'?individualIds=',transform_id(individual_id))
+      url  <- paste0(domain,"/services/samplematrix/?datasetIds=",dataset,"&individualIds=",transform_id(individual_id))
       encoded_url <- URLencode(url)
       pg.data[[3]] <- read.table(encoded_url, header=TRUE, sep="\t")
     }
@@ -476,29 +477,29 @@ pgxcallsetLoader <- function(biosample_id, individual_id, filters,limit,skip,cod
 }
 
 
-pgxCovLoader <- function(biosample_id, individual_id, filters, codematches,skip,limit,domain){
+pgxCovLoader <- function(biosample_id, individual_id, filters, codematches, skip, limit, domain, dataset){
     pg.data <- list()
     if (!is.null(filters)){
-        url <- paste0(domain,'/beacon/analyses/?output=cnvstats&filters=',filters)
-        url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
+        url <- paste0(domain,"/beacon/analyses/?datasetIds=",dataset,"&output=cnvstats&filters=",filters)
+        url  <- ifelse(is.null(limit) | limit == 0, url, paste0(url,"&limit=",limit)) # limit bug in cnvstats api
         url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
         if (codematches){
           suppressWarnings(all_biosample_id <- pgxmetaLoader(type = 'biosample', 
                                                              biosample_id = NULL,individual_id = NULL,
                                                              filters = filters,codematches = TRUE,
-                                                             skip=NULL,limit=0,filterLogic="AND",domain=domain))
+                                                             skip=NULL,limit=0,filterLogic="AND",domain=domain,dataset=dataset))
           all_biosample_id <- all_biosample_id$biosample_id    
         }
         pg.data[[1]] <- read_cov_json(url,codematches,all_biosample_id)
     } 
   
     if (!is.null(biosample_id)){
-        url  <- paste0(domain,'/beacon/analyses/?output=cnvstats&biosampleIds=',transform_id(biosample_id))
+        url  <- paste0(domain,"/beacon/analyses/?datasetIds=",dataset,"&output=cnvstats&biosampleIds=",transform_id(biosample_id))
         pg.data[[2]] <- read_cov_json(url)
     }
     
     if (!is.null(individual_id)){
-        url  <- paste0(domain,'/beacon/analyses/?output=cnvstats&&individualIds=',transform_id(individual_id))
+        url  <- paste0(domain,"/beacon/analyses/?datasetIds=",dataset,"&output=cnvstats&&individualIds=",transform_id(individual_id))
         pg.data[[3]] <- read_cov_json(url)
     }
     

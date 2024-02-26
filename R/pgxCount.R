@@ -5,6 +5,7 @@
 #'
 #' @param filters A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","icdom-98353")
 #' @param domain A string specifying the domain of database. Default is "http://progenetix.org".
+#' @param dataset A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".
 #' @importFrom utils URLencode
 #' @importFrom httr GET content
 #' @return Count of samples in the given filter
@@ -12,13 +13,17 @@
 #' @examples
 #' pgxCount(filters = "NCIT:C3512")
 
-pgxCount <- function(filters=NULL,domain="http://progenetix.org"){
+pgxCount <- function(filters=NULL,domain="http://progenetix.org",dataset="Progenetix"){
     if (is.null(filters)){
         stop("Please input filter")
     }
+
+    dataset <- match.arg(dataset, c("Progenetix","cancercelllines","cellz","examplez"))
+    # actual dataset name for cancercelllines
+    if (dataset == "cancercelllines") dataset <- "cellz"
     
     filter <- transform_id(filters)
-    url <- paste0(domain,"/services/collations?filters=",filter)
+    url <- paste0(domain,"/services/collations?datasetIds=",dataset,"&filters=",filter)
     encoded_url <- URLencode(url)
     info <-  content(GET(url))
     res <- lapply(info$response$results, function(x){

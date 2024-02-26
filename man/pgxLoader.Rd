@@ -16,7 +16,8 @@ pgxLoader(
   individual_id = NULL,
   save_file = FALSE,
   filename = NULL,
-  domain = "http://progenetix.org"
+  domain = "http://progenetix.org",
+  dataset = "Progenetix"
 )
 }
 \arguments{
@@ -54,6 +55,8 @@ Only used if the parameter \code{save_file} is TRUE. Default is "variants.seg/pg
 in current work directory.}
 
 \item{domain}{A string specifying the domain of database. Default is "http://progenetix.org".}
+
+\item{dataset}{A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".}
 }
 \value{
 Data from Progenetix database

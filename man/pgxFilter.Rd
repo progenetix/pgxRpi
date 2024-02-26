@@ -7,7 +7,8 @@
 pgxFilter(
   prefix = NULL,
   return_all_prefix = FALSE,
-  domain = "http://progenetix.org"
+  domain = "http://progenetix.org",
+  dataset = "Progenetix"
 )
 }
 \arguments{
@@ -18,6 +19,8 @@ means that all available filters will be returned. When specified, it returns al
 If TRUE, the \code{prefix} parameter will be ignored. Default is FALSE.}
 
 \item{domain}{A string specifying the domain of the Progenetix database. Default is "http://progenetix.org".}
+
+\item{dataset}{A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".}
 }
 \value{
 filter terms used in Progenetix.
