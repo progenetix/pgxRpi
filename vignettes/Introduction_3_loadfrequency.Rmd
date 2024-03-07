@@ -45,7 +45,7 @@ from child concepts of specified filters that belong to cancer type/tissue encod
 If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
 Do not use this parameter when `filters` include cancer-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.
-* `dataset` A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".
+* `dataset` A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
 
 # Retrieve CNV frequency data
 

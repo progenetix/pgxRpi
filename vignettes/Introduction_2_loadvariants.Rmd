@@ -54,7 +54,7 @@ Default is NULL (no skip).
 instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
 * `filename` A string specifying the path and name of the file to be saved. 
 Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
-* `dataset` A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".
+* `dataset` A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
 
 # Retrive CNV coverage of biosamples 
 

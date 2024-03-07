@@ -25,7 +25,7 @@
 #' Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" 
 #' in current work directory.
 #' @param domain A string specifying the domain of database. Default is "http://progenetix.org".
-#' @param dataset A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".
+#' @param dataset A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
 #' @importFrom utils URLencode modifyList read.table write.table
 #' @importFrom httr GET content
 #' @return Data from Progenetix database
@@ -51,10 +51,10 @@ pgxLoader <- function(
     save_file=FALSE,
     filename=NULL,
     domain="http://progenetix.org",
-    dataset="Progenetix"){
+    dataset="progenetix"){
     
     type <- match.arg(type, c("biosample", "individual","variant","frequency"))
-    dataset <- match.arg(dataset, c("Progenetix","cancercelllines","cellz","examplez"))
+    dataset <- match.arg(dataset, c("progenetix","cancercelllines","cellz","examplez"))
     
     # actual dataset name for cancercelllines
     if (dataset == "cancercelllines") dataset <- "cellz"

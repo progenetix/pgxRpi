@@ -7,15 +7,15 @@
 #' @param return_all_prefix A logical value determining whether to return all valid prefixes of filters used in Progenetix. 
 #' If TRUE, the `prefix` parameter will be ignored. Default is FALSE.
 #' @param domain A string specifying the domain of the Progenetix database. Default is "http://progenetix.org".
-#' @param dataset A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".
+#' @param dataset A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
 #' @importFrom httr GET content
 #' @return filter terms used in Progenetix.
 #' @export
 #' @examples
 #' pgxFilter(prefix = "NCIT")
 
-pgxFilter <- function(prefix=NULL, return_all_prefix=FALSE, domain="http://progenetix.org", dataset="Progenetix"){
-    dataset <- match.arg(dataset, c("Progenetix","cancercelllines","cellz","examplez"))
+pgxFilter <- function(prefix=NULL, return_all_prefix=FALSE, domain="http://progenetix.org", dataset="progenetix"){
+    dataset <- match.arg(dataset, c("progenetix","cancercelllines","cellz","examplez"))
     # actual dataset name for cancercelllines
     if (dataset == "cancercelllines") dataset <- "cellz"
     url <- paste0(domain,"/beacon/filtering_terms?datasetIds=",dataset)

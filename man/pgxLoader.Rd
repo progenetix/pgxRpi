@@ -17,7 +17,7 @@ pgxLoader(
   save_file = FALSE,
   filename = NULL,
   domain = "http://progenetix.org",
-  dataset = "Progenetix"
+  dataset = "progenetix"
 )
 }
 \arguments{
@@ -56,7 +56,7 @@ in current work directory.}
 
 \item{domain}{A string specifying the domain of database. Default is "http://progenetix.org".}
 
-\item{dataset}{A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".}
+\item{dataset}{A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".}
 }
 \value{
 Data from Progenetix database

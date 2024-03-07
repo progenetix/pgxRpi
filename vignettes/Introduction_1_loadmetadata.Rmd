@@ -48,7 +48,7 @@ Default is 0 (return all).
 * `skip` Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. 
 E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
 Default is NULL (no skip). 
-* `dataset` A string specifying the dataset to query. Default is "Progenetix". Other available options are "cancercelllines".
+* `dataset` A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
 
 # Retrieve meatdata of samples 
 

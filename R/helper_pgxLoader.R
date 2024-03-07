@@ -229,7 +229,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
         
         if (filterLogic == "AND"){
             filters <- transform_id(filters)
-            url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&filters=",filters,"&responseEntityId=",type)
+            url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&filters=",filters,"&requestEntityPathId=",type)
             url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
             url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
             encoded_url <- URLencode(url)
@@ -251,7 +251,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
           res_1 <- list()
           for (i in seq_len(length(trans.filters))){
-              url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&filters=",trans.filters[i],"&responseEntityId=",type)
+              url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&filters=",trans.filters[i],"&requestEntityPathId=",type)
               url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
               url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
               encoded_url <- URLencode(url)
@@ -273,7 +273,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
     if (!(is.null(biosample_id))){
         filter <- transform_id(biosample_id)
-        url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&biosampleIds=",filter,"&responseEntityId=",type)
+        url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&biosampleIds=",filter,"&requestEntityPathId=",type)
         encoded_url <- URLencode(url)
         attempt::try_catch(res_2 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),.e= function(e){
                 warning("\n Query fails for biosample_id ", filter, "\n")
@@ -282,7 +282,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
     if (!(is.null(individual_id))){
         filter <- transform_id(individual_id)
-        url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&individualIds=",filter,"&responseEntityId=",type)
+        url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&individualIds=",filter,"&requestEntityPathId=",type)
         encoded_url <- URLencode(url)
         attempt::try_catch(res_3 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),.e= function(e){
                 warning("\n Query fails for individual_id ", filter, "\n")
