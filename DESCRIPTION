@@ -1,6 +1,10 @@
 Package: pgxRpi
 Title: R wrapper for Progenetix 
+<<<<<<< HEAD
 Version: 0.99.14
+=======
+Version: 0.99.13
+>>>>>>> bfa28a2aad1e508c4c34ecfc0d58e6f4f5bb60b3
 Authors@R: 
     c(person(given = "Hangjia",
            family = "Zhao",
@@ -28,14 +32,14 @@ Imports:
     methods,
     grDevices,
     graphics,
-	circlize,
-	httr,
-	dplyr,
-  	attempt,
-  	lubridate,
-  	survival,
-  	survminer,
-  	ggplot2,
+    circlize,
+    httr,
+    dplyr,
+    attempt,
+    lubridate,
+    survival,
+    survminer,
+    ggplot2,
     plyr,
     GenomicRanges,
     SummarizedExperiment,

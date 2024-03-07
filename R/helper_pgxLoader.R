@@ -481,7 +481,7 @@ pgxCovLoader <- function(biosample_id, individual_id, filters, codematches, skip
     pg.data <- list()
     if (!is.null(filters)){
         url <- paste0(domain,"/beacon/analyses/?datasetIds=",dataset,"&output=cnvstats&filters=",filters)
-        url  <- ifelse(is.null(limit) | limit == 0, url, paste0(url,"&limit=",limit)) # limit bug in cnvstats api
+        url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit)) 
         url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
         if (codematches){
           suppressWarnings(all_biosample_id <- pgxmetaLoader(type = 'biosample', 
