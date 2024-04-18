@@ -11,7 +11,7 @@ url_5 <- "https://progenetix.org/services/samplematrix/?filters=pgx:icdom-88503&
 url_6 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972&datasetIds=progenetix"
 url_7 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&individualIds=pgxind-kftx3565,pgxind-kftx5g4v&datasetIds=progenetix"
 url_8 <- "https://progenetix.org/beacon/analyses/?output=cnvstats&filters=pgx:icdom-88503&datasetIds=progenetix"
-url_9 <- "http://progenetix.org/beacon/biosamples/pgxbs-0821E6df/g_variants?datasetIds=cellz"
+url_9 <- "http://progenetix.org/beacon/biosamples/cellzbs-0821E6df/g_variants?datasetIds=cellz"
 test_that("retrieve variants with JSON",{
         cat(paste("\n trying:",url,"\n"))
         result <-  content(GET(url))
