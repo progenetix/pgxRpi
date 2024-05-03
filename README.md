@@ -2,11 +2,22 @@
 
 Welcome to our R wrapper package for Progenetix REST API that leverages the capabilities of [Beacon v2](https://docs.genomebeacons.org/) specification. Please note that a stable internet connection is required for the query functionality. This package is aimed to simplify the process of accessing oncogenomic data from [Progenetix](https://progenetix.org/) database. 
 
-You can install this package from GitHub using:
+You can install this package using either of the following methods:
+
+### From Bioconductor
 
 ```r
-install.packages("devtools")
-devtools::install_github("progenetix/pgxRpi")
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("pgxRpi")
+```
+
+### From Github for the latest development version 
+
+```r
+if (!require("remotes", quietly = TRUE))
+    install.packages("remotes")
+remotes::install_github("progenetix/pgxRpi")
 ```
 
 For accessing metadata of biosamples/individuals, or learning more about filters, get started from the vignette Introduction_1_loadmetadata.
