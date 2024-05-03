@@ -10,6 +10,11 @@
 #' @param return_seg A logical value determining whether to return segment data. Default is FALSE.
 #' @param return_frequency A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.
 #' @param assembly A string specifying which genome assembly version should be applied to CNV frequency calculation and plotting. Allowed options are "hg19", "hg38". Default is "hg38".
+#' @param bin_size Size of genomic bins used in CNV frequency calculation to split the genome, in base pairs (bp). Default is 1,000,000.
+#' @param overlap Numeric value defining the amount of overlap between bins and segments considered as bin-specific CNV, in base pairs (bp). Default is 1,000.
+#' @param soft_expansion Fraction of `bin_size` to determine merge criteria.
+#' During the generation of genomic bins, division starts at the centromere and expands towards the telomeres on both sides.
+#' If the size of the last bin is smaller than `soft_expansion` * bin_size, it will be merged with the previous bin. Default is 0.1.
 #' @param ... Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot from survminer)
 #' @importFrom utils URLencode modifyList read.table write.table data
 #' @importFrom methods show
@@ -18,7 +23,7 @@
 #' @examples
 #' file_path <- system.file("extdata", "example.pgxseg",package = 'pgxRpi')
 #' info <- pgxSegprocess(file=file_path,show_KM_plot = TRUE, return_seg = TRUE, return_metadata = TRUE)
-pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_metadata=FALSE,return_seg=FALSE,return_frequency=FALSE,assembly='hg38',...){
+pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_metadata=FALSE,return_seg=FALSE,return_frequency=FALSE,assembly='hg38',bin_size= 1000000,overlap=1000,soft_expansion = 0.1,...){
     if(!any(show_KM_plot, return_metadata, return_seg, return_frequency)){return()}
     full.data <- readLines(file)
     idx <- grep("#sample=>",full.data)
@@ -90,13 +95,10 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
         seg <- do.call(rbind,seg)
         rownames(seg) <- seq_len(dim(seg)[1])
         if (return_frequency){
-            bin.data <- extract.bin.feature(seg,genome=assembly)
+            bin.data <- extract.bin.feature(seg,genome=assembly,bin.size=bin_size,overlap=overlap,soft.expansion = soft_expansion)
             bin.dup.data <- bin.data[['dup']]
             bin.del.data <- bin.data[['del']]
-            frequency <- list()
-            frequency[['data']] <- list()
-            frequency[['meta']] <- c()
-            total_sample_count <- 0
+  
             freq_data <- list()
             freq_meta <- list()
             for (id in unique(meta[,group_id])){

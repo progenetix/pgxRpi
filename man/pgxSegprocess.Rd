@@ -12,6 +12,9 @@ pgxSegprocess(
   return_seg = FALSE,
   return_frequency = FALSE,
   assembly = "hg38",
+  bin_size = 1e+06,
+  overlap = 1000,
+  soft_expansion = 0.1,
   ...
 )
 }
@@ -29,6 +32,14 @@ pgxSegprocess(
 \item{return_frequency}{A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.}
 
 \item{assembly}{A string specifying which genome assembly version should be applied to CNV frequency calculation and plotting. Allowed options are "hg19", "hg38". Default is "hg38".}
+
+\item{bin_size}{Size of genomic bins used in CNV frequency calculation to split the genome, in base pairs (bp). Default is 1,000,000.}
+
+\item{overlap}{Numeric value defining the amount of overlap between bins and segments considered as bin-specific CNV, in base pairs (bp). Default is 1,000.}
+
+\item{soft_expansion}{Fraction of \code{bin_size} to determine merge criteria.
+During the generation of genomic bins, division starts at the centromere and expands towards the telomeres on both sides.
+If the size of the last bin is smaller than \code{soft_expansion} * bin_size, it will be merged with the previous bin. Default is 0.1.}
 
 \item{...}{Other parameters relevant to KM plot. These include \code{pval}, \code{pval.coord}, \code{pval.method}, \code{conf.int}, \code{linetype}, and \code{palette} (see ggsurvplot from survminer)}
 }

@@ -126,6 +126,38 @@ For example, if the value in the second row and first column is 8.457, it means 
 
 Note: it is different from CNV status matrix introduced in Introduction_2_loadvariants. Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV status matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in the individual sample.
 
+# Calculate CNV frequency data
+
+## `segtoFreq` function
+
+This function computes the binned CNV frequency from segment data.
+
+The parameters of this function:
+
+* `data`: Segment data with CNV states. The first four columns should specify sample ID, chromosome, start position, and end position, respectively. The column representing CNV states should contain either "DUP" for duplications or "DEL" for deletions.
+* `cnv_column_idx`: Index of the column specifying CNV state. Default is 6, following the "pgxseg" format used in Progenetix. If the input segment data uses the general `.seg` file format, it might need to be set differently.
+* `cohort_name`: A string specifying the cohort name. Default is "unspecified cohort".
+* `assembly`: A string specifying the genome assembly version for CNV frequency calculation. Allowed options are "hg19" or "hg38". Default is "hg38".
+* `bin_size`: Size of genomic bins used to split the genome, in base pairs (bp). Default is 1,000,000.
+* `overlap`: Numeric value defining the amount of overlap between bins and segments considered as bin-specific CNV, in base pairs (bp). Default is 1,000.
+* `soft_expansion`: Fraction of `bin_size` to determine merge criteria. During the generation of genomic bins, division starts at the centromere and expands towards the telomeres on both sides. If the size of the last bin is smaller than `soft_expansion` * bin_size, it will be merged with the previous bin. Default is 0.1.
+
+Suppose you have segment data from several biosamples:
+
+```{r}
+# access variant data
+vardata <- pgxLoader(type="variant",biosample_id = c("pgxbs-kftvhmz9", "pgxbs-kftvhnqz","pgxbs-kftvhupd"),output="pgxseg")
+# only keep segment cnv data
+segdata <- vardata[vardata$variant_type %in% c("DUP","DEL"),]
+```
+
+You can then calculate the CNV frequency from this cohort comprised of these samples. The output is stored in "pgxfreq" format:
+
+```{r}
+segfreq <- segtoFreq(segdata,cohort_name="c1")
+segfreq
+```
+
 # Visualization of CNV frequency data using 'pgxfreq' format
 
 ## `pgxFreqplot` function
