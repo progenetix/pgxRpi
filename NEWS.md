@@ -11,4 +11,6 @@
 
 - Add `pgxFilter` function to expose all available filters.
 
+## Version: 1.1.2 (2024-05-03)
 
+- Add `segtoFreq` function to allow CNV frequency calculation from given segment data
