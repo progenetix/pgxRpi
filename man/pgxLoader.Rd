@@ -16,6 +16,7 @@ pgxLoader(
   individual_id = NULL,
   save_file = FALSE,
   filename = NULL,
+  num_cores = 1,
   domain = "http://progenetix.org",
   dataset = "progenetix"
 )
@@ -32,7 +33,7 @@ available options are "pgxfreq" or "pgxmatrix".}
 
 \item{codematches}{A logical value determining whether to exclude samples from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon).
 If TRUE, retrieved samples only keep samples exactly encoded by specified filters.
-Do not use this parameter when \code{filters} include cancer-irrelevant filters such as PMID and cohort identifiers.
+Do not use this parameter when \code{filters} include ontology-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.}
 
 \item{filterLogic}{A string specifying logic for combining multiple filters when query metadata (the paramter \code{type} = "biosample" or "individual"). Available options are "AND" and "OR". Default is "AND".  An exception is filters associated with age that always use AND logic
@@ -53,6 +54,8 @@ instead of direct return. Only used when the parameter \code{type} is "variant" 
 \item{filename}{A string specifying the path and name of the file to be saved.
 Only used if the parameter \code{save_file} is TRUE. Default is "variants.seg/pgxseg"
 in current work directory.}
+
+\item{num_cores}{Integer to specify the number of cores used for the variant query. Only used when the parameter \code{type} is "variant". Default is 1.}
 
 \item{domain}{A string specifying the domain of database. Default is "http://progenetix.org".}
 

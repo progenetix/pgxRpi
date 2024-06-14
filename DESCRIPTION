@@ -39,7 +39,8 @@ Imports:
     plyr,
     GenomicRanges,
     SummarizedExperiment,
-    S4Vectors 
+    S4Vectors,
+    parallelly 
 Depends: 
     R (>= 4.2)
 Suggests: 

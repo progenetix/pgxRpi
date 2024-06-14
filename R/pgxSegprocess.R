@@ -43,7 +43,7 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
     if (show_KM_plot){
         # remove samples without survival data
         meta.sel.df <- meta[!is.na(meta$followup_time) & meta$followup_state_id != 'EFO:0030039',]
-        attempt::stop_if(.x= dim(meta.sel.df)[1] == 0, msg="\n No available survival data \n")
+        if(dim(meta.sel.df)[1] == 0) stop("\n No available survival data \n")
           # transform ISOdate interal to days
         meta.sel.df$followup_time <- lubridate::time_length(meta.sel.df$followup_time,unit='day')
           # Map EFO code to numerical representation for plotting

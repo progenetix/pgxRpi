@@ -3,7 +3,7 @@ require(httr)
 
 test_that("retrieve samples with group id",{
     
-    url <- "http://progenetix.org/services/sampletable/?filters=NCIT:C3697&datasetIds=progenetix"
+    url <- "http://progenetix.org/services/sampletable/?filters=NCIT:C3697&responseEntityPathId=biosamples&datasetIds=progenetix"
 
     cat(paste("\n trying:",url,"\n"))
     r <- GET(url)
@@ -14,7 +14,7 @@ test_that("retrieve samples with group id",{
 
 test_that("retrieve samples with biosample id",{
 
-    url <- "http://progenetix.org/services/sampletable/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g&datasetIds=progenetix"
+    url <- "http://progenetix.org/services/sampletable/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g&responseEntityPathId=biosamples&datasetIds=progenetix"
     cat(paste("\n trying:",url,"\n"))
     r <- GET(url)
     expect_equal(http_type(r), "text/tsv")
@@ -23,7 +23,7 @@ test_that("retrieve samples with biosample id",{
 })
 
 test_that("retrieve individuals with biosample id",{
-  url <- "http://progenetix.org/services/sampletable/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvjji1&requestEntityPathId=individual&datasetIds=progenetix"
+  url <- "http://progenetix.org/services/sampletable/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvjji1&responseEntityPathId=individuals&datasetIds=progenetix"
   cat(paste("\n trying:",url,"\n"))
   r <- GET(url)
   expect_equal(http_type(r), "text/tsv")
@@ -32,7 +32,7 @@ test_that("retrieve individuals with biosample id",{
 })
 
 test_that("retrieve individuals with individual id",{
-  url <- "http://progenetix.org/services/sampletable/?individualIds=pgxind-kftx3565,pgxind-kftx5g4v&requestEntityPathId=individual&datasetIds=progenetix"
+  url <- "http://progenetix.org/services/sampletable/?individualIds=pgxind-kftx3565,pgxind-kftx5g4v&responseEntityPathId=individuals&datasetIds=progenetix"
   cat(paste("\n trying:",url,"\n"))
   r <- GET(url)
   expect_equal(http_type(r), "text/tsv")
@@ -41,7 +41,7 @@ test_that("retrieve individuals with individual id",{
 })
 
 test_that("retrieve limited individuals with group id",{
-  url <- "http://progenetix.org/services/sampletable/?filters=NCIT:C3512&requestEntityPathId=individual&limit=1000&datasetIds=progenetix"
+  url <- "http://progenetix.org/services/sampletable/?filters=NCIT:C3512&responseEntityPathId=individuals&limit=1000&datasetIds=progenetix"
   cat(paste("\n trying:",url,"\n"))
   r <- GET(url)
   expect_equal(http_type(r), "text/tsv")
@@ -51,7 +51,7 @@ test_that("retrieve limited individuals with group id",{
 
 test_that("retrieve samples with group id in cellz",{
     
-    url <- "http://progenetix.org/services/sampletable/?filters=NCIT:C7707&datasetIds=cellz"
+    url <- "http://progenetix.org/services/sampletable/?filters=NCIT:C7707&responseEntityPathId=biosamples&datasetIds=cellz"
 
     cat(paste("\n trying:",url,"\n"))
     r <- GET(url)

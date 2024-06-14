@@ -17,8 +17,11 @@ transform_id <- function(id){
     return(filter)
 }
 
-read_variant_pgxseg <- function(url){
-    result <- read.table(url, header = TRUE, sep="\t")
+read_variant_pgxseg <- function(biosample_id, domain, dataset){
+    url <- paste0(domain,"/services/pgxsegvariants/?datasetIds=",dataset,"&biosampleIds=",biosample_id)
+    encoded_url <- URLencode(url)
+    result <- read.table(encoded_url, header = TRUE, sep="\t",quote="")
+    if (dim(result)[1] == 0) return(NA)
     col <- c("start","end","log2")
     suppressWarnings(result[,col] <- sapply(result[,col], as.numeric))
     result <- result[order(result$start),]
@@ -31,6 +34,61 @@ read_variant_pgxseg <- function(url){
     return(result)
 }
 
+read_variant_beacon <- function(biosample_id, domain, dataset){
+    url <- paste0(domain,"/beacon/biosamples/",biosample_id,"/g_variants","?datasetIds=",dataset)
+    encoded_url <- URLencode(url)
+    response <- NULL
+    tryCatch({
+      response <- GET(encoded_url)
+      httr::stop_for_status(response)
+    }, error = function(e) {
+      NULL
+    })
+    
+    if (is.null(response)) return(NULL)
+    
+    content <- content(response)
+    result <- lapply(content$response$resultSets[[1]]$results,unlist)
+    
+    # when no variants for this id              
+    if (length(result) == 0) return(NA)
+    
+    result <- lapply(result,function(x){
+      var_meta <- x[c('caseLevelData.id','caseLevelData.biosampleId','caseLevelData.analysisId',
+                      'variation.subject.sequence_id','variantInternalId','caseLevelData.info.cnvValue','variation.copyChange')]
+      temp_row <- as.data.frame(matrix(var_meta,nrow=1,byrow = TRUE))
+      colnames(temp_row) <- c("variant_id","biosample_id","analysis_id",
+                              "reference_genome","variant","variant_log2","variant_copychange")
+      return(temp_row)
+    })
+    result <- Reduce(rbind,result)
+    
+    # change interval order 
+    location <- strsplit(result$variant,split = ':')
+    start <- sapply(location, function(x){x[2]})
+    start <- as.numeric(gsub('-.*','',start))
+    result <- result[order(start),]
+    location <- strsplit(result$variant,split = ':')
+    chr <-  sapply(location, function(x){x[1]})
+    chr[chr == 'X'] <- 23
+    chr[chr == 'Y'] <- 24
+    chr <- as.numeric(chr)
+    result <- result[order(chr),]
+    
+    # in case one sample corresponds to multiple analysis
+    result <- result[order(result$analysis_id),]
+    return(result)
+}
+
+
+read_variant_pgxseg_meta <- function(biosample_id,domain, dataset){
+    url <- paste0(domain,"/services/pgxsegvariants/?datasetIds=",dataset,"&biosampleIds=",biosample_id)
+    encoded_url <- URLencode(url)
+    meta <- readLines(encoded_url)
+    idx <- length(grep("#",meta))
+    return(meta[seq_len(idx)])
+}
+  
 read_cov_json <- function(url,codematches=FALSE,all_biosample_id=NULL){
   encoded_url <- URLencode(url)
   data <- content(GET(encoded_url))
@@ -111,11 +169,7 @@ read_cov_json <- function(url,codematches=FALSE,all_biosample_id=NULL){
   return(result)
 }
 
-read_variant_pgxseg_meta <- function(url){
-    meta <- readLines(url)
-    idx <- length(grep("#",meta))
-    return(meta[seq_len(idx)])
-}
+
 
 disease_code_check <- function(id, remain.id, url){
   total.id <- c()
@@ -186,16 +240,16 @@ pgxFreqLoader <- function(output, codematches, filters, domain, dataset) {
     count <- as.numeric(gsub('.*=','',count))
     meta <- data.frame(filter = filters, label, sample_count=count)
     # access data 
-    pg.data  <- read.table(encoded_url, header=TRUE, sep="\t")
+    pg.data  <- read.table(encoded_url, header=TRUE, sep="\t",,quote="")
     colnames(pg.data)[1] <- 'filters'
     if (output == 'pgxfreq'){
       colnames(pg.data)[2] <- 'chr'
       data_lst <- GenomicRanges::makeGRangesListFromDataFrame(pg.data,split.field = 'filters',keep.extra.columns=TRUE)
       S4Vectors::mcols(data_lst) <- meta
     } else if (output == "pgxmatrix"){
-      frequency <- as.data.frame(t(pg.data[,-1]))
-      rowRanges <- rownames(frequency)
-      rowRanges <- lapply(rowRanges,function(x){
+        frequency <- as.data.frame(t(pg.data[,-1]))
+        rowRanges <- rownames(frequency)
+        rowRanges <- lapply(rowRanges,function(x){
         range_str <- unlist(strsplit(x,split = '\\.'))
         chr <- range_str[1]
         chr <- gsub("X","",chr)
@@ -229,12 +283,12 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
         
         if (filterLogic == "AND"){
             filters <- transform_id(filters)
-            url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&filters=",filters,"&requestEntityPathId=",type)
+            url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&filters=",filters,"&responseEntityPathId=",type,"s")
             url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
             url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
             encoded_url <- URLencode(url)
             attempt::try_catch(
-              res_1 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),
+              res_1 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE,quote=""),
               .e= function(e){
                 warning("\n Query fails for the filters ", filters,"\n")
               })
@@ -251,13 +305,13 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
           res_1 <- list()
           for (i in seq_len(length(trans.filters))){
-              url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&filters=",trans.filters[i],"&requestEntityPathId=",type)
+              url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&filters=",trans.filters[i],"&responseEntityPathId=",type,"s")
               url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
               url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
               encoded_url <- URLencode(url)
       
               attempt::try_catch(
-                res_1[[i]] <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),
+                res_1[[i]] <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE,quote=""),
                 .e= function(e){
                   warning("\n Query fails for the filter ", trans.filters[i],"\n")
                 })
@@ -273,18 +327,18 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
     if (!(is.null(biosample_id))){
         filter <- transform_id(biosample_id)
-        url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&biosampleIds=",filter,"&requestEntityPathId=",type)
+        url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&biosampleIds=",filter,"&responseEntityPathId=",type,"s")
         encoded_url <- URLencode(url)
-        attempt::try_catch(res_2 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),.e= function(e){
+        attempt::try_catch(res_2 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE,quote=""),.e= function(e){
                 warning("\n Query fails for biosample_id ", filter, "\n")
         })           
     }
 
     if (!(is.null(individual_id))){
         filter <- transform_id(individual_id)
-        url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&individualIds=",filter,"&requestEntityPathId=",type)
+        url <- paste0(domain,"/services/sampletable/?datasetIds=",dataset,"&individualIds=",filter,"&responseEntityPathId=",type,"s")
         encoded_url <- URLencode(url)
-        attempt::try_catch(res_3 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE),.e= function(e){
+        attempt::try_catch(res_3 <- read.table(encoded_url,stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=TRUE,quote=""),.e= function(e){
                 warning("\n Query fails for individual_id ", filter, "\n")
         })
     }
@@ -329,111 +383,90 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
     return(res)
 }
 
-pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, dataset){
+retry_query <- function(results,retry_query_idx,biosample_id,domain,dataset,num_cores){
+    retry_count <- 1
+    while (length(retry_query_idx) > 0 & retry_count <= 5){
+      re_try_result <- parallel::mclapply(biosample_id[retry_query_idx],
+                                        FUN = function(i){read_variant_beacon(i,domain, dataset)}, 
+                                        mc.cores = num_cores)
+      results[retry_query_idx] <-  re_try_result
+      retry_query_idx <-  which(sapply(results,is.null))
+      retry_count <- retry_count + 1
+    }
+    return(list(results=results,retry_query_idx= retry_query_idx))
+}
+
+pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, dataset, num_cores){
     if (save_file & is.null(output)){
       stop("The parameter 'output' is invalid when 'save_file=TRUE' (available: \"seg\" or \"pgxseg\")") 
     } 
-             
-    res <- list()
-    meta <- c()
-    for (i in seq_len(length(biosample_id))){
-        if (!(is.null(output))){
-            url <- paste0(domain,"/services/pgxsegvariants/?datasetIds=",dataset,"&biosampleIds=",biosample_id[i])
-            encoded_url <- URLencode(url)
-            attempt::try_catch(res[[i]] <- read_variant_pgxseg(encoded_url), .e = function(e){
-                warning("\n Query fails for biosample_id ", biosample_id[i], "\n")
-            })
-        }else{
-            url <- paste0(domain,"/beacon/biosamples/",biosample_id[i],"/g_variants","?datasetIds=",dataset)
-            encoded_url <- URLencode(url)
-            attempt::try_catch(res[[i]] <- content(GET(encoded_url)), .e = function(e){
-                 warning("\n Query fails for biosample_id ", biosample_id[i], "\n")
-            })
-            # when query failed  
-            if (length(res) < i){
-                res[[i]] <- NA
-                next
-            } 
-            
-            res[[i]] <- lapply(res[[i]]$response$resultSets[[1]]$results,unlist)
-            # when no variants for this id              
-            if (length(res[[i]]) == 0){
-                res[[i]] <- NA
-                next
-            }
-            
-            temp <- res[[i]]              
-            temp <- lapply(temp,function(x){
-                var_meta <- x[c('caseLevelData.id','caseLevelData.biosampleId','caseLevelData.analysisId',
-                                'variation.subject.sequence_id','variantInternalId','caseLevelData.info.cnvValue','variation.copyChange')]
-                temp_row <- as.data.frame(matrix(var_meta,nrow=1,byrow = TRUE))
-                colnames(temp_row) <- c("variant_id","biosample_id","analysis_id",
-                                        "reference_genome","variant","variant_log2","variant_copychange")
-                return(temp_row)
-            })
-            temp <- Reduce(rbind,temp)
-            # change interval order 
-            location <- strsplit(temp$variant,split = ':')
-            start <- sapply(location, function(x){x[2]})
-            start <- as.numeric(gsub('-.*','',start))
-            temp <- temp[order(start),]
-            
-            location <- strsplit(temp$variant,split = ':')
-            chr <-  sapply(location, function(x){x[1]})
-            chr[chr == 'X'] <- 23
-            chr[chr == 'Y'] <- 24
-            chr <- as.numeric(chr)
-            temp <- temp[order(chr),]
-            
-            temp <- temp[order(temp$biosample_id),]
-            res[[i]] <- temp
-        }
-
-        if (save_file){
-            if (output == 'pgxseg'){
-                if (length(meta) == 0){
-                     meta <- read_variant_pgxseg_meta(encoded_url)
-                }else{
-                     meta <- c(meta, meta[-c(1,2)])
-                }
-            }
-        }
-
-    }
-
-    res[is.na(res)] <- NULL
-
-    res <- do.call(rbind, res)
     
-    if (dim(res)[1] == 0){
-      warning("\n No variants retrieved \n")
-      return()
-    }
-
+    num_cores <- min(num_cores, parallelly::availableCores())
+    
     if (!(is.null(output))){
-        if (output == 'seg'){
-            res <- res[,c(1,2,3,4,6,5)]
+        results <- parallel::mclapply(biosample_id,
+                                      FUN = function(i){read_variant_pgxseg(i,domain, dataset)}, 
+                                      mc.cores = num_cores)
+    }else{
+        results <- parallel::mclapply(biosample_id,
+                                      FUN = function(i){read_variant_beacon(i,domain, dataset)}, 
+                                      mc.cores = num_cores)
+        
+        
+        retry_query_idx <- which(sapply(results,is.null))
+        
+        if (length(retry_query_idx) > 0){
+            retry_result <- retry_query(results,retry_query_idx,biosample_id,domain,dataset,num_cores)
+            retry_query_idx <- retry_result[['retry_query_idx']]
+            results <- retry_result[['results']]
+            if (length(retry_query_idx) > 0) warning("\n Query fails for biosample_id ", paste(biosample_id[retry_query_idx],collapse = ','), "\n")
         }
     }
+    fail_idx <- which(is.na(results))
+    if (length(fail_idx > 0)) warning("\n Query fails for biosample_id ", paste(biosample_id[fail_idx],collapse = ','), "\n")
     
+    results[is.na(results)] <- NULL
+    results <- do.call(rbind, results)
+        
+    if (dim(results)[1] == 0){
+        warning("\n No variants retrieved \n")
+        return()
+    }
+        
     # quality check
-    res <- res[res$biosample_id %in% biosample_id,]
-    rownames(res) <- seq(nrow(res))
-
+    results <- results[results$biosample_id %in% biosample_id,]
+    rownames(results) <- seq(nrow(results))
+    
+    # format conversion
+    if (!(is.null(output))){
+      if (output == 'seg'){
+        results <- results[,c(1,2,3,4,6,5)]
+      }
+    }
+    
     if (save_file){
         if (output=='pgxseg'){
+           # query metadata
+            meta <-  parallel::mclapply(biosample_id,
+                                      FUN = function(i){read_variant_pgxseg_meta(i,domain, dataset)}, 
+                                      mc.cores = numCores)
+            head <- meta[[1]][c(1:2)]
+            meta <- lapply(meta, FUN = function(x){return(x[-c(1,2,3)])})
+            meta <- do.call(c,meta)
+            meta <- c(head,meta)
+            # write result
             if (is.null(filename)) filename <- "variants.pgxseg"            
             write.table(meta, file=filename,row.names = FALSE,col.names = FALSE, quote = FALSE)
-            suppressWarnings(write.table(res, append=TRUE, sep='\t',file=filename,row.names = FALSE,col.names = TRUE, quote = FALSE))
+            suppressWarnings(write.table(results, append=TRUE, sep='\t',file=filename,row.names = FALSE,col.names = TRUE, quote = FALSE))
         } else if(output == 'seg'){
             if (is.null(filename))  filename <- "variants.seg"  
-            write.table(res, file=filename, sep='\t',row.names = FALSE,col.names = TRUE, quote = FALSE)
+            write.table(results, file=filename, sep='\t',row.names = FALSE,col.names = TRUE, quote = FALSE)
         } 
         message("\n The file is saved \n")
         return()
     }
 
-    return(res)
+    return(results)
 }
 
 
@@ -444,7 +477,7 @@ pgxcallsetLoader <- function(biosample_id, individual_id, filters, limit, skip, 
       url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit))
       url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
       encoded_url <- URLencode(url)
-      pg.data[[1]] <- read.table(encoded_url, header=TRUE, sep="\t")
+      pg.data[[1]] <- read.table(encoded_url, header=TRUE, sep="\t",quote="")
       ori.dim <- dim(pg.data[[1]])[1]
       if (codematches){
         pg.data[[1]] <- pg.data[[1]][pg.data[[1]]$group_id %in% filters,]
@@ -456,13 +489,13 @@ pgxcallsetLoader <- function(biosample_id, individual_id, filters, limit, skip, 
     if (!is.null(biosample_id)){
       url  <- paste0(domain,"/services/samplematrix/?datasetIds=",dataset,"&biosampleIds=",transform_id(biosample_id))
       encoded_url <- URLencode(url)
-      pg.data[[2]] <- read.table(encoded_url, header=TRUE, sep="\t")
+      pg.data[[2]] <- read.table(encoded_url, header=TRUE, sep="\t",quote="")
     }  
     
     if (!is.null(individual_id)){
       url  <- paste0(domain,"/services/samplematrix/?datasetIds=",dataset,"&individualIds=",transform_id(individual_id))
       encoded_url <- URLencode(url)
-      pg.data[[3]] <- read.table(encoded_url, header=TRUE, sep="\t")
+      pg.data[[3]] <- read.table(encoded_url, header=TRUE, sep="\t",quote="")
     }
 
     pg.data <- do.call(rbind,pg.data)

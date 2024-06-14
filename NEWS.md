@@ -14,3 +14,8 @@
 ## Version: 1.1.2 (2024-05-03)
 
 - Add `segtoFreq` function to allow CNV frequency calculation from given segment data
+
+## Version: 1.1.3 (2024-06-14)
+
+- Add `pgxMetaplot` function to generate survival plots from metadata
+- Add `num_cores` parameter for parallel query of variants

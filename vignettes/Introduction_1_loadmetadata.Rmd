@@ -34,14 +34,14 @@ The parameters of this function used in this tutorial:
 
 * `type` A string specifying output data type. Available options are "biosample", "individual", "variant" or "frequency".   
 * `filters` Identifiers for cancer type, literature, cohorts, and age such as 
-c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). For more information about filters, see the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
+c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
 * `filterLogic` A string specifying logic for combining multiple filters when query metadata. Available options are "AND" and "OR". Default is "AND". An exception is filters associated with age that always use AND logic when combined with any other filter, even if filterLogic = "OR", which affects other filters. 
 * `individual_id` Identifiers used in Progenetix database for identifying individuals. 
 * `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
 * `codematches` A logical value determining whether to exclude samples 
 from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
 If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
-Do not use this parameter when `filters` include cancer-irrelevant filters such as PMID and cohort identifiers.
+Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.
 * `limit` Integer to specify the number of returned samples/individuals/coverage profiles for each filter. 
 Default is 0 (return all). 
@@ -170,6 +170,33 @@ individual <- pgxLoader(type="individual",individual_id = "pgxind-kftx26ml", bio
 
 individual
 ```
+
+# Visualization of survival data 
+
+## `pgxMetaplot` function
+
+This function generates a survival plot using metadata of individuals obtained by the `pgxLoader` function.
+
+The parameters of this function:
+
+* `data`: The meatdata of individuals returned by `pgxLoader` function.
+* `group_id`: A string specifying which column is used for grouping in the Kaplan-Meier plot.
+* `condition`: Condition for splitting individuals into younger and older groups. Only used if `group_id` is age related.
+* `return_data`: A logical value determining whether to return the metadata used for plotting. Default is FALSE.
+* `...`: Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot function from survminer package)
+
+Suppose you want to investigate whether there are survival differences between younger and older 
+patients with a particular disease, you can query and visualize the relevant information as follows:
+
+```{r}
+# query metadata of individuals with lung adenocarcinoma
+luad_inds <- pgxLoader(type="individual",filters="NCIT:C3512")
+# use 65 years old as the splitting condition
+pgxMetaplot(data=luad_inds, group_id="age_iso", condition="P65Y", pval=TRUE)
+```
+
+It's noted that not all individuals have available survival data. If you set `return_data` to `TRUE`, 
+the function will return the metadata of individuals used for the plot.
 
 # Session Info
 
