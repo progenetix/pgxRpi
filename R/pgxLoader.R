@@ -10,7 +10,7 @@
 #' @param filters Identifiers for cancer type, literature, cohorts, and age such as c("NCIT:C7376", "pgx:icdom-98353", "PMID:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). 
 #' @param codematches A logical value determining whether to exclude samples from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
 #' If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
-#' Do not use this parameter when `filters` include cancer-irrelevant filters such as PMID and cohort identifiers.
+#' Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
 #' Default is FALSE.
 #' @param filterLogic A string specifying logic for combining multiple filters when query metadata (the paramter `type` = "biosample" or "individual"). Available options are "AND" and "OR". Default is "AND".  An exception is filters associated with age that always use AND logic 
 #' when combined with any other filter, even if filterLogic = "OR", which affects other filters.  Note that when `type` = "frequency", the combining logic is "OR", which is not changed by this parameter.
@@ -24,6 +24,7 @@
 #' @param filename A string specifying the path and name of the file to be saved. 
 #' Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" 
 #' in current work directory.
+#' @param num_cores Integer to specify the number of cores used for the variant query. Only used when the parameter `type` is "variant". Default is 1.
 #' @param domain A string specifying the domain of database. Default is "http://progenetix.org".
 #' @param dataset A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
 #' @importFrom utils URLencode modifyList read.table write.table
@@ -50,6 +51,7 @@ pgxLoader <- function(
     individual_id=NULL,
     save_file=FALSE,
     filename=NULL,
+    num_cores=1,
     domain="http://progenetix.org",
     dataset="progenetix"){
     
@@ -109,7 +111,7 @@ pgxLoader <- function(
     switch(type,
            biosample = pgxmetaLoader(type=type,biosample_id= biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,filterLogic=filterLogic,domain=domain,dataset=dataset),
            individual= pgxmetaLoader(type=type,biosample_id= biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,filterLogic=filterLogic,domain=domain,dataset=dataset),
-           variant = pgxVariantLoader(biosample_id = biosample_id,output=output,save_file=save_file, filename = filename,domain=domain,dataset=dataset),
+           variant = pgxVariantLoader(biosample_id = biosample_id,output=output,save_file=save_file, filename = filename,domain=domain,dataset=dataset, num_cores=num_cores),
            frequency = pgxFreqLoader(output = output, codematches = codematches, filters=filters,domain=domain,dataset=dataset),
            callset = pgxcallsetLoader(biosample_id = biosample_id, individual_id=individual_id, filters = filters,limit=limit, skip=skip,codematches = codematches,domain=domain,dataset=dataset),
            coverage = pgxCovLoader(biosample_id = biosample_id, individual_id=individual_id, filters = filters, codematches = codematches,skip=skip,limit=limit,domain=domain,dataset=dataset))

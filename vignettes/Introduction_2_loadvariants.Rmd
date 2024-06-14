@@ -37,13 +37,13 @@ The parameters of this function used in this tutorial:
 available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg".
 * `filters` Identifiers for cancer type, literature, cohorts, and age such as 
 c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y").
-For more information about filters, see the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
+For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
 * `individual_id` Identifiers used in Progenetix database for identifying individuals. 
 * `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
 * `codematches` A logical value determining whether to exclude samples 
 from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
 If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
-Do not use this parameter when `filters` include cancer-irrelevant filters such as PMID and cohort identifiers.
+Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.
 * `limit` Integer to specify the number of returned CNV coverage profiles for each filter. 
 Default is 0 (return all). 
@@ -54,6 +54,7 @@ Default is NULL (no skip).
 instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
 * `filename` A string specifying the path and name of the file to be saved. 
 Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
+* `num_cores` Integer to specify the number of cores on your local computer to be used for the variant query. The default is 1.
 * `dataset` A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
 
 # Retrive CNV coverage of biosamples 
@@ -151,12 +152,12 @@ cnv_ind_cov <- pgxLoader(type="variant", output="coverage",
 
 # Retrieve segment variants 
 
-Because of the time-out problem, the segment variant data can only be accessed by 
-biosample id instead of filters.
+Because of a time-out issue, segment variant data can only be accessed by biosample id instead of filters. 
+To speed up this process, you can set the `num_cores` parameter for parallel processing. 
 
 ## Relevant parameters 
 
-type, output, biosample_id, save_file, filename, dataset
+type, output, biosample_id, save_file, filename, num_cores, dataset
 
 ## Get biosample id 
 

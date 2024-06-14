@@ -1,6 +1,6 @@
 Package: pgxRpi
 Title: R wrapper for Progenetix 
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: 
     c(person(given = "Hangjia",
            family = "Zhao",
@@ -39,7 +39,8 @@ Imports:
     plyr,
     GenomicRanges,
     SummarizedExperiment,
-    S4Vectors 
+    S4Vectors,
+    parallelly 
 Depends: 
     R (>= 4.2)
 Suggests: 

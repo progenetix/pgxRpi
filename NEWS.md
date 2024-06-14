@@ -11,4 +11,11 @@
 
 - Add `pgxFilter` function to expose all available filters.
 
+## Version: 1.0.1 (2024-05-03)
 
+- Add `segtoFreq` function to allow CNV frequency calculation from given segment data
+
+## Version: 1.0.2 (2024-06-14)
+
+- Add `pgxMetaplot` function to generate survival plots from metadata
+- Add `num_cores` parameter for parallel query of variants

@@ -36,22 +36,17 @@ This function loads various data from `Progenetix` database.
 The parameters of this function used in this tutorial:
 
 * `type` A string specifying output data type. Available options are "biosample", "individual", "variant" or "frequency". 
-* `output` A string specifying output file format. When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix" .
+* `output` A string specifying output file format. When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix".
 * `filters` Identifiers for cancer type, literature, cohorts, and age such as 
 c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y").
-For more information about filters, see the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
-* `codematches` A logical value determining whether to exclude samples 
-from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
-If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
-Do not use this parameter when `filters` include cancer-irrelevant filters such as PMID and cohort identifiers.
-Default is FALSE.
+For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
 * `dataset` A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
 
 # Retrieve CNV frequency data
 
 ## Relevant parameters
 
-type, output, filters, codematches, dataset
+type, output, filters, dataset
 
 ## The first output format (`output` = "pgxfreq")
 
@@ -79,8 +74,6 @@ To get metadata such as count of samples used to calculate frequency, use `mcols
 ```{r}
 mcols(freq_pgxfreq)
 ```
-
-The parameter `codematches` determines whether the calculation of CNV frequency excludes samples from child terms.
 
 ## The second output format (`output` = "pgxmatrix")
 

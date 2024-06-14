@@ -38,7 +38,7 @@ This function extracts segments, CNV frequency, and metadata from local "pgxseg"
 * `return_seg` A logical value determining whether to return segment data. Default is FALSE.
 * `return_frequency` A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.
 * `assembly` A string specifying which genome assembly version should be applied to CNV frequency calculation and plotting. Allowed options are "hg19", "hg38". Default is "hg38".
-* `...` Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot from survminer)
+* `...` Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot function from survminer package)
 
 # Extract segment data 
 
