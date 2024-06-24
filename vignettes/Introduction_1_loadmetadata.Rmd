@@ -89,7 +89,7 @@ In Progenetix, biosample id and individual id serve as unique identifiers for bi
 ```{r}
 biosamples_2 <- pgxLoader(type="biosample", biosample_id = "pgxbs-kftvgioe",individual_id = "pgxind-kftx28q5")
 
-metainfo <- c("biosample_id","individual_id","pubmed_id","followup_state_label","followup_time")
+metainfo <- c("biosample_id","individual_id","pubmed_id","histological_diagnosis_id","geoprov_city")
 biosamples_2[metainfo]
 ```
 
