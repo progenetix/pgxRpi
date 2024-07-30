@@ -18,199 +18,101 @@ knitr::opts_chunk$set(
 )
 ```
 
-[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing genomic variant data within the Progenetix database. If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines". This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing genomic variant data within the Progenetix database. 
+
+If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines" in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 # Load library 
 
 ```{r setup}
 library(pgxRpi)
+library(SummarizedExperiment) # for pgxmatrix data
 ```
 
 ## `pgxLoader` function 
 
-This function loads various data from `Progenetix` database.  
+This function loads various data from `Progenetix` database via the Beacon v2 API with some extensions (BeaconPlus).
 
 The parameters of this function used in this tutorial:
 
-* `type` A string specifying output data type. Available options are "biosample", "individual", "variant" or "frequency". 
-* `output` A string specifying output file format. When the parameter `type` is "variant",
-available options are NULL, "pgxseg" ,"pgxmatrix", "coverage" or "seg".
-* `filters` Identifiers for cancer type, literature, cohorts, and age such as 
-c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y").
-For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
-* `individual_id` Identifiers used in Progenetix database for identifying individuals. 
-* `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
-* `codematches` A logical value determining whether to exclude samples 
-from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
-If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
+* `type`: A string specifying output data type. Only "g_variants" is used in this tutorial. 
+* `output`: A string specifying output file format. When the parameter `type` is "g_variants",
+available options are NULL, "pgxseg" ,"pgxmatrix", "cnvfraction" or "seg".
+* `biosample_id`: Identifiers used in the query database for identifying biosamples. 
+* `individual_id`: Identifiers used in the query database for identifying individuals. 
+* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
+* `codematches`: A logical value determining whether to exclude samples from child concepts 
+of specified filters in the ontology tree. If TRUE, only samples exactly matching the specified filters will be included. 
 Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.
-* `limit` Integer to specify the number of returned CNV coverage profiles for each filter. 
-Default is 0 (return all). 
-* `skip` Integer to specify the number of skipped CNV coverage profiles for each filter. 
-E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
-Default is NULL (no skip). 
-* `save_file` A logical value determining whether to save the segment variant data as file 
-instead of direct return. Only used when the parameter `type` is "variant" and `output` is "pgxseg" or "seg". Default is FALSE.
-* `filename` A string specifying the path and name of the file to be saved. 
-Only used if the parameter `save_file` is TRUE. Default is "variants.seg/pgxseg" in current work directory.
-* `num_cores` Integer to specify the number of cores on your local computer to be used for the variant query. The default is 1.
-* `dataset` A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
+* `limit`: Integer to specify the number of returned profiles. Default is 0 (return all). 
+* `skip`: Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip). 
+* `save_file`: A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter `type` is "g_variants". Default is FALSE.
+* `filename`: A string specifying the path and name of the file to be saved. Only used if the parameter `save_file` is TRUE. Default is "variants" in current work directory.
+* `num_cores`: Integer to specify the number of cores used for the variant query. Only used when the parameter `type` is "g_variants". Default is 1.
+* `domain`: A string specifying the domain of the query data resource. Default is "http://progenetix.org".
+* `dataset`: A string specifying the dataset to query. When the parameter `domain` is "http://progenetix.org", available options are "progenetix" (by defualt) and "cancercelllines".
+* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".
 
-# Retrive CNV coverage of biosamples 
-
-## Relevant parameters 
-
-type, output, filters, individual_id, biosample_id, codematches, skip, limit, dataset
-
-## Across genomic bins 
-
-```{r}
-cnv_matrix <- pgxLoader(type="variant", output="pgxmatrix", filters = "NCIT:C2948")
-```
-
-The data looks like this
-
-```{r}
-print(dim(cnv_matrix))
-cnv_matrix[c(1:3), c(1:5,6213:6215)]
-```
-
-In this dataframe, `analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for individual biosample. It is noted that the number of analysis profiles does not necessarily equal the number of samples. One biosample_id may correspond to multiple analysis_id. `group_id` equals the meaning of `filters`. It's followed by all “gain status” columns (3106 intervals) plus all “loss status” columns (3106 intervals). The status is indicated by a coverage value, i.e. the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the column `chr1.400000.1400000.DUP` is 0.200 in one row, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the corresponding analysis.
-
-## Across chromosomes or the whole genome 
-
-```{r}
-cnv_covergae <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948")
-```
-
-It includes CNV coverage across chromosome arms, whole chromosomes, or whole genome.
-
-```{r}
-names(cnv_covergae)
-```
-
-The data of CNV coverage across chromosomal arms looks like this
-
-```{r}
-head(cnv_covergae$chrom_arm_coverage)[,c(1:4, 49:52)]
-```
-
-The row names are id of biosamples from the group NCIT:C2948. There are 96 columns. 
-The first 48 columns are duplication coverage across chromosomal arms, followed by deletion coverage.
-The data of CNV coverage across whole chromosomes is similar, with the only difference in columns.
-
-The data of CNV coverage across genome (hg38) looks like this
-
-```{r}
-head(cnv_covergae$whole_genome_coverage)
-```
-
-The first column is the total called coverage, followed by duplication coverage and deletion coverage.
-
-## Parameter `codematches` use
-
-Setting `codematches = True` can exclude profiles with group_id belonging to child terms of the input filters.
-
-21 samples are excluded from the original 47 samples in this case.
-
-```{r}
-cnv_covergae_2 <- pgxLoader(type="variant", output="coverage", filters = "NCIT:C2948",
-                            codematches = TRUE)
-
-print(dim(cnv_covergae$chrom_arm_coverage))
-print(dim(cnv_covergae_2$chrom_arm_coverage))
-```
-
-## Access a subset of samples
-
-By default, it returns all available profiles (limit=0), so the query may take a while 
-when the number of retrieved samples is large. You can use the parameters `limit` and 
-`skip` to access a subset of samples.
-
-```{r}
-cnv_matrix_2 <- pgxLoader(type="variant", output="pgxmatrix", 
-                          filters = "NCIT:C2948",
-                          skip = 0, limit=10)
-# the dimention of subset 
-print(dim(cnv_matrix_2))
-# the dimention of original set
-print(dim(cnv_matrix))
-```
-
-## Access by biosample id and individual id
-
-```{r}
-cnv_ind_matrix <- pgxLoader(type="variant", output="pgxmatrix", 
-                          biosample_id = "pgxbs-kftva604",
-                          individual_id = "pgxind-kftx5g4t")
-
-cnv_ind_cov <- pgxLoader(type="variant", output="coverage", 
-                          biosample_id = "pgxbs-kftva604",
-                          individual_id = "pgxind-kftx5g4t")
-```
 
 # Retrieve segment variants 
 
 Because of a time-out issue, segment variant data can only be accessed by biosample id instead of filters. 
-To speed up this process, you can set the `num_cores` parameter for parallel processing. 
-
-## Relevant parameters 
-
-type, output, biosample_id, save_file, filename, num_cores, dataset
+To speed up this process, you can set the `num_cores` parameter for parallel processing. For more information about filters and how to get biosample ids, see the vignette Introduction_1_loadmetadata.
 
 ## Get biosample id 
 
-The biosample information is also obtained by `pgxLoader` and the vignette about metadata
-query see Introduction_1_loadmetadata.
-
 ```{r}
+# get 2 samples for demonstration
 biosamples <- pgxLoader(type="biosample", filters = "PMID:20229506", limit=2)
 
 biosample_id <- biosamples$biosample_id
+
+biosample_id
 ```
 
 There are three output formats. 
 
 ## The first output format (by default)
 
- This format contains variant id and associated biosample id as well as analysis id. The variant is represented as 'DUP' (duplication) or 'DEL' (deletion) in specific chromosome locations. 
+The default output format extracts variant data from the Beacon v2 response, containing variant id and associated analysis id, biosample id and individual id. The CNV data is represented as [copy number change class](https://vrs.ga4gh.org/en/2.x/concepts/systemic_variation/CopyNumber.html#copynumberchange) following the GA4GH Variation Representation Specification (VRS).
 
 ```{r}
-variant_1 <- pgxLoader(type="variant", biosample_id = biosample_id)
+variant_1 <- pgxLoader(type="g_variants", biosample_id = biosample_id)
 head(variant_1)
 ```
 
 ## The second output format (`output` = "pgxseg")
 
-This format is '.pgxseg' file format. It contains segment mean values (in `log2` column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)). A few variants are point mutations represented by columns `reference_bases` and `alternate_bases`.
+This format accesses data from [Progenetix API services](https://docs.progenetix.org/services/). The '.pgxseg' file format contains segment mean values (in `log2` column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)). A few variants are point mutations represented by columns `reference_bases` and `alternate_bases`.
 
 ```{r}
-variant_2 <- pgxLoader(type="variant", biosample_id = biosample_id,output = "pgxseg")
+variant_2 <- pgxLoader(type="g_variants", biosample_id = biosample_id,output = "pgxseg")
 head(variant_2)
 ```
 
 ## The third output format (`output` = "seg")
 
-This format is similar to the general '.seg' file format and compatible with IGV tool for visualization. The only difference between this file format and the general '.seg' file format is the fifth column. It represents variant type in this format while in the general '.seg' file format, it represents number of probes or bins covered by the segment. In addition, the point mutation variants are excluded in this file format.
+This format accesses data from [Progenetix API services](https://docs.progenetix.org/services/). This format is similar to the general '.seg' file format and compatible with IGV tool for visualization. The only difference between this file format and the general '.seg' file format is the fifth column. It represents variant type in this format while in the general '.seg' file format, it represents number of probes or bins covered by the segment.
 
 ```{r}
-variant_3 <- pgxLoader(type="variant", biosample_id = biosample_id,output = "seg")
+variant_3 <- pgxLoader(type="g_variants", biosample_id = biosample_id,output = "seg")
 head(variant_3)
 ```
 
 # Export variants data for visualization
 
-Setting `save_file` as TRUE in `pgxLoader` function would make this function doesn't return 
-variants data directly but let the retrieved data saved in the current work directory by default or other 
-paths (specified by `filename`). The export is only available for variants data (type='variant'). 
+Setting `save_file` to TRUE in the `pgxLoader` function will save the retrieved variants data to a file 
+rather than returning it directly. By default, the data will be saved in the current working directory, 
+but you can specify a different path using the `filename` parameter. This export functionality is 
+only available for variants data (when `type='g_variants'`).
 
 ## Upload 'pgxseg' file to Progenetix website
 
 The following command creates a '.pgxseg' file with the name "variants.pgxseg" in "~/Downloads/" folder. 
 
 ```{r eval=FALSE}
-pgxLoader(type="variant", output="pgxseg", biosample_id=biosample_id, save_file=TRUE, 
+pgxLoader(type="g_variants", output="pgxseg", biosample_id=biosample_id, save_file=TRUE, 
           filename="~/Downloads/variants.pgxseg")
 ```
 
@@ -222,11 +124,81 @@ or use the [byconaut](https://byconaut.progenetix.org/) package for local visual
 The following command creates a special '.seg' file with the name "variants.seg" in "~/Downloads/" folder. 
 
 ```{r eval=FALSE}
-pgxLoader(type="variant", output="seg", biosample_id=biosample_id, save_file=TRUE, 
+pgxLoader(type="g_variants", output="seg", biosample_id=biosample_id, save_file=TRUE, 
           filename="~/Downloads/variants.seg")
 ```
 
 You can upload this '.seg' file to [IGV tool](https://software.broadinstitute.org/software/igv/) for visualization.
+
+# Retrive CNV fraction of biosamples 
+
+Because segment variants are not harmonized across samples, Progenetix provides processed CNV features, namely CNV fractions, to facilitate sample-wise comparisons. The following query is based on filters, but biosample id and individual id are also available for sample-specific CNV fraction queries. For more information about filters, biosample id and individual id, as well as the use of parameters `skip`, `limit`, and `codematches`, see the vignette Introduction_1_loadmetadata.
+
+## Across genomic bins 
+
+```{r}
+cnv_matrix <- pgxLoader(type="g_variants", output="pgxmatrix", filters = "NCIT:C2948")
+```
+
+The returned data is stored in [*RangedSummarizedExperiment*](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html) object, which is a matrix-like container where rows represent ranges of interest (as a GRanges object) and columns represent analyses derived from biosamples. The data looks like this
+
+```{r}
+cnv_matrix
+```
+
+You could get the interval information by `rowRanges` function from *SummarizedExperiment* package.
+
+```{r}
+rowRanges(cnv_matrix)
+```
+
+To access the CNV fraction matrix, use `assay` accesssor from *SummarizedExperiment* package
+
+```{r}
+assay(cnv_matrix)[1:3,1:3]
+```
+
+The matrix has 6212 rows (genomic regions) and 47 columns (analysis profiles derived from samples belonging to the input filter). The rows comprised 3106 intervals with “gain status” plus 3106 intervals with “loss status”. 
+
+The value is the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the value in the second row, the first column is 0.2, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the first analysis profile.
+
+To get associated biosample id and filters for analyses, use `colData` function from *SummarizedExperiment* package:
+
+```{r}
+colData(cnv_matrix)
+```
+
+`analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for individual biosample. It is noted that the number of analysis profiles does not necessarily equal the number of samples. One biosample id may correspond to multiple analysis ids. `group_id` corresponds to the meaning of `filters`.
+
+## Across chromosomes or the whole genome 
+
+```{r}
+cnv_fraction <- pgxLoader(type="g_variants", output="cnvfraction", filters = "NCIT:C2948")
+```
+
+This includes CNV fraction across chromosome arms, whole chromosomes, or the whole genome.
+
+```{r}
+names(cnv_fraction)
+```
+
+The CNV fraction across chromosomal arms looks like this
+
+```{r}
+head(cnv_fraction$arm_cnv_frac)[,c(1:4, 49:52)]
+```
+
+The row names are analyses ids from samples that belong to the input filter NCIT:C2948. There are 96 columns. 
+The first 48 columns are duplication fraction across chromosomal arms, followed by deletion fraction. 
+CNV fraction across whole chromosomes is similar, with the only difference in columns.
+
+The CNV fraction across the genome (hg38) looks like this
+
+```{r}
+head(cnv_fraction$genome_cnv_frac)
+```
+
+The first column is the total called fraction, followed by duplication fraction and deletion fraction.
 
 # Session Info
 

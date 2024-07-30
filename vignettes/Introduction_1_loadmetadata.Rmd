@@ -18,7 +18,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing and utilizing metadata for samples or their corresponding individuals within the Progenetix database. If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines". This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing and utilizing metadata for samples or their corresponding individuals within the Progenetix database. 
+
+If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines" in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 # Load library 
 
@@ -28,69 +30,69 @@ library(pgxRpi)
 
 ## `pgxLoader` function 
 
-This function loads various data from `Progenetix` database.  
+This function loads various data from `Progenetix` database via the Beacon v2 API with some extensions (BeaconPlus).
 
 The parameters of this function used in this tutorial:
 
-* `type` A string specifying output data type. Available options are "biosample", "individual", "variant" or "frequency".   
-* `filters` Identifiers for cancer type, literature, cohorts, and age such as 
-c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y"). For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
-* `filterLogic` A string specifying logic for combining multiple filters when query metadata. Available options are "AND" and "OR". Default is "AND". An exception is filters associated with age that always use AND logic when combined with any other filter, even if filterLogic = "OR", which affects other filters. 
-* `individual_id` Identifiers used in Progenetix database for identifying individuals. 
-* `biosample_id` Identifiers used in Progenetix database for identifying biosamples. 
-* `codematches` A logical value determining whether to exclude samples 
-from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon). 
-If TRUE, retrieved samples only keep samples exactly encoded by specified filters. 
+* `type`: A string specifying output data type. Available options are "biosamples", "individuals", "analyses".   
+* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). When multiple filters are used, they are combined using AND logic.
+* `biosample_id`: Identifiers used in the query database for identifying biosamples. 
+* `individual_id`: Identifiers used in the query database for identifying individuals. 
+* `codematches`: A logical value determining whether to exclude samples from child concepts 
+of specified filters in the ontology tree. If TRUE, only samples exactly matching the specified filters will be included. 
 Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.
-* `limit` Integer to specify the number of returned samples/individuals/coverage profiles for each filter. 
-Default is 0 (return all). 
-* `skip` Integer to specify the number of skipped samples/individuals/coverage profiles for each filter. 
-E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. 
-Default is NULL (no skip). 
-* `dataset` A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
+* `limit`: Integer to specify the number of returned profiles. Default is 0 (return all). 
+* `skip`: Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip). 
+* `domain`: A string specifying the domain of the query data resource. Default is "http://progenetix.org".
+* `dataset`: A string specifying the dataset to query. When the parameter `domain` is "http://progenetix.org", available options are "progenetix" (by defualt) and "cancercelllines".
+* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".
 
-# Retrieve meatdata of samples 
-
-## Relevant parameters 
-
-type, filters, filterLogic, individual_id, biosample_id, codematches, limit, skip, dataset
+# Retrieve biosamples information
 
 ## Search by filters
 
-Filters are a significant enhancement to the [Beacon](https://www.ga4gh.org/product/beacon-api/) query API, providing a mechanism for specifying rules to select records based on their field values. To learn more about how to utilize filters in Progenetix, please refer to the [documentation](https://docs.progenetix.org/beaconplus/#filters-filters-filtering-terms).
+Filters are a significant enhancement to the [Beacon](https://www.ga4gh.org/product/beacon-api/) query API, providing a mechanism for specifying rules to select records based on their field values. To learn more about how to utilize filters in Progenetix, please refer to the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
 
-The `pgxFilter` function helps access available filters used in Progenetix. Here is the example use:
+The `pgxFilter` function helps access available filters used in Progenetix by default. It is also possible to query available filters used in other resources via the Beacon v2 API by setting the `domain` and `entry_point` parameters accordingly. 
+Here is an example usage:
 
 ```{r}
 # access all filters
 all_filters <- pgxFilter()
+head(all_filters)
+```
+
+```{r}
 # get all prefix
 all_prefix <- pgxFilter(return_all_prefix = TRUE)
+all_prefix
+```
+
+```{r}
 # access specific filters based on prefix
 ncit_filters <- pgxFilter(prefix="NCIT")
 head(ncit_filters)
 ```
 
-The following query is designed to retrieve metadata in Progenetix related to all samples of lung adenocarcinoma, utilizing a specific type of filter based on an [NCIt code](https://ncit.nci.nih.gov) as an ontology identifier.
+The following query retrieves metadata in Progenetix related to all samples of retinoblastoma, utilizing a specific filter based on an [NCIt code](https://ncit.nci.nih.gov) as a disease identifier.
 
 ```{r}
-biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512")
+biosamples <- pgxLoader(type="biosamples", filters = "NCIT:C7541")
 # data looks like this
-biosamples[c(1700:1705),]
+biosamples[1:5,]
 ```
 
-The data contains many columns representing different aspects of sample information. 
+The data contains many columns representing different aspects of sample information.
 
 ## Search by biosample id and individual id 
 
 In Progenetix, biosample id and individual id serve as unique identifiers for biosamples and the corresponding individuals. You can obtain these IDs through metadata search with filters as described above, or through [website](https://progenetix.org/search) interface query.
 
 ```{r}
-biosamples_2 <- pgxLoader(type="biosample", biosample_id = "pgxbs-kftvgioe",individual_id = "pgxind-kftx28q5")
+biosamples_2 <- pgxLoader(type="biosamples", biosample_id = "pgxbs-kftvgioe",individual_id = "pgxind-kftx28q5")
 
-metainfo <- c("biosample_id","individual_id","pubmed_id","histological_diagnosis_id","geoprov_city")
-biosamples_2[metainfo]
+biosamples_2
 ```
 
 It's also possible to query by a combination of filters, biosample id, and individual id.
@@ -98,80 +100,64 @@ It's also possible to query by a combination of filters, biosample id, and indiv
 ## Access a subset of samples
 
 By default, it returns all related samples (limit=0). You can access a subset of them 
-via the parameter `limit` and `skip`. For example, if you want to access the first 1000 samples
-, you can set `limit` = 1000, `skip` = 0. 
+via the parameter `limit` and `skip`. For example, if you want to access the first 10 samples
+, you can set `limit` = 10, `skip` = 0. 
 
 ```{r}
-biosamples_3 <- pgxLoader(type="biosample", filters = "NCIT:C3512",skip=0, limit = 1000)
+biosamples_3 <- pgxLoader(type="biosamples", filters = "NCIT:C7541",skip=0, limit = 10)
 # Dimension: Number of samples * features
 print(dim(biosamples))
 print(dim(biosamples_3))
 ```
 
-## Query the number of samples in Progenetix
-
-The number of samples in specific group can be queried by  `pgxCount` function.
-
-```{r}
-pgxCount(filters = "NCIT:C3512")
-```
-
 ## Parameter `codematches` use
 
-The NCIt code of retrieved samples doesn't only contain specified filters but contains child terms. 
+Some filters, such as NCIt codes, are hierarchical. As a result, retrieved samples may 
+include not only the specified filters but also their child terms.
 
 ```{r}
 unique(biosamples$histological_diagnosis_id)
 ```
 
-Setting `codematches` as TRUE allows this function to only return biosamples with exact match to the filter.
+Setting `codematches` as TRUE allows this function to only return biosamples that exactly match the specified filter, excluding child terms.
 
 ```{r}
-biosamples_4 <- pgxLoader(type="biosample", filters = "NCIT:C3512",codematches = TRUE)
-
+biosamples_4 <- pgxLoader(type="biosamples", filters = "NCIT:C7541",codematches = TRUE)
 unique(biosamples_4$histological_diagnosis_id)
 ```
 
-## Parameter `filterLogic` use
-
-This function supports querying samples that belong to multiple filters. For example, If you want to retrieve information about lung adenocarcinoma samples from the literature 
-PMID:24174329, you can specify multiple matching filters and set `filterLogic` to "AND".
+To query the number of samples collected in Progenetix, you can use the `pgxCount` function. 
 
 ```{r}
-biosamples_5 <- pgxLoader(type="biosample", filters = c("NCIT:C3512","PMID:24174329"), 
-                          filterLogic = "AND")
+pgxCount(filters = "NCIT:C7541")
 ```
 
-# Retrieve meatdata of individuals 
+# Retrieve individuals information
 
 If you want to query metadata (e.g. survival data) of individuals where the samples 
-of interest come from, you can follow the tutorial below.
-
-## Relevant parameters  
-
-type, filters, filterLogic, individual_id, biosample_id, codematches, limit, skip, dataset 
-
-## Search by filters
+of interest come from, set the parameter `type` to "individuals" and follow the same steps as above.
 
 ```{r}
-individuals <- pgxLoader(type="individual",filters="NCIT:C3270")
-# Dimension: Number of individuals * features
-print(dim(individuals))
+individuals <- pgxLoader(type="individuals",individual_id = "pgxind-kftx26ml",filters="NCIT:C7541")
 # data looks like this
-individuals[c(36:40),]
+individuals[173:174,]
 ```
 
-## Search by biosample id and individual id 
+# Retrieve analyses information 
 
-You can get the id from the query of samples
+If you want to know more details about data analyses, set the parameter `type` to "analyses". 
+The other steps are the same, except the parameter `codematches` is not available because 
+analyses data do not include filter information, even though it can be searched by filters.
 
 ```{r}
-individual <- pgxLoader(type="individual",individual_id = "pgxind-kftx26ml", biosample_id="pgxbs-kftvh94d")
+analyses <- pgxLoader(type="analyses",biosample_id = c("pgxbs-kftvik5i","pgxbs-kftvik96"))
 
-individual
+analyses
 ```
 
-# Visualization of survival data 
+# Visualization of survival data
+
+Suppose you want to investigate whether there are survival differences associated with a particular disease, for example, between younger and older patients, or based on other variables. You can query and visualize the relevant information using the `pgxMetaplot` function.
 
 ## `pgxMetaplot` function
 
@@ -179,14 +165,13 @@ This function generates a survival plot using metadata of individuals obtained b
 
 The parameters of this function:
 
-* `data`: The meatdata of individuals returned by `pgxLoader` function.
+* `data`: The object returned by the `pgxLoader` function, which includes survival data about individuals.
 * `group_id`: A string specifying which column is used for grouping in the Kaplan-Meier plot.
-* `condition`: Condition for splitting individuals into younger and older groups. Only used if `group_id` is age related.
+* `condition`: Condition for splitting individuals into younger and older groups. Only used if `group_id` is "age_iso".
 * `return_data`: A logical value determining whether to return the metadata used for plotting. Default is FALSE.
 * `...`: Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot function from survminer package)
 
-Suppose you want to investigate whether there are survival differences between younger and older 
-patients with a particular disease, you can query and visualize the relevant information as follows:
+### Example usage 
 
 ```{r}
 # query metadata of individuals with lung adenocarcinoma
@@ -195,7 +180,7 @@ luad_inds <- pgxLoader(type="individual",filters="NCIT:C3512")
 pgxMetaplot(data=luad_inds, group_id="age_iso", condition="P65Y", pval=TRUE)
 ```
 
-It's noted that not all individuals have available survival data. If you set `return_data` to `TRUE`, 
+It's noted that not all individuals have available survival data. If you set `return_data` to TRUE, 
 the function will return the metadata of individuals used for the plot.
 
 # Session Info

@@ -15,27 +15,23 @@ pgxFreqplot(
 )
 }
 \arguments{
-\item{data}{The frequency object returned by \code{pgxLoader} function.}
+\item{data}{CNV frequency object returned by the \code{pgxLoader} or \code{segtoFreq} functions.}
 
-\item{chrom}{A vector with chromosomes to be plotted. If NULL, return the plot
-by genome. If specified the frequencies are plotted with one panel for each
-chromosome. Default is NULL.}
+\item{chrom}{A vector specifying which chromosomes to plot. If NULL, the plot will cover the entire genome.
+If specified, the frequencies are plotted with one panel for each chromosome. Default is NULL.}
 
-\item{layout}{Number of columns and rows in plot. Only used in plot by chromosome.
-Default is c(1,1).}
+\item{layout}{Number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1).}
 
-\item{filters}{Index or string value to indicate which filter to be plotted, such as 1
-(the first filters in \code{data} slot of object ) or 'NCIT:C4038' (specific filter name). The length of filters
-is limited to one if the parameter \code{circos} is False. Default is 1.}
+\item{filters}{Index or string value indicating which filter to plot. The length of filters
+is limited to one if the parameter \code{circos} is FALSE. Default is the first filter.}
 
-\item{circos}{A logical value to indicate if return a circos plot. If TRUE, it
-can return a circos plot with multiple filters for display and comparison.
-Default is FALSE.}
+\item{circos}{A logical value indicating whether to return a circos plot. If TRUE, it returns a circos plot
+that can display and compare multiple filters. Default is FALSE.}
 
-\item{highlight}{Indices of genomic bins to be highlighted with red color.}
+\item{highlight}{Indices of genomic bins to be highlighted in red.}
 
-\item{assembly}{A string specifying which genome assembly version should be applied to CNV frequency plotting.
-Allowed options are "hg19", "hg38". Default is "hg38" (genome version used in Progenetix).}
+\item{assembly}{A string specifying the genome assembly version to apply to CNV frequency plotting.
+Allowed options are "hg19" and "hg38". Default is "hg38".}
 }
 \value{
 The binned CNV frequency plot
@@ -47,7 +43,7 @@ Thie function plots the frequency of deletions and duplications
 ## load necessary data (this step can be skipped in real implementation)
 data("hg38_cytoband")
 ## get frequency data
-freq <- pgxLoader(type="frequency", output ='pgxfreq', filters="NCIT:C3512")
+freq <- pgxLoader(type="cnv_frequency", output ='pgxfreq', filters="NCIT:C3512")
 ## visualize
 pgxFreqplot(freq)
 }

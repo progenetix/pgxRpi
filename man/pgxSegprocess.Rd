@@ -31,7 +31,7 @@ pgxSegprocess(
 
 \item{return_frequency}{A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.}
 
-\item{assembly}{A string specifying which genome assembly version should be applied to CNV frequency calculation and plotting. Allowed options are "hg19", "hg38". Default is "hg38".}
+\item{assembly}{A string specifying the genome assembly version to apply to CNV frequency calculation and plotting. Allowed options are "hg19" and "hg38". Default is "hg38".}
 
 \item{bin_size}{Size of genomic bins used in CNV frequency calculation to split the genome, in base pairs (bp). Default is 1,000,000.}
 
@@ -47,8 +47,7 @@ If the size of the last bin is smaller than \code{soft_expansion} * bin_size, it
 Segments data, CNV frequency object, meta data or KM plots from local "pgxseg" files
 }
 \description{
-This function extracts segments, CNV frequency, and metadata from local "pgxseg" files and
-supports survival data visualization
+This function extracts segment variants, CNV frequency, and metadata from local "pgxseg" files and supports survival data visualization.
 }
 \examples{
 file_path <- system.file("extdata", "example.pgxseg",package = 'pgxRpi')

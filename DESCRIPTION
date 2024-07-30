@@ -36,11 +36,12 @@ Imports:
     survival,
     survminer,
     ggplot2,
-    plyr,
     GenomicRanges,
     SummarizedExperiment,
     S4Vectors,
-    parallelly 
+    parallel,
+    future,
+    future.apply
 Depends: 
     R (>= 4.2)
 Suggests: 

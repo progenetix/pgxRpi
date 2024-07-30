@@ -1,0 +1,240 @@
+biosamples:
+  biosample_id:
+    beacon_model: id
+  
+  individual_id:
+    beacon_model: individualId
+
+  biosample_status_id:
+    beacon_model: biosampleStatus.id
+  
+  biosample_status_label:
+    beacon_model: biosampleStatus.label
+
+  sample_origin_type_id:
+    beacon_model: sampleOriginType.id
+  
+  sample_origin_type_label:
+    beacon_model: sampleOriginType.label
+    
+  histological_diagnosis_id:      
+    beacon_model: histologicalDiagnosis.id
+  
+  histological_diagnosis_label:
+    beacon_model: histologicalDiagnosis.label
+
+  sampled_tissue_id:
+    beacon_model: sampleOriginDetail.id
+  
+  sampled_tissue_label:
+    beacon_model: sampleOriginDetail.label
+  
+  pathological_stage_id:
+    beacon_model: pathologicalStage.id
+  
+  pathological_stage_label:
+    beacon_model: pathologicalStage.label
+             
+  tnm_id:
+    beacon_model: pathologicalTnmFindings.id
+  
+  tnm_label:
+    beacon_model: pathologicalTnmFindings.label
+   
+  tumor_grade_id:
+    beacon_model: tumorGrade.id
+
+  tumor_grade_label:
+    beacon_model: tumorGrade.label
+
+  age_iso:
+    beacon_model: collectionMoment
+
+  notes:
+    beacon_model: notes
+
+  # bycon specials 
+  
+  icdo_morphology_id:
+    bycon_defined: icdoMorphology.id
+ 
+  icdo_morphology_label:
+    bycon_defined: icdoMorphology.label
+  
+  icdo_topography_id:
+    bycon_defined: icdoTopography.id
+
+  icdo_topography_label:
+    bycon_defined: icdoTopography.label
+  
+  pubmed_id:
+    bycon_defined: externalReferences.id
+
+  cellosaurus_id:
+    bycon_defined: externalReferences.id
+
+  cbioportal_id:
+    bycon_defined: externalReferences.id
+  
+  tcga_project_id:
+    bycon_defined: externalReferences.id
+
+  analysis_info_experiment_id:
+    bycon_defined: analysisInfo.experimentId
+
+  analysis_info_series_id:
+    bycon_defined: analysisInfo.seriesId
+
+  analysis_info_platform_id:
+    bycon_defined: analysisInfo.platformId
+
+  cohort_ids:
+    bycon_defined: cohorts.id
+  
+  biosample_legacy_id:
+    bycon_defined: info.legacyId
+
+  geoprov_city:
+    bycon_defined: provenance.geoLocation.properties.city
+
+  geoprov_country:
+    bycon_defined: provenance.geoLocation.properties.country
+ 
+  geoprov_iso_alpha3:
+    bycon_defined: provenance.geoLocation.properties.ISO3166alpha3
+
+  geoprov_long_latitude:
+    bycon_defined: provenance.geoLocation.properties.latitude
+
+  geoprov_long_longitude:
+    bycon_defined: provenance.geoLocation.properties.longitude
+
+  updated:
+    bycon_defined: updated
+    
+#------------------------------------------------------------------------------#
+
+individuals:
+
+  individual_id:
+    beacon_model: id
+ 
+  sex_id:
+    beacon_model: sex.id
+
+  sex_label:
+    beacon_model: sex.label
+
+  age_iso:
+    beacon_model: diseases.onset.age
+  
+  histological_diagnosis_id:
+    beacon_model: diseases.diseaseCode.id
+
+  histological_diagnosis_label:
+    beacon_model: diseases.diseaseCode.label
+  
+  followup_time:
+    beacon_model: diseases.followupTime
+
+  followup_state_id:
+    beacon_model: diseases.followupState.id
+  
+  followup_state_label:
+    beacon_model: diseases.followupState.label
+
+  diseases_notes:
+    beacon_model: diseases.notes
+
+  # cell_line_donation_id:
+  #   beacon_model: info.cell_line_donation.id
+
+  # cell_line_donation_label:
+  #   beacon_model: info.cell_line_donation.label
+
+  # data_use_conditions_id:
+  #   beacon_model: dataUseConditions.id
+  
+  # data_use_conditions_label:
+  #   beacon_model: dataUseConditions.id
+
+  # bycon specials
+
+  individual_legacy_id:
+    bycon_defined: info.legacyIds
+
+  updated:
+    bycon_defined: updated
+
+
+
+#------------------------------------------------------------------------------#
+
+analyses:
+  analysis_id:
+    beacon_model: id
+      
+  biosample_id:
+    beacon_model: biosampleId
+
+  individual_id:
+    beacon_model: individualId
+        
+  analysis_operation_id:
+    bycon_defined: analysisInfo.operation.id
+        
+  analysis_operation_label:
+    bycon_defined: analysisInfo.operation.label
+       
+  experiment_id:
+    bycon_defined: analysisInfo.experimentId
+     
+  series_id:
+    bycon_defined: analysisInfo.seriesId
+
+  platform_id:
+    bycon_defined: platformModel.id
+      
+  platform_label:
+    bycon_defined: platformModel.label     
+       
+  calling_pipeline:
+    bycon_defined: pipelineName
+
+  updated:
+    bycon_defined: updated
+     
+#------------------------------------------------------------------------------#
+
+g_variants:
+  variant_id:
+    beacon_model: caseLevelData.variantId
+
+  analysis_id:
+    beacon_model: caseLevelData.analysisId
+  
+  biosample_id:
+    beacon_model: caseLevelData.biosampleId
+  
+  individual_id:
+    beacon_model: caseLevelData.individualId
+
+  variant_internal_id:
+    beacon_model: variantInternalId
+
+  sequence_id:
+    beacon_model: variation.subject.sequence_id
+
+  start:
+    beacon_model: variation.subject.interval.start.value
+
+  end:
+    beacon_model: variation.subject.interval.end.value
+
+  variant_copychange:
+    beacon_model: variation.copyChange
+
+  # bycon specials 
+
+ # variant_log2:
+ #   bycon_defined: caseLevelData.info.cnvValue

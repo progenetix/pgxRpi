@@ -7,11 +7,11 @@
 pgxMetaplot(data, group_id, condition, return_data = FALSE, ...)
 }
 \arguments{
-\item{data}{The meatdata of individuals returned by \code{pgxLoader} function.}
+\item{data}{The object returned by the \code{pgxLoader} function, which includes survival data about individuals.}
 
 \item{group_id}{A string specifying which column is used for grouping in the Kaplan-Meier plot.}
 
-\item{condition}{Condition for splitting individuals into younger and older groups. Only used if \code{group_id} is age related.}
+\item{condition}{Condition for splitting individuals into younger and older groups. Only used if \code{group_id} is "age_iso".}
 
 \item{return_data}{A logical value determining whether to return the metadata used for plotting. Default is FALSE.}
 
@@ -24,6 +24,6 @@ The KM plot from input data
 This function provides the survival plot from individual metadata.
 }
 \examples{
-individuals <- pgxLoader(type="individual",filters="NCIT:C3512")
+individuals <- pgxLoader(type="individuals",filters="NCIT:C3512")
 pgxMetaplot(individuals, group_id="age_iso", condition="P65Y")
 }

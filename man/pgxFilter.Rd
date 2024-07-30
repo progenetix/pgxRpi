@@ -8,25 +8,28 @@ pgxFilter(
   prefix = NULL,
   return_all_prefix = FALSE,
   domain = "http://progenetix.org",
-  dataset = "progenetix"
+  entry_point = "beacon",
+  dataset = NULL
 )
 }
 \arguments{
-\item{prefix}{A string specifying the prefix of filters, such as 'NCIT' and 'PMID'. Default is NULL, which
+\item{prefix}{A string specifying the prefix of filters, such as 'NCIT'. Default is NULL, which
 means that all available filters will be returned. When specified, it returns all filters with the specified prefix.}
 
-\item{return_all_prefix}{A logical value determining whether to return all valid prefixes of filters used in Progenetix.
+\item{return_all_prefix}{A logical value determining whether to return all valid prefixes of filters used in database.
 If TRUE, the \code{prefix} parameter will be ignored. Default is FALSE.}
 
-\item{domain}{A string specifying the domain of the Progenetix database. Default is "http://progenetix.org".}
+\item{domain}{A string specifying the domain of the query data resource. Default is "http://progenetix.org".}
 
-\item{dataset}{A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".}
+\item{entry_point}{A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".}
+
+\item{dataset}{A string specifying the dataset to query. When the parameter \code{domain} is "http://progenetix.org", available options are "progenetix" (by defualt) and "cancercelllines".}
 }
 \value{
-filter terms used in Progenetix.
+Filter terms used in the data resource that you query.
 }
 \description{
-This function retrieves available filters in the Progenetix database.
+This function retrieves available filters in the Progenetix database via the Beacon v2 API.
 }
 \examples{
 pgxFilter(prefix = "NCIT")

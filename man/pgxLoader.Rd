@@ -2,76 +2,71 @@
 % Please edit documentation in R/pgxLoader.R
 \name{pgxLoader}
 \alias{pgxLoader}
-\title{Load data from Progenetix database}
+\title{Load data from Progenetix database via the Beacon v2 API with some extensions}
 \usage{
 pgxLoader(
   type = NULL,
   output = NULL,
-  filters = NULL,
-  codematches = FALSE,
-  filterLogic = "AND",
-  limit = 0,
-  skip = NULL,
   biosample_id = NULL,
   individual_id = NULL,
+  filters = NULL,
+  limit = 0,
+  skip = NULL,
+  codematches = FALSE,
   save_file = FALSE,
-  filename = NULL,
+  filename = "variant",
   num_cores = 1,
+  dataset = NULL,
   domain = "http://progenetix.org",
-  dataset = "progenetix"
+  entry_point = "beacon"
 )
 }
 \arguments{
-\item{type}{A string specifying output data type. Available options are "biosample", "individual",
-"variant" or "frequency". The first two options return corresponding metadata, "variant" returns CNV variant data, and "frequency" returns precomputed CNV frequency based on data in Progenetix.}
+\item{type}{A string specifying output data type. Available options are "biosamples", "individuals", "analyses",
+"g_variants" or "cnv_frequency". The first three options return corresponding metadata, "g_variants" returns variants data with the focus on CNV,
+and "cnv_frequency" returns precomputed CNV frequency based on data in Progenetix.}
 
-\item{output}{A string specifying output data format. When the parameter \code{type} is "variant",
-available options are NULL, "pgxseg", "seg", "coverage", or "pgxmatrix"; When the parameter \code{type} is "frequency",
-available options are "pgxfreq" or "pgxmatrix".}
+\item{output}{A string specifying output data format. When the parameter \code{type} is "g_variants",
+available options are NULL, "pgxseg", "seg", "cnvfraction", or "pgxmatrix"; When the parameter \code{type} is "cnv_frequency", available options are "pgxfreq" or "pgxmatrix".}
 
-\item{filters}{Identifiers for cancer type, literature, cohorts, and age such as c("NCIT:C7376", "pgx:icdom-98353", "PMID:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y").}
+\item{biosample_id}{Identifiers used in the query database for identifying biosamples.}
 
-\item{codematches}{A logical value determining whether to exclude samples from child concepts of specified filters that belong to cancer type/tissue encoding system (NCIt, icdom/t, Uberon).
-If TRUE, retrieved samples only keep samples exactly encoded by specified filters.
-Do not use this parameter when \code{filters} include ontology-irrelevant filters such as PMID and cohort identifiers.
+\item{individual_id}{Identifiers used in the query database for identifying individuals.}
+
+\item{filters}{Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID\if{html}{\out{<!-- -->}}:22824167").
+When multiple filters are used, they are combined using AND logic when the parameter \code{type} is "biosamples", "individuals", or "analyses"; OR logic when the parameter \code{type} is "cnv_frequency".}
+
+\item{limit}{Integer to specify the number of returned profiles. Default is 0 (return all).}
+
+\item{skip}{Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip).}
+
+\item{codematches}{A logical value determining whether to exclude samples from child concepts of specified filters in the ontology tree.
+If TRUE, only samples exactly matching the specified filters will be included.  Do not use this parameter when \code{filters} include ontology-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.}
 
-\item{filterLogic}{A string specifying logic for combining multiple filters when query metadata (the paramter \code{type} = "biosample" or "individual"). Available options are "AND" and "OR". Default is "AND".  An exception is filters associated with age that always use AND logic
-when combined with any other filter, even if filterLogic = "OR", which affects other filters.  Note that when \code{type} = "frequency", the combining logic is "OR", which is not changed by this parameter.}
+\item{save_file}{A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter \code{type} is "g_variants". Default is FALSE.}
 
-\item{limit}{Integer to specify the number of returned biosample/individual/variant profiles for each filter. Default is 0 (return all).}
+\item{filename}{A string specifying the path and name of the file to be saved. Only used if the parameter \code{save_file} is TRUE. Default is "variants" in current work directory.}
 
-\item{skip}{Integer to specify the number of skipped biosample/individual/variant profiles for each filter. E.g. if skip = 2, limit=500,
-the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip).}
+\item{num_cores}{Integer to specify the number of cores used for the variant query. Only used when the parameter \code{type} is "g_variants". Default is 1.}
 
-\item{biosample_id}{Identifiers used in Progenetix database for identifying biosamples.}
+\item{dataset}{A string specifying the dataset to query. When the parameter \code{domain} is "http://progenetix.org", available options are "progenetix" (by defualt) and "cancercelllines".}
 
-\item{individual_id}{Identifiers used in Progenetix database for identifying individuals.}
+\item{domain}{A string specifying the domain of the query data resource. Default is "http://progenetix.org".}
 
-\item{save_file}{A logical value determining whether to save the segment variant data as file
-instead of direct return. Only used when the parameter \code{type} is "variant" and \code{output} is "pgxseg" or "seg". Default is FALSE.}
-
-\item{filename}{A string specifying the path and name of the file to be saved.
-Only used if the parameter \code{save_file} is TRUE. Default is "variants.seg/pgxseg"
-in current work directory.}
-
-\item{num_cores}{Integer to specify the number of cores used for the variant query. Only used when the parameter \code{type} is "variant". Default is 1.}
-
-\item{domain}{A string specifying the domain of database. Default is "http://progenetix.org".}
-
-\item{dataset}{A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".}
+\item{entry_point}{A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".}
 }
 \value{
 Data from Progenetix database
 }
 \description{
-This function loads various data from \code{Progenetix} database.
+This function loads various data from \code{Progenetix} database via the Beacon v2 API with some extensions (BeaconPlus).
 }
 \examples{
 ## query metadata
-biosamples <- pgxLoader(type="biosample", filters = "NCIT:C3512")
+biosamples <- pgxLoader(type="biosamples", filters = "NCIT:C3512")
 ## query segment variants
-seg <- pgxLoader(type="variant", output = "pgxseg", biosample_id = "pgxbs-kftvgx4y")
+seg <- pgxLoader(type="g_variants", output = "pgxseg", biosample_id = "pgxbs-kftvgx4y")
 ## query CNV frequency
-freq <- pgxLoader(type="frequency", output ='pgxfreq', filters="NCIT:C3512")
+freq <- pgxLoader(type="cnv_frequency", output ='pgxfreq', filters="NCIT:C3512")
 }

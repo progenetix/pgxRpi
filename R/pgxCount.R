@@ -1,7 +1,6 @@
 #' Count samples in one collation of a given filter
 #'
-#' This function returns the number of samples for every filter in 
-#' Progenetix database.
+#' This function returns the number of samples for every filter in Progenetix database by Progenetix API services.
 #'
 #' @param filters A single or a comma-concatenated list of identifiers such as c("NCIT:C7376","icdom-98353")
 #' @param domain A string specifying the domain of database. Default is "http://progenetix.org".
@@ -13,7 +12,9 @@
 #' @examples
 #' pgxCount(filters = "NCIT:C3512")
 
-pgxCount <- function(filters=NULL,domain="http://progenetix.org",dataset="progenetix"){
+pgxCount <- function(filters=NULL,domain="http://progenetix.org",dataset=NULL){
+    if (!domain %in% c("http://progenetix.org","progenetix.org")) stop("This function accesses sample count data from progenetix.org.")
+
     if (is.null(filters)){
         stop("Please input filter")
     }
@@ -23,7 +24,8 @@ pgxCount <- function(filters=NULL,domain="http://progenetix.org",dataset="progen
     if (dataset == "cancercelllines") dataset <- "cellz"
     
     filter <- transform_id(filters)
-    url <- paste0(domain,"/services/collations?datasetIds=",dataset,"&filters=",filter)
+    url <- paste0(domain,"/services/collations?filters=",filter)
+    url <- add_parameter(url,"datasetIds",dataset)
     encoded_url <- URLencode(url)
     info <-  content(GET(url))
     res <- lapply(info$response$results, function(x){

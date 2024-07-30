@@ -28,7 +28,7 @@ test_that("retrieve variants with pgxseg",{
     expect_equal(http_type(r), "text/plain")
     expect_no_error(result <- read.table(url_2, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
     expect_gt(nrow(result),0)
-    expect_gt(ncol(result),0)
+    expect_gt(ncol(result),5)
 })
 
 test_that("retrieve pgxmatrix variant with biosample id",{
@@ -37,7 +37,7 @@ test_that("retrieve pgxmatrix variant with biosample id",{
     expect_equal(http_type(r), "text/plain")
     expect_no_error(result <- read.table(url_3, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
     expect_gt(nrow(result),0)
-    expect_gt(ncol(result),0)
+    expect_gt(ncol(result),6212)
 })
 
 test_that("retrieve pgxmatrix variant with individual id",{
@@ -46,7 +46,7 @@ test_that("retrieve pgxmatrix variant with individual id",{
     expect_equal(http_type(r), "text/plain")
     expect_no_error(result <- read.table(url_4, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
     expect_gt(nrow(result),0)
-    expect_gt(ncol(result),0)
+    expect_gt(ncol(result),6212)
 })
 
 test_that("retrieve pgxmatrix variant with filters",{
@@ -55,10 +55,10 @@ test_that("retrieve pgxmatrix variant with filters",{
     expect_equal(http_type(r), "text/plain")
     expect_no_error(result <- read.table(url_5, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
     expect_gt(nrow(result),0)
-    expect_gt(ncol(result),0)
+    expect_gt(ncol(result),6212)
 })
 
-test_that("retrieve coverage variant with biosample id",{
+test_that("retrieve fraction variant with biosample id",{
     cat(paste("\n trying:",url_6,"\n")) 
     result <-  content(GET(url_6))
     expect_equal(result$responseSummary$exists,TRUE)
@@ -67,7 +67,7 @@ test_that("retrieve coverage variant with biosample id",{
     expect_gt(nrow(table),0)
 })
 
-test_that("retrieve coverage variant with individual id",{
+test_that("retrieve fraction variant with individual id",{
     cat(paste("\n trying:",url_7,"\n"))
     result <-  content(GET(url_7))
     expect_equal(result$responseSummary$exists,TRUE)
@@ -76,7 +76,7 @@ test_that("retrieve coverage variant with individual id",{
     expect_gt(nrow(table),0)
 })
 
-test_that("retrieve coverage variant with filters",{
+test_that("retrieve fraction variant with filters",{
     cat(paste("\n trying:",url_8,"\n"))
     result <-  content(GET(url_8))
     expect_equal(result$responseSummary$exists,TRUE)

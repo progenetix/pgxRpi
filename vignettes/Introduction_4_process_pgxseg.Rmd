@@ -24,20 +24,22 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(pgxRpi)
-library(GenomicRanges)
+library(GenomicRanges) # for pgxfreq object
 ```
 
 ## `pgxSegprocess` function 
 
-This function extracts segments, CNV frequency, and metadata from local "pgxseg" files and supports survival data visualization  
+This function extracts segment variants, CNV frequency, and metadata from local "pgxseg" files and supports survival data visualization  
 
-* `file` A string specifying the path and name of the "pgxseg" file where the data is to be read. 
-* `group_id` A string specifying which id is used for grouping in KM plot or CNV frequency calculation. Default is "group_id".
-* `show_KM_plot` A logical value determining whether to return the Kaplan-Meier plot based on metadata. Default is FALSE.
-* `return_metadata` A logical value determining whether to return metadata. Default is FALSE.
-* `return_seg` A logical value determining whether to return segment data. Default is FALSE.
-* `return_frequency` A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.
-* `assembly` A string specifying which genome assembly version should be applied to CNV frequency calculation and plotting. Allowed options are "hg19", "hg38". Default is "hg38".
+The parameters of this function used in this tutorial:
+
+* `file`: A string specifying the path and name of the "pgxseg" file where the data is to be read. 
+* `group_id`: A string specifying which id is used for grouping in KM plot or CNV frequency calculation. Default is "group_id".
+* `show_KM_plot`: A logical value determining whether to return the Kaplan-Meier plot based on metadata. Default is FALSE.
+* `return_metadata`: A logical value determining whether to return metadata. Default is FALSE.
+* `return_seg`: A logical value determining whether to return segment data. Default is FALSE.
+* `return_frequency`: A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.
+* `assembly`: A string specifying the genome assembly version to apply to CNV frequency calculation and plotting. Allowed options are "hg19" and "hg38". Default is "hg38".
 * `...` Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot function from survminer package)
 
 # Extract segment data 
@@ -90,8 +92,7 @@ pgxSegprocess(file=file_name,show_KM_plot = TRUE,pval=TRUE,palette='npg')
 
 # Calculate CNV frequency 
 
-The CNV frequency is calculated from segments of samples with the same group_id. The group_id
-is specified in `group_id` parameter. 
+The CNV frequency is calculated from segments of samples with the same group id. The group id is specified in `group_id` parameter. More details about CNV frequency see the vignette Introduction_3_loadfrequency.  
 
 ```{r}
 # Default is "group_id" in metadata
@@ -102,7 +103,7 @@ frequency_2 <- pgxSegprocess(file=file_name,return_frequency = TRUE,
 frequency
 ```
 
-The returned object is same as the CNV frequency object with "pgxfreq" format returned by `pgxLoader` function (format details see the vignette Introduction_3_loadfrequency). The CNV frequency is calculated from groups which exist in both metadata and segment data. It is noted that not all groups in metadata must exist in segment data (e.g. some samples don't have CNV calls).
+The returned object is same as the CNV frequency object with "pgxfreq" format returned by `pgxLoader` function. The CNV frequency is calculated from groups which exist in both metadata and segment data. It is noted that not all groups in metadata must exist in segment data (e.g. some samples don't have CNV calls).
 
 ```{r}
 head(frequency[["pgx:icdot-C16.9"]])
@@ -118,9 +119,7 @@ mcols(frequency)
 mcols(frequency_2)
 ```
 
-## Visualize CNV frequency 
-
-You can visualize the CNV frequency of the interesting group. 
+You can visualize the CNV frequency of the interesting group using `pgxFreqplot` function. For more details on this function, see the vignette Introduction_3_loadfrequency.
 
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(frequency, filters="pgx:icdot-C16.9")
@@ -130,20 +129,13 @@ pgxFreqplot(frequency, filters="pgx:icdot-C16.9")
 pgxFreqplot(frequency, filters="pgx:icdot-C16.9",chrom = c(1,8,14), layout = c(3,1))
 ```
 
-Circos plot supports multiple group visualization
-
 ```{r,fig.width=6, fig.height=6}
 pgxFreqplot(frequency, filters=c("pgx:icdot-C16.9","pgx:icdot-C73.9"),circos = TRUE)
 ```
 
-The details of `pgxFreqplot` function see the vignette Introduction_3_loadfrequency.
-
 # Extract all data 
 
-If you want different types of data such as segment data and metadata, and visualize 
-the survival data at the same time, you can just set the corresponding parameters as TRUE. 
-The returned data is an object including all specified data. It is noted that in this case
-the CNV frequency and KM plot use the same group_id.
+If you want to extract different types of data, such as segment data and metadata, and visualize the survival data simultaneously, you can set the corresponding parameters to TRUE. The returned data will be an object that includes all specified data. Note that in this case, the CNV frequency and KM plot will use the same `group_id`.
 
 ```{r, fig.width=7, fig.height=5}
 info <- pgxSegprocess(file=file_name,show_KM_plot = TRUE, return_seg = TRUE, 

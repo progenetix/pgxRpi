@@ -18,7 +18,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette offers a comprehensive guide on accessing and visualizing CNV frequency data within the Progenetix database. CNV frequency is pre-calculated based on CNV segment data in Progenetix and reflects the CNV pattern in a cohort. It is defined as the percentage of samples showing a CNV for a genomic region (1MB-sized genomic bins in this case) over the total number of samples in a cohort specified by filters. If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines". This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette offers a comprehensive guide on accessing and visualizing CNV frequency data within the Progenetix database. CNV frequency is pre-calculated based on CNV segment data in Progenetix and reflects the CNV pattern in a cohort. It is defined as the percentage of samples showing a CNV for a genomic region (1MB-sized genomic bins in this case) over the total number of samples in a cohort specified by filters. 
+
+If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines". This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 
 # Load library 
@@ -31,27 +33,21 @@ library(GenomicRanges) # for pgxfreq data
 
 ## `pgxLoader` function 
 
-This function loads various data from `Progenetix` database.  
+This function loads various data from `Progenetix` database via the Beacon v2 API with some extensions (BeaconPlus).  
 
 The parameters of this function used in this tutorial:
 
-* `type` A string specifying output data type. Available options are "biosample", "individual", "variant" or "frequency". 
-* `output` A string specifying output file format. When the parameter `type` is "frequency", available options are "pgxfreq" or "pgxmatrix".
-* `filters` Identifiers for cancer type, literature, cohorts, and age such as 
-c("NCIT:C7376", "pgx:icdom-98353", "PMID<!-- -->:22824167", "pgx:cohort-TCGAcancers", "age:>=P50Y").
-For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
-* `dataset` A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
+* `type`: A string specifying output data type. Only "cnv_frequency" is used in this tutorial.
+* `output`: A string specifying output file format. When the parameter `type` is "cnv_frequency", available options are "pgxfreq" or "pgxmatrix".
+* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). When multiple filters are used, they are combined using OR logic when the parameter `type` is "cnv_frequency". For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
+* `dataset`: A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
 
-# Retrieve CNV frequency data
-
-## Relevant parameters
-
-type, output, filters, dataset
+# Retrieve CNV frequency
 
 ## The first output format (`output` = "pgxfreq")
 
 ```{r}
-freq_pgxfreq <- pgxLoader(type="frequency", output ="pgxfreq",
+freq_pgxfreq <- pgxLoader(type="cnv_frequency", output ="pgxfreq",
                          filters=c("NCIT:C4038","pgx:icdom-85003"))
 
 freq_pgxfreq
@@ -77,7 +73,7 @@ mcols(freq_pgxfreq)
 
 ## The second output format (`output` = "pgxmatrix")
 
-Choose 8 NCIT codes of interests that correspond to different tumor types
+Choose 8 NCIt codes of interests that correspond to different tumor types
 
 ```{r}
 code <-c("C3059","C3716","C4917","C3512","C3493","C3771","C4017","C4001")
@@ -85,10 +81,10 @@ code <-c("C3059","C3716","C4917","C3512","C3493","C3771","C4017","C4001")
 code <- sub(".",'NCIT:C',code)
 ```
 
-load data with the specified code
+load data with the specified codes
 
 ```{r}
-freq_pgxmatrix <- pgxLoader(type="frequency",output ="pgxmatrix",filters=code)
+freq_pgxmatrix <- pgxLoader(type="cnv_frequency",output ="pgxmatrix",filters=code)
 freq_pgxmatrix
 ```
 
@@ -117,9 +113,9 @@ rowRanges(freq_pgxmatrix)
 
 For example, if the value in the second row and first column is 8.457, it means that 8.457% samples from the corresponding filter NCIT:C3059 having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
 
-Note: it is different from CNV status matrix introduced in Introduction_2_loadvariants. Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV status matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in the individual sample.
+Note: it is different from CNV fraction matrix introduced in Introduction_2_loadvariants. Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV fraction matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in one sample.
 
-# Calculate CNV frequency data
+# Calculate CNV frequency 
 
 ## `segtoFreq` function
 
@@ -139,9 +135,9 @@ Suppose you have segment data from several biosamples:
 
 ```{r}
 # access variant data
-vardata <- pgxLoader(type="variant",biosample_id = c("pgxbs-kftvhmz9", "pgxbs-kftvhnqz","pgxbs-kftvhupd"),output="pgxseg")
+variants <- pgxLoader(type="g_variants",biosample_id = c("pgxbs-kftvhmz9", "pgxbs-kftvhnqz","pgxbs-kftvhupd"),output="pgxseg")
 # only keep segment cnv data
-segdata <- vardata[vardata$variant_type %in% c("DUP","DEL"),]
+segdata <- variants[variants$variant_type %in% c("DUP","DEL"),]
 ```
 
 You can then calculate the CNV frequency from this cohort comprised of these samples. The output is stored in "pgxfreq" format:
@@ -151,7 +147,7 @@ segfreq <- segtoFreq(segdata,cohort_name="c1")
 segfreq
 ```
 
-# Visualization of CNV frequency data using 'pgxfreq' format
+# Visualize CNV frequency
 
 ## `pgxFreqplot` function
 
@@ -159,24 +155,27 @@ This function provides CNV frequency plots by genome or chromosomes as you reque
 
 The parameters of this function:
 
-* `data`: frequency object returned by `pgxLoader` function. 
-* `chrom`: a vector with chromosomes to be plotted. If NULL, return the plot by genome. If specified the frequencies are plotted with one panel for each chromosome. Default is NULL.
-* `layout`: number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1). 
-* `filters`: Index or string value to indicate which filter to be plotted. The length of filters is limited to one if the parameter `circos` is False. Default is the first filter.
-* `circos`: a logical value to indicate if return a circos plot. If TRUE, it can 
-return a circos plot with multiple group ids for display and comparison. Default is FALSE.
-* `highlight`: Indices of genomic bins to be highlighted with red color.
-* `assembly`: A string specifying which genome assembly version should be applied to CNV frequency plotting. Allowed options are "hg19", "hg38". Default is "hg38" (genome version used in Progenetix).
+* `data`: CNV frequency object returned by `pgxLoader` or `segtoFreq` functions. 
+* `chrom`: A vector specifying which chromosomes to plot. If NULL, the plot will cover the entire genome. 
+#' If specified, the frequencies are plotted with one panel for each chromosome. Default is NULL.
+* `layout`: Number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1).
+* `filters`: Index or string value indicating which filter to plot. The length of filters
+is limited to one if the parameter `circos` is FALSE. Default is the first filter.
+* `circos`: A logical value indicating whether to return a circos plot. If TRUE, it returns a circos plot 
+that can display and compare multiple filters. Default is FALSE.
+* `highlight`: Indices of genomic bins to be highlighted in red.
+* `assembly`: A string specifying the genome assembly version to apply to CNV frequency plotting. 
+Allowed options are "hg19" and "hg38". Default is "hg38".
 
-## CNV frequency plot by genome 
+## CNV frequency plot by genome
 
-### Input is `pgxfreq` object.
+### Input is `pgxfreq` object
 
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(freq_pgxfreq, filters="pgx:icdom-85003")
 ```
 
-### Input is `pgxmatrix` object. 
+### Input is `pgxmatrix` object 
 
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(freq_pgxmatrix, filters = "NCIT:C3512")
@@ -203,7 +202,7 @@ pgxFreqplot(freq_pgxfreq,filters= c("NCIT:C4038","pgx:icdom-85003"),circos = TRU
 ## Highlight interesting genomic intervals
 
 If you want to look at the CNV frequency at specific genomic bins, you can use `highlight` parameter.
-For example, when you are interested in CNV pattern of CCND1 gene in samples with infiltrating duct carcinoma (icdom-85003).
+For example, when you are interested in CNV frequency of CCND1 gene in samples with infiltrating duct carcinoma (icdom-85003).
 You could first find the genomic bin where CCND1 (chr11:69641156-69654474) is located.
 
 ```{r}
