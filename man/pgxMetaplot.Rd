@@ -11,7 +11,7 @@ pgxMetaplot(data, group_id, condition, return_data = FALSE, ...)
 
 \item{group_id}{A string specifying which column is used for grouping in the Kaplan-Meier plot.}
 
-\item{condition}{Condition for splitting individuals into younger and older groups. Only used if \code{group_id} is "age_iso".}
+\item{condition}{A string for splitting individuals into younger and older groups, following the ISO 8601 duration format. Only used if \code{group_id} is "age_iso".}
 
 \item{return_data}{A logical value determining whether to return the metadata used for plotting. Default is FALSE.}
 

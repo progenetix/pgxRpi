@@ -167,7 +167,8 @@ The parameters of this function:
 
 * `data`: The object returned by the `pgxLoader` function, which includes survival data about individuals.
 * `group_id`: A string specifying which column is used for grouping in the Kaplan-Meier plot.
-* `condition`: Condition for splitting individuals into younger and older groups. Only used if `group_id` is "age_iso".
+* `condition`: A string for splitting individuals into younger and older groups, following the ISO 8601 duration format. 
+Only used if `group_id` is "age_iso".
 * `return_data`: A logical value determining whether to return the metadata used for plotting. Default is FALSE.
 * `...`: Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot function from survminer package)
 

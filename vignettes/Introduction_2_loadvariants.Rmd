@@ -132,7 +132,7 @@ You can upload this '.seg' file to [IGV tool](https://software.broadinstitute.or
 
 # Retrive CNV fraction of biosamples 
 
-Because segment variants are not harmonized across samples, Progenetix provides processed CNV features, namely CNV fractions, to facilitate sample-wise comparisons. The following query is based on filters, but biosample id and individual id are also available for sample-specific CNV fraction queries. For more information about filters, biosample id and individual id, as well as the use of parameters `skip`, `limit`, and `codematches`, see the vignette Introduction_1_loadmetadata.
+Because segment variants are not harmonized across samples, Progenetix provides processed CNV features, known as CNV fractions. These fractions represent the proportion of genomic regions overlapping one or more CNVs of a given type, facilitating sample-wise comparisons. The following query is based on filters, but biosample id and individual id are also available for sample-specific CNV fraction queries. For more information about filters, biosample id and individual id, as well as the use of parameters `skip`, `limit`, and `codematches`, see the vignette Introduction_1_loadmetadata.
 
 ## Across genomic bins 
 
@@ -160,7 +160,7 @@ assay(cnv_matrix)[1:3,1:3]
 
 The matrix has 6212 rows (genomic regions) and 47 columns (analysis profiles derived from samples belonging to the input filter). The rows comprised 3106 intervals with “gain status” plus 3106 intervals with “loss status”. 
 
-The value is the fraction of how much the binned interval overlaps with one or more CNVs of the given type (DUP/DEL). For example, if the value in the second row, the first column is 0.2, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the first analysis profile.
+The value is the fraction of the binned interval overlapping with one or more CNVs of the given type (DUP/DEL). For example, if the value in the second row, the first column is 0.2, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the first analysis profile.
 
 To get associated biosample id and filters for analyses, use `colData` function from *SummarizedExperiment* package:
 

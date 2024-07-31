@@ -56,7 +56,7 @@ extract_special_results <- function(data, mapping, prefix){
     result <- data[[keys[1]]]
     result <- sapply(result,function(x){x[[keys[2]]]})
     if (prefix == "pubmed") prefix <- "PMID"
-    if (keys[1] == "externalReferences") result <- result[grepl(prefix,result,ignore.case = T)]
+    if (keys[1] == "externalReferences") result <- result[grepl(prefix,result,ignore.case = TRUE)]
     if (length(result) == 0) return(NA)
     result <- paste0(result,collapse = ",")
     return(result)
@@ -236,7 +236,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, 
         results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_pgxseg(i, domain, dataset)})
         
         meta <- lapply(results,FUN= function(x){x[["meta"]]})
-        head <- meta[[1]][c(1:2)]
+        head <- meta[[1]][1:2]
         meta <- lapply(meta, FUN = function(x){return(x[-c(1,2,3)])})
         meta <- do.call(c,meta)
         meta <- c(head,meta)

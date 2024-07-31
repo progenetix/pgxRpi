@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. Progenetix uses the ".pgxseg" data format to store variant data, which encompasses CNV (Copy Number Variation) and SNV (Single Nucleotide Variant), as well as the metadata of associated samples. This vignette describes how to work with local ".pgxseg" files using this package. For more details about the ".pgxseg" file format, please refer to the the [documentation](https://docs.progenetix.org/file-formats/?h=.pgxseg#pgxseg-sample-variant-files).
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. Progenetix uses the ".pgxseg" data format to store variant data, which encompasses CNV (Copy Number Variation) and SNV (Single Nucleotide Variant), as well as the metadata of associated samples. This vignette describes how to work with local ".pgxseg" files using this package. For more details about the ".pgxseg" file format, please refer to the the [documentation](https://docs.progenetix.org/file-formats/?h=.pgxseg#pgxseg-sample-variant-files).
 
 # Load library 
 
@@ -45,7 +45,7 @@ The parameters of this function used in this tutorial:
 # Extract segment data 
 
 ```{r}
-# specify the location of file
+# specify the location of the example file
 file_name <- system.file("extdata", "example.pgxseg",package = 'pgxRpi')
 
 # extract segment data
@@ -135,7 +135,7 @@ pgxFreqplot(frequency, filters=c("pgx:icdot-C16.9","pgx:icdot-C73.9"),circos = T
 
 # Extract all data 
 
-If you want to extract different types of data, such as segment data and metadata, and visualize the survival data simultaneously, you can set the corresponding parameters to TRUE. The returned data will be an object that includes all specified data. Note that in this case, the CNV frequency and KM plot will use the same `group_id`.
+If you want to extract different types of data, such as segment variants, metadata, CNV frequency and visualize the survival data simultaneously, you can set the corresponding parameters to TRUE. The returned data will be an object that includes all specified data. Note that in this case, the CNV frequency and KM plot will use the same `group_id`.
 
 ```{r, fig.width=7, fig.height=5}
 info <- pgxSegprocess(file=file_name,show_KM_plot = TRUE, return_seg = TRUE, 

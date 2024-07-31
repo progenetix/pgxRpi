@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number aberrations (CNA) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette offers a comprehensive guide on accessing and visualizing CNV frequency data within the Progenetix database. CNV frequency is pre-calculated based on CNV segment data in Progenetix and reflects the CNV pattern in a cohort. It is defined as the percentage of samples showing a CNV for a genomic region (1MB-sized genomic bins in this case) over the total number of samples in a cohort specified by filters. 
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette offers a comprehensive guide on accessing and visualizing CNV frequency data within the Progenetix database. CNV frequency is pre-calculated based on CNV segment data in Progenetix and reflects the CNV pattern in a cohort. It is defined as the percentage of samples showing a CNV for a genomic region (1MB-sized genomic bins in this case) over the total number of samples in a cohort specified by filters. 
 
 If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines". This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 

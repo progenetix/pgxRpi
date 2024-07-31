@@ -4,7 +4,7 @@
 #'
 #' @param data The object returned by the `pgxLoader` function, which includes survival data about individuals.
 #' @param group_id A string specifying which column is used for grouping in the Kaplan-Meier plot.
-#' @param condition Condition for splitting individuals into younger and older groups. Only used if `group_id` is "age_iso".
+#' @param condition A string for splitting individuals into younger and older groups, following the ISO 8601 duration format. Only used if `group_id` is "age_iso".
 #' @param return_data A logical value determining whether to return the metadata used for plotting. Default is FALSE.
 #' @param ... Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot from survminer)
 #' @return The KM plot from input data

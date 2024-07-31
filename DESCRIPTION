@@ -39,6 +39,7 @@ Imports:
     GenomicRanges,
     SummarizedExperiment,
     S4Vectors,
+    yaml,
     parallel,
     future,
     future.apply
