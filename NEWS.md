@@ -30,3 +30,11 @@
 - Removed `filterLogic` parameter from `pgxLoader`.
 - Optimized parallel query for variants.
 - Cleaned up code and vignettes.
+
+## Version: 1.1.6 (2024-08-05)
+
+- Modified `extract_general_results` function to ensure it adapts correctly to arrays.
+- Moved callset and cnvstats data from the "g_variant" type to "cnv_fraction" to better align with data types.
+- Removed the `pgxCount` function and integrated its functionality into `pgxLoader` with the "sample_count" type, streamlining such query.
+
+

@@ -35,9 +35,8 @@ This function loads various data from `Progenetix` database via the Beacon v2 AP
 
 The parameters of this function used in this tutorial:
 
-* `type`: A string specifying output data type. Only "g_variants" is used in this tutorial. 
-* `output`: A string specifying output file format. When the parameter `type` is "g_variants",
-available options are NULL, "pgxseg" ,"pgxmatrix", "cnvfraction" or "seg".
+* `type`: A string specifying output data type. "g_variants" and "cnv_fraction" are used in this tutorial. 
+* `output`: A string specifying output file format. The available options depend on the `type` parameter. When `type` is "g_variants", available options are NULL (default), "pgxseg", or "seg"; when `type` is "cnv_fraction", available options are NULL (default) or "pgxmatrix".
 * `biosample_id`: Identifiers used in the query database for identifying biosamples. 
 * `individual_id`: Identifiers used in the query database for identifying individuals. 
 * `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
@@ -64,7 +63,7 @@ To speed up this process, you can set the `num_cores` parameter for parallel pro
 
 ```{r}
 # get 2 samples for demonstration
-biosamples <- pgxLoader(type="biosample", filters = "PMID:20229506", limit=2)
+biosamples <- pgxLoader(type="biosamples", filters = "PMID:20229506", limit=2)
 
 biosample_id <- biosamples$biosample_id
 
@@ -134,46 +133,10 @@ You can upload this '.seg' file to [IGV tool](https://software.broadinstitute.or
 
 Because segment variants are not harmonized across samples, Progenetix provides processed CNV features, known as CNV fractions. These fractions represent the proportion of genomic regions overlapping one or more CNVs of a given type, facilitating sample-wise comparisons. The following query is based on filters, but biosample id and individual id are also available for sample-specific CNV fraction queries. For more information about filters, biosample id and individual id, as well as the use of parameters `skip`, `limit`, and `codematches`, see the vignette Introduction_1_loadmetadata.
 
-## Across genomic bins 
-
-```{r}
-cnv_matrix <- pgxLoader(type="g_variants", output="pgxmatrix", filters = "NCIT:C2948")
-```
-
-The returned data is stored in [*RangedSummarizedExperiment*](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html) object, which is a matrix-like container where rows represent ranges of interest (as a GRanges object) and columns represent analyses derived from biosamples. The data looks like this
-
-```{r}
-cnv_matrix
-```
-
-You could get the interval information by `rowRanges` function from *SummarizedExperiment* package.
-
-```{r}
-rowRanges(cnv_matrix)
-```
-
-To access the CNV fraction matrix, use `assay` accesssor from *SummarizedExperiment* package
-
-```{r}
-assay(cnv_matrix)[1:3,1:3]
-```
-
-The matrix has 6212 rows (genomic regions) and 47 columns (analysis profiles derived from samples belonging to the input filter). The rows comprised 3106 intervals with “gain status” plus 3106 intervals with “loss status”. 
-
-The value is the fraction of the binned interval overlapping with one or more CNVs of the given type (DUP/DEL). For example, if the value in the second row, the first column is 0.2, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the first analysis profile.
-
-To get associated biosample id and filters for analyses, use `colData` function from *SummarizedExperiment* package:
-
-```{r}
-colData(cnv_matrix)
-```
-
-`analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for individual biosample. It is noted that the number of analysis profiles does not necessarily equal the number of samples. One biosample id may correspond to multiple analysis ids. `group_id` corresponds to the meaning of `filters`.
-
 ## Across chromosomes or the whole genome 
 
 ```{r}
-cnv_fraction <- pgxLoader(type="g_variants", output="cnvfraction", filters = "NCIT:C2948")
+cnv_fraction <- pgxLoader(type="cnv_fraction", filters = "NCIT:C2948")
 ```
 
 This includes CNV fraction across chromosome arms, whole chromosomes, or the whole genome.
@@ -199,6 +162,42 @@ head(cnv_fraction$genome_cnv_frac)
 ```
 
 The first column is the total called fraction, followed by duplication fraction and deletion fraction.
+
+## Across genomic bins 
+
+```{r}
+cnvfrac_matrix <- pgxLoader(type="cnv_fraction", output="pgxmatrix", filters = "NCIT:C2948")
+```
+
+The returned data is stored in [*RangedSummarizedExperiment*](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html) object, which is a matrix-like container where rows represent ranges of interest (as a GRanges object) and columns represent analyses derived from biosamples. The data looks like this
+
+```{r}
+cnvfrac_matrix
+```
+
+You could get the interval information by `rowRanges` function from *SummarizedExperiment* package.
+
+```{r}
+rowRanges(cnvfrac_matrix)
+```
+
+To access the CNV fraction matrix, use `assay` accesssor from *SummarizedExperiment* package
+
+```{r}
+assay(cnvfrac_matrix)[1:3,1:3]
+```
+
+The matrix has 6212 rows (genomic regions) and 47 columns (analysis profiles derived from samples belonging to the input filter). The rows comprised 3106 intervals with “gain status” plus 3106 intervals with “loss status”. 
+
+The value is the fraction of the binned interval overlapping with one or more CNVs of the given type (DUP/DEL). For example, if the value in the second row, the first column is 0.2, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the first analysis profile.
+
+To get associated biosample id and filters for analyses, use `colData` function from *SummarizedExperiment* package:
+
+```{r}
+colData(cnvfrac_matrix)
+```
+
+`analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for individual biosample. It is noted that the number of analysis profiles does not necessarily equal the number of samples. One biosample id may correspond to multiple analysis ids. `group_id` corresponds to the meaning of `filters`.
 
 # Session Info
 

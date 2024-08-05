@@ -14,7 +14,7 @@
 #' pgxMetaplot(individuals, group_id="age_iso", condition="P65Y")
 pgxMetaplot <- function(data, group_id, condition, return_data = FALSE,...){
     # remove samples without survival data
-    meta.sel.df <- data[!is.na(data$followup_time) & !data$followup_state_id %in% c('EFO:0030039',''),]
+    meta.sel.df <- data[!is.na(data$followup_time) & !data$followup_state_id %in% c('EFO:0030039','',NA),]
     if(nrow(meta.sel.df) == 0) stop("\n No available survival data \n")
     
     # transform ISOdate interal to days

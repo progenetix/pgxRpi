@@ -41,10 +41,17 @@ extract_general_results <- function(data, mapping){
         # if key doesn't exist
         if (!key %in% names(result)){
           # in case a list
-          result <- result[[1]]
-          if (!key %in% names(result)) return(NA)
+            if (length(result) == 1){
+                result <- result[[1]]
+            } else{
+          # in case an array
+                result <- unlist(result)
+            }
+        if (!key %in% names(result)) return(NA)
+        result <- result[which(names(result) == key)]
+        } else{
+            result <- result[[key]]
         }
-        result <- result[[key]]
     }
     if (length(result) == 0) return(NA)
     result <- paste0(result,collapse = ",")
@@ -234,15 +241,6 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, 
     
     if (!(is.null(output))){
         results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_pgxseg(i, domain, dataset)})
-        
-        meta <- lapply(results,FUN= function(x){x[["meta"]]})
-        head <- meta[[1]][1:2]
-        meta <- lapply(meta, FUN = function(x){return(x[-c(1,2,3)])})
-        meta <- do.call(c,meta)
-        meta <- c(head,meta)
-
-        results <- lapply(results,FUN= function(x){x[["seg"]]})
-
     }else{
         results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_beacon(i, domain, entry_point, dataset)})
     }
@@ -252,6 +250,16 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, 
     if (length(fail_idx > 0)) warning("\n Query fails for biosample_id ", paste(biosample_id[fail_idx],collapse = ','), "\n")
     
     results[is.na(results)] <- NULL
+    
+    if (!(is.null(output))){
+      meta <- lapply(results,FUN= function(x){x[["meta"]]})
+      head <- meta[[1]][1:2]
+      meta <- lapply(meta, FUN = function(x){return(x[-c(1,2,3)])})
+      meta <- do.call(c,meta)
+      meta <- c(head,meta)
+      results <- lapply(results,FUN= function(x){x[["seg"]]})
+    }
+
     results <- do.call(rbind, results)
     # if the query succeed but no data in database
     if (is.null(results)) stop("No data retrieved")
@@ -365,7 +373,7 @@ read_cnvstats_json <- function(url,codematches=FALSE,all_biosample_id=NULL){
     sel_sample_idx <- seq(length(sample))
     }
 
-    # extract coverage
+    # extract fraction
     data_2 <- lapply(data$response$resultSets[[1]]$results[sel_sample_idx], function(x){
     stats <- lapply(x$cnvChroStats, function(y){
       as.data.frame(y)
@@ -379,17 +387,15 @@ read_cnvstats_json <- function(url,codematches=FALSE,all_biosample_id=NULL){
     return(res)
     })
 
-    analyses_ids <- sapply(data_2, function(x){x[[3]]})
-    # whole genome CNV fraction
-    total_frac <- lapply(data_2, function(x){x[[2]]})
     # some results are SNV instead of CNV
+    total_frac <- lapply(data_2, function(x){x[[2]]})
     rm_idx <- which(sapply(total_frac,length) == 0)
-    if (length(rm_idx) > 0){
-    sel.sample <- sample[sel_sample_idx][-rm_idx]
-    data_2 <- data_2[-rm_idx]
-    } else{
-    sel.sample <- sample[sel_sample_idx]
-    }
+    if (length(rm_idx) > 0) data_2 <- data_2[-rm_idx]
+   
+    analyses_ids <- sapply(data_2, function(x){x[[3]]})
+
+    # whole genome CNV fraction
+
     total_frac <- Reduce(rbind, total_frac)
     rownames(total_frac) <- analyses_ids
     total_frac <- total_frac[,c(2,6,4)]
@@ -544,8 +550,27 @@ pgxcallsetLoader <- function(biosample_id, individual_id, filters, limit, skip, 
     return(result)
 }
 
+# function to query sample count -----------------------------
 
+pgxCount <- function(filters=NULL,domain="http://progenetix.org",dataset=NULL){
+    if (!domain %in% c("http://progenetix.org","progenetix.org")) stop("This function accesses sample count data from progenetix.org.")
 
-
+    dataset <- transform_dataset_parameter(domain, dataset)
+    
+    filter <- transform_id(filters)
+    url <- paste0(domain,"/services/collations?filters=",filter)
+    url <- add_parameter(url,"datasetIds",dataset)
+    encoded_url <- URLencode(url)
+    info <-  content(GET(url))
+    res <- lapply(info$response$results, function(x){
+        if (is.null(x$label)) x$label <- NA
+        df <- data.frame(filters=x$id,label=x$label,total_count=x$count,exact_match_count=x$codeMatches)
+    })
+    
+    res <- Reduce(rbind,res)
+    if (length(res) == 0) stop("No data retrieved")
+  
+    return (res)
+}
 
 

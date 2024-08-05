@@ -34,8 +34,8 @@ This function loads various data from `Progenetix` database via the Beacon v2 AP
 
 The parameters of this function used in this tutorial:
 
-* `type`: A string specifying output data type. Available options are "biosamples", "individuals", "analyses".   
-* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). When multiple filters are used, they are combined using AND logic.
+* `type`: A string specifying output data type. "biosamples", "individuals", "analyses", and "sample_count" are used in this tutorial.
+* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). When multiple filters are used, they are combined using AND logic when the parameter `type` is "biosamples", "individuals", or "analyses"; OR logic when the parameter `type` is "sample_count".
 * `biosample_id`: Identifiers used in the query database for identifying biosamples. 
 * `individual_id`: Identifiers used in the query database for identifying individuals. 
 * `codematches`: A logical value determining whether to exclude samples from child concepts 
@@ -90,7 +90,7 @@ The data contains many columns representing different aspects of sample informat
 In Progenetix, biosample id and individual id serve as unique identifiers for biosamples and the corresponding individuals. You can obtain these IDs through metadata search with filters as described above, or through [website](https://progenetix.org/search) interface query.
 
 ```{r}
-biosamples_2 <- pgxLoader(type="biosamples", biosample_id = "pgxbs-kftvgioe",individual_id = "pgxind-kftx28q5")
+biosamples_2 <- pgxLoader(type="biosamples", biosample_id = "pgxbs-kftvki7h",individual_id = "pgxind-kftx6ltu")
 
 biosamples_2
 ```
@@ -126,10 +126,12 @@ biosamples_4 <- pgxLoader(type="biosamples", filters = "NCIT:C7541",codematches 
 unique(biosamples_4$histological_diagnosis_id)
 ```
 
-To query the number of samples collected in Progenetix, you can use the `pgxCount` function. 
+## Query the number of samples in Progenetix
+
+The number of samples in specific filters can be queried as follows:
 
 ```{r}
-pgxCount(filters = "NCIT:C7541")
+pgxLoader(type="sample_count",filters = "NCIT:C7541")
 ```
 
 # Retrieve individuals information

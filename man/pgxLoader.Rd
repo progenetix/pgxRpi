@@ -23,18 +23,20 @@ pgxLoader(
 }
 \arguments{
 \item{type}{A string specifying output data type. Available options are "biosamples", "individuals", "analyses",
-"g_variants" or "cnv_frequency". The first three options return corresponding metadata, "g_variants" returns variants data with the focus on CNV,
-and "cnv_frequency" returns precomputed CNV frequency based on data in Progenetix.}
+"g_variants", "cnv_frequency", "cnv_fraction", and "sample_count". The options "biosamples", "individuals", and "analyses"
+return corresponding information. "g_variants" returns variants data. The options "cnv_frequency", "cnv_fraction" and "sample_count"
+are based on data in Progenetix, returning precomputed CNV frequency, CNV fraction per sample, and the count of samples for the given filter, respectively.}
 
-\item{output}{A string specifying output data format. When the parameter \code{type} is "g_variants",
-available options are NULL, "pgxseg", "seg", "cnvfraction", or "pgxmatrix"; When the parameter \code{type} is "cnv_frequency", available options are "pgxfreq" or "pgxmatrix".}
+\item{output}{A string specifying output data format. The available options depend on the \code{type} parameter. When \code{type} is "g_variants",
+available options are NULL (default), "pgxseg", or "seg"; When \code{type} is "cnv_frequency", available options are "pgxfreq" or "pgxmatrix";
+when \code{type} is "cnv_fraction", available options are NULL (default) or "pgxmatrix".}
 
 \item{biosample_id}{Identifiers used in the query database for identifying biosamples.}
 
 \item{individual_id}{Identifiers used in the query database for identifying individuals.}
 
 \item{filters}{Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID\if{html}{\out{<!-- -->}}:22824167").
-When multiple filters are used, they are combined using AND logic when the parameter \code{type} is "biosamples", "individuals", or "analyses"; OR logic when the parameter \code{type} is "cnv_frequency".}
+When multiple filters are used, they are combined using AND logic when the parameter \code{type} is "biosamples", "individuals", or "analyses"; OR logic when the parameter \code{type} is "cnv_frequency" or "sample_count".}
 
 \item{limit}{Integer to specify the number of returned profiles. Default is 0 (return all).}
 
@@ -65,8 +67,8 @@ This function loads various data from \code{Progenetix} database via the Beacon 
 \examples{
 ## query metadata
 biosamples <- pgxLoader(type="biosamples", filters = "NCIT:C3512")
-## query segment variants
-seg <- pgxLoader(type="g_variants", output = "pgxseg", biosample_id = "pgxbs-kftvgx4y")
+## query variants
+seg <- pgxLoader(type="g_variants", biosample_id = "pgxbs-kftvgx4y")
 ## query CNV frequency
 freq <- pgxLoader(type="cnv_frequency", output ='pgxfreq', filters="NCIT:C3512")
 }
