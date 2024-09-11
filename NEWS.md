@@ -37,4 +37,8 @@
 - Moved callset and cnvstats data from the "g_variant" type to "cnv_fraction" to better align with data types.
 - Removed the `pgxCount` function and integrated its functionality into `pgxLoader` with the "sample_count" type, streamlining such query.
 
+## Version: 1.1.7 (2024-09-11)
 
+- Adapted to Progenetix API change: updated endpoint from "analyses/?output=cnvstats" to "services/cnvstats/".
+- The `dataset` parameter in `pgxLoader` is now used to select datasets directly from the Beacon response, rather than being used internally.
+- Modified `pgxSegprocess` to support usage with downloaded "pgxseg" files from Progenetix.
