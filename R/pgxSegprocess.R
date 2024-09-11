@@ -42,8 +42,9 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
     if (show_KM_plot){
         pgxMetaplot(meta,group_id = group_id,...)
     }
-   
-    if (return_metadata){
+    
+
+    if (return_metadata & "followup_state_id" %in% colnames(meta)){
         meta$followup_time <- ifelse(length(meta$followup_time) == 0,NA,
                                      round(lubridate::time_length(meta$followup_time,unit='day')))
         meta <- dplyr::mutate(meta,followup_state_label = NA,.after = followup_state_id)

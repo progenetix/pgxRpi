@@ -8,17 +8,15 @@
 #' If TRUE, the `prefix` parameter will be ignored. Default is FALSE.
 #' @param domain A string specifying the domain of the query data resource. Default is "http://progenetix.org".
 #' @param entry_point A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".
-#' @param dataset A string specifying the dataset to query. When the parameter `domain` is "http://progenetix.org", available options are "progenetix" (by defualt) and "cancercelllines".
 #' @importFrom httr GET content
 #' @return Filter terms used in the data resource that you query.
 #' @export
 #' @examples
 #' pgxFilter(prefix = "NCIT")
 
-pgxFilter <- function(prefix=NULL, return_all_prefix=FALSE, domain="http://progenetix.org", entry_point = "beacon", dataset=NULL){
+pgxFilter <- function(prefix=NULL, return_all_prefix=FALSE, domain="http://progenetix.org", entry_point = "beacon"){
 
     url <- paste0(domain,"/",entry_point, "/filtering_terms")
-    url <- ifelse(is.null(dataset), url, paste0(url,"?datasetIds=", transform_dataset_parameter(domain,dataset)))
     query  <- content(GET(url))
     
     data_lst <- lapply(query$response$filteringTerms,FUN = function(term){term$id})

@@ -8,8 +8,7 @@ pgxFilter(
   prefix = NULL,
   return_all_prefix = FALSE,
   domain = "http://progenetix.org",
-  entry_point = "beacon",
-  dataset = NULL
+  entry_point = "beacon"
 )
 }
 \arguments{
@@ -22,8 +21,6 @@ If TRUE, the \code{prefix} parameter will be ignored. Default is FALSE.}
 \item{domain}{A string specifying the domain of the query data resource. Default is "http://progenetix.org".}
 
 \item{entry_point}{A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".}
-
-\item{dataset}{A string specifying the dataset to query. When the parameter \code{domain} is "http://progenetix.org", available options are "progenetix" (by defualt) and "cancercelllines".}
 }
 \value{
 Filter terms used in the data resource that you query.

@@ -29,7 +29,7 @@ library(GenomicRanges) # for pgxfreq object
 
 ## `pgxSegprocess` function 
 
-This function extracts segment variants, CNV frequency, and metadata from local "pgxseg" files and supports survival data visualization  
+This function extracts segment variants, CNV frequency, and metadata from local "pgxseg" files. Additionally, it supports survival data visualization if survival data is available within the file.
 
 The parameters of this function used in this tutorial:
 

@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 [Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing and utilizing metadata for samples or their corresponding individuals within the Progenetix database. 
 
-If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines" in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
+If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to "https://cancercelllines.org" in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 # Load library 
 
@@ -44,8 +44,8 @@ Do not use this parameter when `filters` include ontology-irrelevant filters suc
 Default is FALSE.
 * `limit`: Integer to specify the number of returned profiles. Default is 0 (return all). 
 * `skip`: Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip). 
+* `dataset`: A string specifying the dataset to query from the Beacon response. Default is NULL, which includes results from all datasets.
 * `domain`: A string specifying the domain of the query data resource. Default is "http://progenetix.org".
-* `dataset`: A string specifying the dataset to query. When the parameter `domain` is "http://progenetix.org", available options are "progenetix" (by defualt) and "cancercelllines".
 * `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".
 
 # Retrieve biosamples information

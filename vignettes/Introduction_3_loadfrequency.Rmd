@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 [Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette offers a comprehensive guide on accessing and visualizing CNV frequency data within the Progenetix database. CNV frequency is pre-calculated based on CNV segment data in Progenetix and reflects the CNV pattern in a cohort. It is defined as the percentage of samples showing a CNV for a genomic region (1MB-sized genomic bins in this case) over the total number of samples in a cohort specified by filters. 
 
-If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by specifying the `dataset` parameter as "cancercelllines". This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
+If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to "https://cancercelllines.org" in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 
 # Load library 
@@ -40,7 +40,7 @@ The parameters of this function used in this tutorial:
 * `type`: A string specifying output data type. Only "cnv_frequency" is used in this tutorial.
 * `output`: A string specifying output file format. When the parameter `type` is "cnv_frequency", available options are "pgxfreq" or "pgxmatrix".
 * `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). When multiple filters are used, they are combined using OR logic when the parameter `type` is "cnv_frequency". For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
-* `dataset`: A string specifying the dataset to query. Default is "progenetix". Other available options are "cancercelllines".
+* `dataset`: A string specifying the dataset to query from the Beacon response. Default is NULL, which includes results from all datasets.
 
 # Retrieve CNV frequency
 

@@ -223,18 +223,13 @@ g_variants:
     beacon_model: variantInternalId
 
   sequence_id:
-    beacon_model: variation.subject.sequence_id
+    beacon_model: variation.location.sequenceReference
 
   start:
-    beacon_model: variation.subject.interval.start.value
+    beacon_model: variation.location.start
 
   end:
-    beacon_model: variation.subject.interval.end.value
+    beacon_model: variation.location.end
 
   variant_copychange:
     beacon_model: variation.copyChange
-
-  # bycon specials 
-
- # variant_log2:
- #   bycon_defined: caseLevelData.info.cnvValue

@@ -15,13 +15,13 @@
 #' When multiple filters are used, they are combined using AND logic when the parameter `type` is "biosamples", "individuals", or "analyses"; OR logic when the parameter `type` is "cnv_frequency" or "sample_count".
 #' @param limit Integer to specify the number of returned profiles. Default is 0 (return all). 
 #' @param skip Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip).
+#' @param dataset A string specifying the dataset to query from the Beacon response. Default is NULL, which includes results from all datasets.
 #' @param codematches A logical value determining whether to exclude samples from child concepts of specified filters in the ontology tree. 
 #' If TRUE, only samples exactly matching the specified filters will be included.  Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
 #' Default is FALSE.
 #' @param save_file A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter `type` is "g_variants". Default is FALSE.
 #' @param filename A string specifying the path and name of the file to be saved. Only used if the parameter `save_file` is TRUE. Default is "variants" in current work directory.
 #' @param num_cores Integer to specify the number of cores used for the variant query. Only used when the parameter `type` is "g_variants". Default is 1.
-#' @param dataset A string specifying the dataset to query. When the parameter `domain` is "http://progenetix.org", available options are "progenetix" (by defualt) and "cancercelllines".
 #' @param domain A string specifying the domain of the query data resource. Default is "http://progenetix.org".
 #' @param entry_point A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".
 #' @importFrom utils URLencode modifyList read.table write.table
@@ -44,11 +44,11 @@ pgxLoader <- function(
     filters= NULL,
     limit=0,
     skip=NULL,
+    dataset=NULL,
     codematches = FALSE, 
     save_file=FALSE,
     filename="variant",
     num_cores=1,
-    dataset=NULL,
     domain="http://progenetix.org",
     entry_point="beacon"){
     
@@ -106,9 +106,9 @@ pgxLoader <- function(
            individuals= pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset),
            analyses   = pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset),
            g_variants = pgxVariantLoader(biosample_id=biosample_id,output=output,save_file=save_file,filename=filename,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
-           cnv_frequency = pgxFreqLoader(output=output,filters=filters,domain=domain,dataset=dataset),
-           samplematrix = pgxcallsetLoader(biosample_id=biosample_id,individual_id=individual_id,filters=filters,limit=limit,skip=skip,codematches=codematches,domain=domain,dataset=dataset),
-           cnv_fraction = pgxFracLoader(biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,domain=domain,dataset=dataset),
-           sample_count = pgxCount(filters=filters,domain=domain,dataset=dataset))        
+           cnv_frequency = pgxFreqLoader(output=output,filters=filters,domain=domain),
+           samplematrix = pgxcallsetLoader(biosample_id=biosample_id,individual_id=individual_id,filters=filters,limit=limit,skip=skip,codematches=codematches,domain=domain),
+           cnv_fraction = pgxFracLoader(biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,domain=domain),
+           sample_count = pgxCount(filters=filters,domain=domain))        
 } 
 

@@ -12,11 +12,11 @@ pgxLoader(
   filters = NULL,
   limit = 0,
   skip = NULL,
+  dataset = NULL,
   codematches = FALSE,
   save_file = FALSE,
   filename = "variant",
   num_cores = 1,
-  dataset = NULL,
   domain = "http://progenetix.org",
   entry_point = "beacon"
 )
@@ -42,6 +42,8 @@ When multiple filters are used, they are combined using AND logic when the param
 
 \item{skip}{Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip).}
 
+\item{dataset}{A string specifying the dataset to query from the Beacon response. Default is NULL, which includes results from all datasets.}
+
 \item{codematches}{A logical value determining whether to exclude samples from child concepts of specified filters in the ontology tree.
 If TRUE, only samples exactly matching the specified filters will be included.  Do not use this parameter when \code{filters} include ontology-irrelevant filters such as PMID and cohort identifiers.
 Default is FALSE.}
@@ -51,8 +53,6 @@ Default is FALSE.}
 \item{filename}{A string specifying the path and name of the file to be saved. Only used if the parameter \code{save_file} is TRUE. Default is "variants" in current work directory.}
 
 \item{num_cores}{Integer to specify the number of cores used for the variant query. Only used when the parameter \code{type} is "g_variants". Default is 1.}
-
-\item{dataset}{A string specifying the dataset to query. When the parameter \code{domain} is "http://progenetix.org", available options are "progenetix" (by defualt) and "cancercelllines".}
 
 \item{domain}{A string specifying the domain of the query data resource. Default is "http://progenetix.org".}
 
