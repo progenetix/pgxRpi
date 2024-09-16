@@ -54,11 +54,9 @@ read_variant_beacon <- function(biosample_id, domain, dataset){
     if (length(result) == 0) return(NA)
     
     result <- lapply(result,function(x){
-      var_meta <- x[c('caseLevelData.id','caseLevelData.biosampleId','caseLevelData.analysisId',
-                      'variation.subject.sequence_id','variantInternalId','caseLevelData.info.cnvValue','variation.copyChange')]
+      var_meta <- x[c('caseLevelData.variantId','caseLevelData.analysisId','caseLevelData.biosampleId','caseLevelData.individualId','variantInternalId','variation.copyChange')]
       temp_row <- as.data.frame(matrix(var_meta,nrow=1,byrow = TRUE))
-      colnames(temp_row) <- c("variant_id","biosample_id","analysis_id",
-                              "reference_genome","variant","variant_log2","variant_copychange")
+      colnames(temp_row) <- c("variant_id","analysis_id","biosample_id","individual_id","variant","variant_copychange")
       return(temp_row)
     })
     result <- Reduce(rbind,result)
@@ -513,7 +511,7 @@ pgxcallsetLoader <- function(biosample_id, individual_id, filters, limit, skip, 
 pgxCovLoader <- function(biosample_id, individual_id, filters, codematches, skip, limit, domain, dataset){
     pg.data <- list()
     if (!is.null(filters)){
-        url <- paste0(domain,"/beacon/analyses/?datasetIds=",dataset,"&output=cnvstats&filters=",filters)
+        url <- paste0(domain,"/services/cnvstats/?datasetIds=",dataset,"&filters=",filters)
         url  <- ifelse(is.null(limit), url, paste0(url,"&limit=",limit)) 
         url  <- ifelse(is.null(skip), url, paste0(url,"&skip=",skip))
         if (codematches){
@@ -527,12 +525,12 @@ pgxCovLoader <- function(biosample_id, individual_id, filters, codematches, skip
     } 
   
     if (!is.null(biosample_id)){
-        url  <- paste0(domain,"/beacon/analyses/?datasetIds=",dataset,"&output=cnvstats&biosampleIds=",transform_id(biosample_id))
+        url  <- paste0(domain,"/services/cnvstats/?datasetIds=",dataset,"&biosampleIds=",transform_id(biosample_id))
         pg.data[[2]] <- read_cov_json(url)
     }
     
     if (!is.null(individual_id)){
-        url  <- paste0(domain,"/beacon/analyses/?datasetIds=",dataset,"&output=cnvstats&&individualIds=",transform_id(individual_id))
+        url  <- paste0(domain,"/services/cnvstats/?datasetIds=",dataset,"&individualIds=",transform_id(individual_id))
         pg.data[[3]] <- read_cov_json(url)
     }
     
