@@ -73,7 +73,7 @@ cplotpgxFreq  <- function(data,filters,highlight,assembly){
                                              start=GenomicRanges::start(range.info),
                                              end=GenomicRanges::end(range.info),
                                              gain=gain.freq,
-                                             loss=-loss.freq)
+                                             loss=loss.freq)
         }
     } else{
         stop("\n The input is invalid \n")
@@ -122,7 +122,7 @@ cplotpgxFreq  <- function(data,filters,highlight,assembly){
                                           }
                                         }
                                         circlize::circos.barplot(value=value1,pos=pos, border = bar.col.gain, col = bar.col.gain)
-                                        circlize::circos.barplot(value=value2,pos=pos, border = bar.col.loss, col = bar.col.loss)
+                                        circlize::circos.barplot(value=-value2,pos=pos, border = bar.col.loss, col = bar.col.loss)
                                         y <- seq(-100,100,by=20)
                                         circlize::circos.segments(0,y,circlize::CELL_META$xlim[2], y,col=ifelse(y>0,col.gain,ifelse(y == 0,'#909090',col.loss)))
                                       })

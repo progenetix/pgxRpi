@@ -169,55 +169,55 @@ read_cov_json <- function(url,codematches=FALSE,all_biosample_id=NULL){
 
 
 
-disease_code_check <- function(id, remain.id, url){
-  total.id <- c()
-  for (code in c('NCIT','pgx:icdom','pgx:icdot','UBERON')){
-    idx <- grep(code,id)
-    if (length(idx) > 0){
-      encoded_url <- URLencode(paste0(url,code))
-      res <- content(GET(encoded_url))
-      total.id <- c(total.id,unlist(lapply(res$response$results, function(x){x$id})))
-      remain.id <- remain.id [!remain.id %in% id[idx]]
-    }
-  }
-  return(list(total=total.id,remain=remain.id))
-}
+# disease_code_check <- function(id, remain.id, url){
+#   total.id <- c()
+#   for (code in c('NCIT','pgx:icdom','pgx:icdot','UBERON')){
+#     idx <- grep(code,id)
+#     if (length(idx) > 0){
+#       encoded_url <- URLencode(paste0(url,code))
+#       res <- content(GET(encoded_url))
+#       total.id <- c(total.id,unlist(lapply(res$response$results, function(x){x$id})))
+#       remain.id <- remain.id [!remain.id %in% id[idx]]
+#     }
+#   }
+#   return(list(total=total.id,remain=remain.id))
+# }
 
-pgidCheck <- function(id,domain,dataset){
-    # this query doesn't work for individual GSM id and age filters
-    geogsm.idx <- grep('geo:GSM',id)
-    age.idx <- grep('age:',id)
-    pass.idx <- c(geogsm.idx,age.idx)
-    if (length(pass.idx > 0)){
-      remain.id <- id[-pass.idx]
-    } else{
-      remain.id <- id
-    }
+# pgidCheck <- function(id,domain,dataset){
+#     # this query doesn't work for individual GSM id and age filters
+#     geogsm.idx <- grep('geo:GSM',id)
+#     age.idx <- grep('age:',id)
+#     pass.idx <- c(geogsm.idx,age.idx)
+#     if (length(pass.idx > 0)){
+#       remain.id <- id[-pass.idx]
+#     } else{
+#       remain.id <- id
+#     }
     
-    url <- paste0(domain,"/services/collations?datasetIds=",dataset,"&filters=")
+#     url <- paste0(domain,"/services/collations?datasetIds=",dataset,"&filters=")
     
-    # check if disease_code associated filters exist in Progenetix
-    check.res <- disease_code_check(id, remain.id, url)
-    remain.id <- check.res$remain
-    total.id <- check.res$total
-    # check if non disease_code associated filters exist in Progenetix
-    if (length(remain.id) > 0){
-      encoded_url <- URLencode(paste0(url,transform_id(remain.id)))
-      res <- content(GET(encoded_url))
-      total.id <- c(total.id, unlist(lapply(res$response$results, function(x){x$id})))
-    }
+#     # check if disease_code associated filters exist in Progenetix
+#     check.res <- disease_code_check(id, remain.id, url)
+#     remain.id <- check.res$remain
+#     total.id <- check.res$total
+#     # check if non disease_code associated filters exist in Progenetix
+#     if (length(remain.id) > 0){
+#       encoded_url <- URLencode(paste0(url,transform_id(remain.id)))
+#       res <- content(GET(encoded_url))
+#       total.id <- c(total.id, unlist(lapply(res$response$results, function(x){x$id})))
+#     }
     
-    return(id %in% c(total.id,id[pass.idx]))
-}
+#     return(id %in% c(total.id,id[pass.idx]))
+# }
 
 pgxFreqLoader <- function(output, codematches, filters, domain, dataset) {
     # check if filters exists
-    idcheck <- pgidCheck(filters,domain,dataset)
-    if (!all(idcheck)){
-        databasename <- ifelse(dataset=="cellz","cancercelllines","Progenetix")
-        warning("\n No results for filters ", filters[!idcheck], " in ", databasename, " database.","\n")
-        filters <- filters[idcheck]
-    }
+#    idcheck <- pgidCheck(filters,domain,dataset)
+    # if (!all(idcheck)){
+    #     databasename <- ifelse(dataset=="cellz","cancercelllines","Progenetix")
+    #     warning("\n No results for filters ", filters[!idcheck], " in ", databasename, " database.","\n")
+    #     filters <- filters[idcheck]
+    # }
     # start query
     url <- paste0(domain,"/services/intervalFrequencies/?datasetIds=",dataset,"&output=",output)
   
@@ -272,12 +272,12 @@ pgxFreqLoader <- function(output, codematches, filters, domain, dataset) {
 pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematches, skip, limit, filterLogic, domain, dataset){
     if (!(is.null(filters))){
         # check if filters exists
-        idcheck <- pgidCheck(filters,domain,dataset)
-        if (!all(idcheck)){
-            databasename <- ifelse(dataset=="cellz","cancercelllines","Progenetix")
-            warning("\n No results for filters ", filters[!idcheck], " in ", databasename, " database.","\n")
-            filters <- filters[idcheck]
-        }
+#        idcheck <- pgidCheck(filters,domain,dataset)
+        # if (!all(idcheck)){
+        #     databasename <- ifelse(dataset=="cellz","cancercelllines","Progenetix")
+        #     warning("\n No results for filters ", filters[!idcheck], " in ", databasename, " database.","\n")
+        #     filters <- filters[idcheck]
+        # }
         
         if (filterLogic == "AND"){
             filters <- transform_id(filters)
