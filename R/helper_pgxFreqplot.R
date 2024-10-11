@@ -8,19 +8,29 @@
 ## function: genomeFreq, chromosomeFreq, getFreqPlotParameters
 ####################################################################
 
-genomeFreq <- function(data,pos.unit="bp",id,highlight,assembly,...){
+genomeFreq <- function(data,pos.unit="bp",id,assembly,...){
     if (is.null(id)) id <- 1
       # input is pgxfreq
     if (is(data,"CompressedGRangesList")){
         range.info <- data[[id]]
-        gain.freq <- S4Vectors::mcols(range.info)$gain_frequency
-        loss.freq <- S4Vectors::mcols(range.info)$loss_frequency
+        ind_data_freq <- S4Vectors::mcols(data[[id]])
+        # in case input is not level-specific calls
+        names(ind_data_freq)[which(names(ind_data_freq) == "gain_frequency")] <- "low_gain_frequency"
+        names(ind_data_freq)[which(names(ind_data_freq) == "loss_frequency")] <- "low_loss_frequency"
+        gain.freq1 <- ind_data_freq$low_gain_frequency
+        loss.freq1 <- ind_data_freq$low_loss_frequency
+        gain.freq2 <- ind_data_freq$high_gain_frequency
+        loss.freq2 <- ind_data_freq$high_loss_frequency
         meta <- S4Vectors::mcols(data)
-      # input is data.frame
+      # input is pgxmatrix
     } else if (is(data,"RangedSummarizedExperiment")){
         range.info <- unique(GenomicRanges::granges(SummarizedExperiment::rowRanges(data)))
-        gain.freq <- SummarizedExperiment::assay(data)[which(SummarizedExperiment::rowData(data)$type == "DUP"),id]
-        loss.freq <- SummarizedExperiment::assay(data)[which(SummarizedExperiment::rowData(data)$type == "DEL"),id]
+        ind_data_freq <- SummarizedExperiment::assays(data)
+        ind_data_row <- SummarizedExperiment::rowData(data)
+        gain.freq1 <- ind_data_freq$lowlevel_cnv_frequency[which(ind_data_row$type == "gain"),id]
+        loss.freq1 <- ind_data_freq$lowlevel_cnv_frequency[which(ind_data_row$type == "loss"),id]
+        gain.freq2 <- ind_data_freq$highlevel_cnv_frequency[which(ind_data_row$type == "gain"),id]
+        loss.freq2 <- ind_data_freq$highlevel_cnv_frequency[which(ind_data_row$type == "loss"),id]
         meta <- SummarizedExperiment::colData(data)
     } else{
         stop("\n The input is invalid \n")
@@ -50,7 +60,7 @@ genomeFreq <- function(data,pos.unit="bp",id,highlight,assembly,...){
   
     par(fig=fig,new=new,oma=c(0,0,1,0),mar=op$mar)
   
-    op <- updateFreqParameters(loss.freq,gain.freq,op)
+    op <- updateFreqParameters(loss.freq1,gain.freq1,op)
     plot(1,1,type="n",ylim=op$ylim,xlim=op$xlim,xaxs="i",main="",frame.plot=TRUE,yaxt="n",xaxt="n",ylab="",xlab="")
     chromPattern(pos.unit,op)
   
@@ -65,19 +75,17 @@ genomeFreq <- function(data,pos.unit="bp",id,highlight,assembly,...){
     }
     
   
-    title(main=op$main,line=op$main.line,cex.main=op$cex.main)
-  
-    if (!is.null(highlight)){
-      op$col.gain <- rep(op$col.gain, length(range.info))
-      op$col.gain[highlight] <- 'red'
-        op$col.loss <- rep(op$col.loss, length(range.info))
-        op$col.loss[highlight] <- 'red'
-    }
+    title(main=op$main,line=op$main.line,cex.main=op$cex.main)  
   
     #Add axes, labels and percentage lines:
     addToFreqPlot(op,type="genome")
-    rect(xleft=xleft,ybottom=0,xright=xright,ytop=gain.freq,col=op$col.gain,border=op$col.gain)
-    rect(xleft=xleft,ybottom=0,xright=xright,ytop=-loss.freq,col=op$col.loss,border=op$col.loss)
+    rect(xleft=xleft,ybottom=0,xright=xright,ytop=gain.freq1,col=op$col.lowgain,border=op$col.lowgain)
+    rect(xleft=xleft,ybottom=0,xright=xright,ytop=-loss.freq1,col=op$col.lowloss,border=op$col.lowloss)
+    if (!is.null(gain.freq2) & !is.null(loss.freq2)){
+        rect(xleft=xleft,ybottom=0,xright=xright,ytop=gain.freq2,col=op$col.highgain,border=op$col.highgain)
+        rect(xleft=xleft,ybottom=0,xright=xright,ytop=-loss.freq2,col=op$col.highloss,border=op$col.highloss)
+    }
+
     abline(h=0,lty=1,col="grey82",lwd=1.5)
   
     op$chrom.lty <- 1
@@ -85,19 +93,29 @@ genomeFreq <- function(data,pos.unit="bp",id,highlight,assembly,...){
     addArmlines(as.numeric(GenomicRanges::seqnames(range.info)),xaxis="pos",unit=pos.unit,cex=op$cex.chrom,op=op)
 }
 
-chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,highlight,assembly,...){
+chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,assembly,...){
     if (is.null(id)) id <- 1
     # input is pgxfreq
     if (is(data, "CompressedGRangesList")){
         range.info <- data[[id]]
-        gain.freq <- S4Vectors::mcols(range.info)$gain_frequency
-        loss.freq <- S4Vectors::mcols(range.info)$loss_frequency
+        ind_data_freq <- S4Vectors::mcols(data[[id]])
+        # in case input is not level-specific calls
+        names(ind_data_freq)[which(names(ind_data_freq) == "gain_frequency")] <- "low_gain_frequency"
+        names(ind_data_freq)[which(names(ind_data_freq) == "loss_frequency")] <- "low_loss_frequency"
+        gain.freq1 <- ind_data_freq$low_gain_frequency
+        loss.freq1 <- ind_data_freq$low_loss_frequency
+        gain.freq2 <- ind_data_freq$high_gain_frequency
+        loss.freq2 <- ind_data_freq$high_loss_frequency
         meta <- S4Vectors::mcols(data)
-    # input is data.frame
+    # input is pgxmatrix
     } else if (is(data, "RangedSummarizedExperiment")){
         range.info <- unique(GenomicRanges::granges(SummarizedExperiment::rowRanges(data)))
-        gain.freq <- SummarizedExperiment::assay(data)[which(SummarizedExperiment::rowData(data)$type == "DUP"),id]
-        loss.freq <- SummarizedExperiment::assay(data)[which(SummarizedExperiment::rowData(data)$type == "DEL"),id]
+        ind_data_freq <- SummarizedExperiment::assays(data)
+        ind_data_row <- SummarizedExperiment::rowData(data)
+        gain.freq1 <- ind_data_freq$lowlevel_cnv_frequency[which(ind_data_row$type == "gain"),id]
+        loss.freq1 <- ind_data_freq$lowlevel_cnv_frequency[which(ind_data_row$type == "loss"),id]
+        gain.freq2 <- ind_data_freq$highlevel_cnv_frequency[which(ind_data_row$type == "gain"),id]
+        loss.freq2 <- ind_data_freq$highlevel_cnv_frequency[which(ind_data_row$type == "loss"),id]
         meta <- SummarizedExperiment::colData(data)
     } else{
         stop("\n The input is invalid \n")
@@ -147,7 +165,7 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,highlight,assembly
   
     #Find default ylimits and at.y (tickmarks):
     use <- which(as.numeric(GenomicRanges::seqnames(range.info)) %in% chrom)
-    op <- updateFreqParameters(loss.freq[use],gain.freq[use],op)
+    op <- updateFreqParameters(loss.freq1[use],gain.freq1[use],op)
   
     #Make separate plots for each chromosome:
   
@@ -165,8 +183,10 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,highlight,assembly
   
       #Pick out frequencies for this chromsome
       ind.c <- which(as.numeric(GenomicRanges::seqnames(range.info)) ==k)
-      freqamp.c <- gain.freq[ind.c]
-      freqdel.c <- loss.freq[ind.c]
+      freqamp1.c <- gain.freq1[ind.c]
+      freqdel1.c <- loss.freq1[ind.c]
+      freqamp2.c <- gain.freq2[ind.c]
+      freqdel2.c <- loss.freq2[ind.c]
   
       xlim <- c(0,max(xright[ind.c]))
   
@@ -207,25 +227,17 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,highlight,assembly
       addToFreqPlot(chrom.op,type="bychrom")
   
       #Plot frequencies as rectangles
-      # check if highlight exists
-      if (length(which(highlight %in% ind.c)) > 0){
-        op$col.gain <- rep(op$col.gain, length(range.info))
-        op$col.loss <- rep(op$col.loss, length(range.info))
-        op$col.gain[highlight] <- 'red'
-          op$col.loss[highlight] <- 'red'
-            rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=freqamp.c,
-                 col=op$col.gain[ind.c],border=op$col.gain[ind.c])
-            rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=-freqdel.c,
-                 col=op$col.loss[ind.c],border=op$col.loss[ind.c])
-  
-      } else{
-        rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=freqamp.c,
-             col=op$col.gain,border=op$col.gain)
-        rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=-freqdel.c,
-             col=op$col.loss,border=op$col.loss)
+      rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=freqamp1.c,
+             col=op$col.lowgain,border=op$col.lowgain)
+      rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=-freqdel1.c,
+             col=op$col.lowloss,border=op$col.lowloss)
+      if (!is.null(freqamp2.c) & !is.null(freqdel2.c)){
+            rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=freqamp2.c,
+             col=op$col.highgain,border=op$col.highgain)
+            rect(xleft=xleft[ind.c],ybottom=0,xright=xright[ind.c],ytop=-freqdel2.c,
+             col=op$col.highloss,border=op$col.highloss)
       }
-  
-  
+        
       #Add line at y=0 and x=0
       abline(h=0,lty=1,col="grey90")
       abline(v=0)
@@ -294,8 +306,10 @@ getFreqPlotParameters <- function(type,nc,nr,assembly,chrom=NULL,...){
     #Common default parameters for genome and bychrom:
     op <- list(ylab="% with gain or loss",
                plot.size=c(11.8,min(3*nr,8.2)),
-               col.gain="#FFC633",
-               col.loss="#33A0FF",
+               col.lowgain="#FFC633",
+               col.lowloss="#33A0FF",
+               col.highgain="#d00000",
+               col.highloss="#0000FF",
                chr_sep_color = "grey95",
                plot.unit="mbp",
                percentLines=TRUE,

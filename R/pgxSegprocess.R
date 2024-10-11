@@ -9,6 +9,9 @@
 #' @param return_seg A logical value determining whether to return segment data. Default is FALSE.
 #' @param return_frequency A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.
 #' @param assembly A string specifying the genome assembly version to apply to CNV frequency calculation and plotting. Allowed options are "hg19" and "hg38". Default is "hg38".
+#' @param cnv_column_idx Index of the column specifying the CNV state used for calculating CNV frequency. 
+#' The index must be at least 6, with the default set to 6. The CNV states should either contain "DUP" for duplications and "DEL" for deletions, 
+#' or level-specific CNV states represented using Experimental Factor Ontology (EFO) codes.
 #' @param bin_size Size of genomic bins used in CNV frequency calculation to split the genome, in base pairs (bp). Default is 1,000,000.
 #' @param overlap Numeric value defining the amount of overlap between bins and segments considered as bin-specific CNV, in base pairs (bp). Default is 1,000.
 #' @param soft_expansion Fraction of `bin_size` to determine merge criteria.
@@ -22,7 +25,7 @@
 #' @examples
 #' file_path <- system.file("extdata", "example.pgxseg",package = 'pgxRpi')
 #' info <- pgxSegprocess(file=file_path,show_KM_plot = TRUE, return_seg = TRUE, return_metadata = TRUE)
-pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_metadata=FALSE,return_seg=FALSE,return_frequency=FALSE,assembly='hg38',bin_size= 1000000,overlap=1000,soft_expansion = 0.1,...){
+pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_metadata=FALSE,return_seg=FALSE,return_frequency=FALSE,assembly='hg38',cnv_column_idx=6,bin_size= 1000000,overlap=1000,soft_expansion = 0.1,...){
     if(!any(show_KM_plot, return_metadata, return_seg, return_frequency)){return()}
     full.data <- readLines(file)
     idx <- grep("#sample=>",full.data)
@@ -34,24 +37,28 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
         df <- as.data.frame(t(data.frame(col_data,row.names = col_name)))
         return(df)
     })
-    meta <- dplyr::bind_rows(meta)
-    rownames(meta) <- seq(dim(meta)[1])
-    if (!group_id %in% colnames(meta)){
+    if (length(meta) == 0){
+      meta <- NA
+    } else{
+      meta <- data.frame(dplyr::bind_rows(meta))
+      rownames(meta) <- seq(dim(meta)[1])
+      if (!group_id %in% colnames(meta)){
         stop('group_id: ',group_id,' is not in metadata')
+      }
     }
-    if (show_KM_plot){
+
+    if (show_KM_plot & any(!is.na(meta))){
         pgxMetaplot(meta,group_id = group_id,...)
     }
     
 
-    if (return_metadata & "followup_state_id" %in% colnames(meta)){
-        meta$followup_time <- ifelse(length(meta$followup_time) == 0,NA,
+    if (return_metadata & "followup_state_id" %in% colnames(meta) & any(!is.na(meta))){
+        meta_followup_time <- ifelse(length(meta$followup_time) == 0,NA,
                                      round(lubridate::time_length(meta$followup_time,unit='day')))
         meta <- dplyr::mutate(meta,followup_state_label = NA,.after = followup_state_id)
         meta$followup_state_label[meta$followup_state_id == "EFO:0030041"] <- 'alive'
         meta$followup_state_label[meta$followup_state_id == "EFO:0030049"] <- 'dead'
         meta$followup_state_label[meta$followup_state_id == "EFO:0030039"] <- 'unknown'
-        meta <- dplyr::rename(meta,'followup_time(days)' = followup_time)
     }
   
     if (return_seg  | return_frequency){
@@ -73,18 +80,32 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
             frequency <- c()
             freq.id <- c()
             freq.meta <- list()
-            for (id in unique(meta[,group_id])){
-                plot.samples <- meta[,1][meta[,group_id] %in% id]
+            if (any(!is.na(meta))){
+              total.plot.ids <- unique(meta[,group_id])
+            } else{
+              total.plot.ids <- c(1)
+            }
+            for (id in total.plot.ids){
+                if (any(!is.na(meta))){
+                  plot.sample <- meta[,1][meta[,group_id] %in% id]
+                } else{
+                  plot.sample <- unique(seg[,1])
+                }
                 # select samples from pgxseg data
-                plot.idx <- seg[,1] %in% plot.samples
+                plot.idx <- seg[,1] %in% plot.sample
                 plot.seg <- seg[plot.idx,]
                 nsamples <- length(unique(plot.seg[,1]))
                 if (nsamples == 0) next
-                freq.seg <- segtoFreq(data=plot.seg,cohort_name=id,assembly=assembly,bin_size=bin_size,overlap = overlap,soft_expansion = soft_expansion)
+                freq.seg <- segtoFreq(data=plot.seg,cnv_column_idx=cnv_column_idx,cohort_name=id,assembly=assembly,bin_size=bin_size,overlap = overlap,soft_expansion = soft_expansion)
                 frequency <- c(frequency,freq.seg[[1]])
                 freq.id <- c(freq.id,id)
-                freq.meta[[id]] <- data.frame(group_id = id, group_label=ifelse(group_label %in% colnames(meta),unique(meta[,group_label][meta[,group_id] == id]),NA),
-                                                             sample_count=nsamples)
+                if (any(!is.na(meta))){
+                  freq.meta[[id]] <- data.frame(group_id = id, group_label=ifelse(group_label %in% colnames(meta),unique(meta[,group_label][meta[,group_id] == id]),NA),
+                                                sample_count=nsamples)
+                } else{
+                  freq.meta[[id]] <- data.frame(group_id = "", group_label="",
+                                                sample_count=nsamples)
+                }
             } 
             frequency <- GenomicRanges::GRangesList(frequency)
             names(frequency) <- freq.id

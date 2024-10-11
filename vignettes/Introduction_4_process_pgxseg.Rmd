@@ -39,6 +39,7 @@ The parameters of this function used in this tutorial:
 * `return_metadata`: A logical value determining whether to return metadata. Default is FALSE.
 * `return_seg`: A logical value determining whether to return segment data. Default is FALSE.
 * `return_frequency`: A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.
+* `cnv_column_idx`: Index of the column specifying the CNV state used for calculating CNV frequency. The index must be at least 6, with the default set to 6. The CNV states should either contain "DUP" for duplications and "DEL" for deletions, or level-specific CNV states represented using Experimental Factor Ontology (EFO) codes.
 * `assembly`: A string specifying the genome assembly version to apply to CNV frequency calculation and plotting. Allowed options are "hg19" and "hg38". Default is "hg38".
 * `...` Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot function from survminer package)
 

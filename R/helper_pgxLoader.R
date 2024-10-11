@@ -302,57 +302,61 @@ pgxFreqLoader <- function(output, filters, domain) {
     check_pgx_domain(domain, "CNV frequency data")
 
     # start query
-    url <- paste0(domain,"/services/intervalFrequencies?output=",output)
-    url <- add_parameter(url,"filters",transform_id(filters))
+    url <- paste0(domain,"/services/intervalFrequencies?filters=",transform_id(filters))
     encoded_url <- URLencode(url)
 
     # access data 
-    pg.data  <- read.table(encoded_url, header=TRUE, sep="\t",,quote="")
-    colnames(pg.data)[1] <- 'filters'
+    pg_data  <- content(GET(encoded_url))
 
-    filter_exist <- filters %in% unique(pg.data[,1])
-    if (all(!filter_exist)) stop("No data retrieved")
-    if (any(!filter_exist)) warning("\n Query fails for the filters ", paste(filters[!filter_exist],collapse = ','),"\n")
-    filters <- filters[filter_exist]
+    if (!pg_data$responseSummary$exists) stop("No data retrieved")
+    if (pg_data$responseSummary$numTotalResults != length(filters)){
+        pg_allids <- sapply(pg_data$response$results,function(x){x$groupId})
+        warning("\n Query fails for filter ", paste(filters[!filters %in% pg_allids],collapse = ','), "\n")
+    }
 
-    # access metadata from JSON output
-    meta <- readLines(encoded_url)[seq_len(length(filters))+1]
-    meta_lst <- unlist(strsplit(meta,split = ';'))
-    label <- meta_lst[grep("label",meta_lst)]
-    label<- gsub('.*=','',label)
-    count <- meta_lst[grep("sample_count",meta_lst)]
-    count <- as.numeric(gsub('.*=','',count))
-    meta <- data.frame(filter = filters, label, sample_count=count)
-    
-    # convert to GRangesList
-    if (output == 'pgxfreq'){
-      colnames(pg.data)[2] <- 'chr'
-      data_lst <- GenomicRanges::makeGRangesListFromDataFrame(pg.data,split.field = 'filters',keep.extra.columns=TRUE)
-      S4Vectors::mcols(data_lst) <- meta
+    pg_data_lst <- lapply(pg_data$response$results, function(x){
+        indmeta <- as.data.frame(x[c("groupId","label","sampleCount")])
+        colnames(indmeta) <- c("filter","label","sample_count")
+        indfreq <- lapply(x$intervalFrequencies,function(x){
+            as.data.frame(x[c("referenceName","start","end","gainFrequency","gainHlfrequency","lossFrequency","lossHlfrequency")])
+        })
+        indfreq <- do.call(rbind,indfreq)
+        return(list(meta=indmeta,data=indfreq))
+    })
+    meta <- do.call(rbind,lapply(pg_data_lst,function(x){x$meta}))
     
     # convert to RangedSummarizedExperiment
-    } else if (output == "pgxmatrix"){
-        frequency <- as.data.frame(t(pg.data[,-1]))
-        rowRanges <- rownames(frequency)
-        rowRanges <- lapply(rowRanges,function(x){
-        range_str <- unlist(strsplit(x,split = '\\.'))
-        chr <- range_str[1]
-        chr <- gsub("X","",chr)
-        if (chr == "") chr <- 'X'
-        return(data.frame(chr=chr,start=range_str[2],end = range_str[3],type=range_str[4]))
-      })
-      rowRanges <- do.call(rbind, rowRanges)
-      rowRanges <- GenomicRanges::GRanges(rowRanges)
-      names(rowRanges) <- seq_len(dim(frequency)[1])
-      
-      colnames(frequency) <- pg.data[,1]
-      rownames(frequency) <- seq_len(dim(frequency)[1])
-      
-      data_lst <- SummarizedExperiment::SummarizedExperiment(assays=list(cnv_frequency=frequency),
-                           rowRanges=rowRanges, colData=meta)
+    if (output == 'pgxmatrix'){
+        result_freq_lst <- lapply(pg_data_lst, function(x){
+            lfrequency <- data.frame(c(x$data$gainFrequency,x$data$lossFrequency))
+            colnames(lfrequency) <- x$meta$filter
+            hfrequency <- data.frame(c(x$data$gainHlfrequency,x$data$lossHlfrequency))
+            colnames(hfrequency) <- x$meta$filter
+            return(list(lfreq=lfrequency,hfreq=hfrequency))
+        })
+        
+        lfrequency <- do.call(cbind,lapply(result_freq_lst, function(x){x$lfreq}))
+        hfrequency <- do.call(cbind,lapply(result_freq_lst, function(x){x$hfreq}))
+        
+        rowRanges <- pg_data_lst[[1]]$data[c("referenceName","start","end")]
+        colnames(rowRanges)[1] <- 'chr'
+        rowRanges <- rbind(rowRanges,rowRanges) 
+        rowRanges$type <- rep(c("gain","loss"),each = nrow(pg_data_lst[[1]]$data))
+        rowRanges <- GenomicRanges::GRanges(rowRanges)
+
+        result <- SummarizedExperiment::SummarizedExperiment(assays=list(lowlevel_cnv_frequency=lfrequency,
+                                                                         highlevel_cnv_frequency = hfrequency),
+                                                             rowRanges=rowRanges, colData=meta)
+    # convert to GRangesList
+    } else if (output == "pgxfreq"){
+        result_freq <- do.call(rbind,lapply(pg_data_lst,function(x){cbind(filter = x$meta$filter,x$data)}))
+        colnames(result_freq)[2] <- 'chr'
+        colnames(result_freq)[5:8] <- c("low_gain_frequency","high_gain_frequency","low_loss_frequency","high_loss_frequency")  
+        result <- GenomicRanges::makeGRangesListFromDataFrame(result_freq,split.field = 'filter',keep.extra.columns=TRUE)   
+        S4Vectors::mcols(result) <- meta
     }
     
-    return(data_lst)
+    return(result)
 }
 
 # utility function for transforming cnv fraction data ---------------------

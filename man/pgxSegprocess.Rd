@@ -12,6 +12,7 @@ pgxSegprocess(
   return_seg = FALSE,
   return_frequency = FALSE,
   assembly = "hg38",
+  cnv_column_idx = 6,
   bin_size = 1e+06,
   overlap = 1000,
   soft_expansion = 0.1,
@@ -32,6 +33,10 @@ pgxSegprocess(
 \item{return_frequency}{A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.}
 
 \item{assembly}{A string specifying the genome assembly version to apply to CNV frequency calculation and plotting. Allowed options are "hg19" and "hg38". Default is "hg38".}
+
+\item{cnv_column_idx}{Index of the column specifying the CNV state used for calculating CNV frequency.
+The index must be at least 6, with the default set to 6. The CNV states should either contain "DUP" for duplications and "DEL" for deletions,
+or level-specific CNV states represented using Experimental Factor Ontology (EFO) codes.}
 
 \item{bin_size}{Size of genomic bins used in CNV frequency calculation to split the genome, in base pairs (bp). Default is 1,000,000.}
 

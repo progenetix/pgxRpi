@@ -7,11 +7,14 @@
 pgxMetaplot(data, group_id, condition, return_data = FALSE, ...)
 }
 \arguments{
-\item{data}{The object returned by the \code{pgxLoader} function, which includes survival data about individuals.}
+\item{data}{The data frame returned by the \code{pgxLoader} function, containing survival data for individuals.
+The survival state is represented by Experimental Factor Ontology in the "followup_state_id" column,
+and the survival time is represented in ISO 8601 duration format in the "followup_time" column.}
 
 \item{group_id}{A string specifying which column is used for grouping in the Kaplan-Meier plot.}
 
-\item{condition}{A string for splitting individuals into younger and older groups, following the ISO 8601 duration format. Only used if \code{group_id} is "age_iso".}
+\item{condition}{A string for splitting individuals into younger and older groups,
+following the ISO 8601 duration format. Only used if \code{group_id} is "age_iso".}
 
 \item{return_data}{A logical value determining whether to return the metadata used for plotting. Default is FALSE.}
 

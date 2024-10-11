@@ -15,10 +15,13 @@ segtoFreq(
 )
 }
 \arguments{
-\item{data}{Segment data with CNV states. The first four columns should specify sample ID, chromosome, start position, and end position, respectively. The column representing CNV states should contain either "DUP" for duplications or "DEL" for deletions.}
+\item{data}{Segment data containing CNV states. The first four columns should represent sample ID, chromosome, start position, and end position, respectively.
+The fifth column can contain the number of markers or other relevant information.
+The column representing CNV states (with a column index of 6 or higher) should either contain "DUP" for duplications and "DEL" for deletions,
+or level-specific CNV states such as "EFO:0030072", "EFO:0030071", "EFO:0020073", and "EFO:0030068", which correspond to high-level duplication, low-level duplication, high-level deletion, and low-level deletion, respectively.}
 
-\item{cnv_column_idx}{Index of the column specifying CNV state. Default is 6, following the "pgxseg" format used in Progenetix.
-If the input segment data uses the general \code{.seg} file format, it might need to be set differently.}
+\item{cnv_column_idx}{Index of the column specifying the CNV state. Default is 6, based on the "pgxseg" format used in Progenetix.
+If the input segment data follows the general \code{.seg} file format, this index may need to be adjusted accordingly.}
 
 \item{cohort_name}{A string specifying the cohort name. Default is "unspecified cohort".}
 

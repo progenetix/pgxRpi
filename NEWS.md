@@ -42,3 +42,9 @@
 - Adapted to Progenetix API change: updated endpoint from "analyses/?output=cnvstats" to "services/cnvstats/".
 - The `dataset` parameter in `pgxLoader` is now used to select datasets directly from the Beacon response, rather than being used internally.
 - Modified `pgxSegprocess` to support usage with downloaded "pgxseg" files from Progenetix.
+
+## Version: 1.1.8 (2024-10-11)
+
+- Added support for accessing and visualizing level-specific CNV frequency data.
+- Enabled calculation of level-specific CNV frequencies from segment data.
+

@@ -48,21 +48,21 @@ The parameters of this function used in this tutorial:
 
 ```{r}
 freq_pgxfreq <- pgxLoader(type="cnv_frequency", output ="pgxfreq",
-                         filters=c("NCIT:C4038","pgx:icdom-85003"))
+                         filters=c("NCIT:C3058","NCIT:C3493"))
 
 freq_pgxfreq
 ```
 
 The returned data is stored in [*GRangesList*](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html) container which consists of multiple *GRanges* objects.
 Each *GRanges* object stores CNV frequency from samples pecified by a particular filter. 
-Within each GRanges object, you can find annotation columns "gain_frequency" and "loss_frequency" in each row, which express the percentage values across samples (%) for gains and losses that overlap the corresponding genomic interval.
+Within each GRanges object, there are annotation columns that provide information on CNV frequencies for each row, expressed as percentage values across samples (%). These percentages represent level-specific gains and losses that overlap the corresponding genomic intervals.
 
 These genomic intervals are derived from the partitioning of the entire genome (GRCh38). Most of these bins have a size of 1MB, except for a few bins located near the telomeres. In total, there are 3106 intervals encompassing the genome.
 
 To access the CNV frequency data from specific filters, you could access like this
 
 ```{r}
-freq_pgxfreq[["NCIT:C4038"]]
+freq_pgxfreq[["NCIT:C3058"]]
 ```
 
 To get metadata such as count of samples used to calculate frequency, use `mcols` function from *GenomicRanges* package:
@@ -99,19 +99,18 @@ colData(freq_pgxmatrix)
 To access the CNV frequency matrix, use `assay` accesssor from *SummarizedExperiment* package
 
 ```{r}
-head(assay(freq_pgxmatrix))
+head(assay(freq_pgxmatrix,"lowlevel_cnv_frequency"))
 ```
 
 The matrix has 6212 rows (genomic regions) and 8 columns (filters). The rows comprised 3106 intervals with “gain status” plus 3106 intervals with “loss status”. 
 
-The value is the percentage of samples from the corresponding filter having one or more CNV events in the 
-specific genomic intervals. You could get the interval information by `rowRanges` function from *SummarizedExperiment* package
+The value is the percentage of samples from the corresponding filter having one or more CNV events in the specific genomic intervals. For example, if the value in the second row and first column is 8.65, it means that 8.65% samples from the corresponding filter NCIT:C3059 having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
+
+You could get the interval information by `rowRanges` function from *SummarizedExperiment* package.
 
 ```{r}
 rowRanges(freq_pgxmatrix)
 ```
-
-For example, if the value in the second row and first column is 8.457, it means that 8.457% samples from the corresponding filter NCIT:C3059 having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
 
 Note: it is different from CNV fraction matrix introduced in Introduction_2_loadvariants. Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV fraction matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in one sample.
 
@@ -123,7 +122,7 @@ This function computes the binned CNV frequency from segment data.
 
 The parameters of this function:
 
-* `data`: Segment data with CNV states. The first four columns should specify sample ID, chromosome, start position, and end position, respectively. The column representing CNV states should contain either "DUP" for duplications or "DEL" for deletions.
+* `data`: Segment data containing CNV states. The first four columns should represent sample ID, chromosome, start position, and end position, respectively. The fifth column can contain the number of markers or other relevant information. The column representing CNV states (with a column index of 6 or higher) should either contain "DUP" for duplications and "DEL" for deletions, or level-specific CNV states such as "EFO:0030072", "EFO:0030071", "EFO:0020073", and "EFO:0030068", which correspond to high-level duplication, low-level duplication, high-level deletion, and low-level deletion, respectively.
 * `cnv_column_idx`: Index of the column specifying CNV state. Default is 6, following the "pgxseg" format used in Progenetix. If the input segment data uses the general `.seg` file format, it might need to be set differently.
 * `cohort_name`: A string specifying the cohort name. Default is "unspecified cohort".
 * `assembly`: A string specifying the genome assembly version for CNV frequency calculation. Allowed options are "hg19" or "hg38". Default is "hg38".
@@ -138,13 +137,23 @@ Suppose you have segment data from several biosamples:
 variants <- pgxLoader(type="g_variants",biosample_id = c("pgxbs-kftvhmz9", "pgxbs-kftvhnqz","pgxbs-kftvhupd"),output="pgxseg")
 # only keep segment cnv data
 segdata <- variants[variants$variant_type %in% c("DUP","DEL"),]
+head(segdata)
 ```
 
-You can then calculate the CNV frequency from this cohort comprised of these samples. The output is stored in "pgxfreq" format:
+You can then calculate the CNV frequency for this cohort based on the specified CNV calls. The output will be stored in the "pgxfreq" format.
+
+In the following example, the CNV frequency is calculated based on "DUP" and "DEL" calls:
 
 ```{r}
-segfreq <- segtoFreq(segdata,cohort_name="c1")
-segfreq
+segfreq1 <- segtoFreq(segdata,cnv_column_idx = 6, cohort_name="c1")
+segfreq1
+```
+
+For level-specific CNV calls, set the `cnv_column_idx` parameter to the column containing CNV states represented as [EFO codes](https://www.ebi.ac.uk/efo/).
+
+```{r}
+segfreq2 <- segtoFreq(segdata,cnv_column_idx = 9,cohort_name="c1")
+segfreq2
 ```
 
 # Visualize CNV frequency
@@ -159,76 +168,36 @@ The parameters of this function:
 * `chrom`: A vector specifying which chromosomes to plot. If NULL, the plot will cover the entire genome. 
 #' If specified, the frequencies are plotted with one panel for each chromosome. Default is NULL.
 * `layout`: Number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1).
-* `filters`: Index or string value indicating which filter to plot. The length of filters
-is limited to one if the parameter `circos` is FALSE. Default is the first filter.
-* `circos`: A logical value indicating whether to return a circos plot. If TRUE, it returns a circos plot 
-that can display and compare multiple filters. Default is FALSE.
-* `highlight`: Indices of genomic bins to be highlighted in red.
-* `assembly`: A string specifying the genome assembly version to apply to CNV frequency plotting. 
-Allowed options are "hg19" and "hg38". Default is "hg38".
+* `filters`: Index or string value indicating which filter to plot. The length of filters is limited to one if the parameter `circos` is FALSE. Default is the first filter.
+* `circos`: A logical value indicating whether to return a circos plot. If TRUE, it returns a circos plot that can display and compare multiple filters. Default is FALSE.
+* `assembly`: A string specifying the genome assembly version to apply to CNV frequency plotting. Allowed options are "hg19" and "hg38". Default is "hg38".
 
 ## CNV frequency plot by genome
 
 ### Input is `pgxfreq` object
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxfreq, filters="pgx:icdom-85003")
+pgxFreqplot(freq_pgxfreq, filters="NCIT:C3058")
 ```
 
 ### Input is `pgxmatrix` object 
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxmatrix, filters = "NCIT:C3512")
+pgxFreqplot(freq_pgxmatrix, filters = "NCIT:C3493")
 ```
 
 ## CNV frequency plot by chromosomes
 
 ```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxfreq, filters='NCIT:C4038',chrom=c(1,2,3), layout = c(3,1))  
+pgxFreqplot(freq_pgxfreq, filters='NCIT:C3058',chrom=c(7,9), layout = c(2,1))  
 ```
 
 ## CNV frequency circos plot 
 
-```{r,fig.width=6, fig.height=6}
-pgxFreqplot(freq_pgxfreq, filters='pgx:icdom-85003', circos = TRUE)
-```
-
-The circos plot also supports multiple group comparison
+The circos plot supports multiple group comparison
 
 ```{r,fig.width=6, fig.height=6}
-pgxFreqplot(freq_pgxfreq,filters= c("NCIT:C4038","pgx:icdom-85003"),circos = TRUE) 
-```
-
-## Highlight interesting genomic intervals
-
-If you want to look at the CNV frequency at specific genomic bins, you can use `highlight` parameter.
-For example, when you are interested in CNV frequency of CCND1 gene in samples with infiltrating duct carcinoma (icdom-85003).
-You could first find the genomic bin where CCND1 (chr11:69641156-69654474) is located.
-
-```{r}
-# Extract the CNV frequency data frame of samples from 'icdom-85003' from 
-# the previously returned object
-freq_IDC <- freq_pgxfreq[['pgx:icdom-85003']]
-# search the genomic bin where CCND1 is located
-bin <- which(seqnames(freq_IDC) == 11 & start(freq_IDC) <= 69641156 &  
-             end(freq_IDC) >= 69654474)
-freq_IDC[bin,]
-```
-
-Then you could highlight this genomic bin like this
-
-```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxfreq,filters = 'pgx:icdom-85003', chrom = 11,highlight = bin)
-```
-
-Note: For CNV analysis of specific genes, the highlighted plot is rough as a reference, 
-because the bin size in frequency plots is 1MB, which is possible to cover multiple genes.
-
-The highlighting is also available for genome plots and circos plots. And you could highlight 
-multiple bins by a vector of indices.
-
-```{r, fig.width=7, fig.height=5}
-pgxFreqplot(freq_pgxfreq,filters = 'pgx:icdom-85003',highlight = c(1:100))
+pgxFreqplot(freq_pgxmatrix,filters= c("NCIT:C3493","NCIT:C3512"),circos = TRUE) 
 ```
 
 # Session Info

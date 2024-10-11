@@ -10,7 +10,6 @@ pgxFreqplot(
   layout = c(1, 1),
   filters = NULL,
   circos = FALSE,
-  highlight = NULL,
   assembly = "hg38"
 )
 }
@@ -27,8 +26,6 @@ is limited to one if the parameter \code{circos} is FALSE. Default is the first 
 
 \item{circos}{A logical value indicating whether to return a circos plot. If TRUE, it returns a circos plot
 that can display and compare multiple filters. Default is FALSE.}
-
-\item{highlight}{Indices of genomic bins to be highlighted in red.}
 
 \item{assembly}{A string specifying the genome assembly version to apply to CNV frequency plotting.
 Allowed options are "hg19" and "hg38". Default is "hg38".}
