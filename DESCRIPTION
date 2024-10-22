@@ -1,6 +1,6 @@
 Package: pgxRpi
 Title: R wrapper for Progenetix 
-Version: 1.1.9
+Version: 1.1.10
 Authors@R: 
     c(person(given = "Hangjia",
            family = "Zhao",
