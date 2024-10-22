@@ -45,7 +45,7 @@ Thie function calculates the frequency of deletions and duplications
 ## load necessary data (this step can be skipped in real implementation)
 data("hg38_cytoband")
 ## get pgxseg data
-seg <- read.table(system.file("extdata", "example.pgxseg",package = 'pgxRpi'),header=TRUE)
+seg <- read.table(system.file("extdata", "example.pgxseg",package = 'pgxRpi'),header=TRUE,sep = "\t")
 ## calculate frequency data
 freq <- segtoFreq(seg)
 ## visualize

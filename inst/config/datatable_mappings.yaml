@@ -95,19 +95,19 @@ biosamples:
     bycon_defined: info.legacyId
 
   geoprov_city:
-    bycon_defined: provenance.geoLocation.properties.city
+    bycon_defined: geoLocation.properties.city
 
   geoprov_country:
-    bycon_defined: provenance.geoLocation.properties.country
+    bycon_defined: geoLocation.properties.country
  
   geoprov_iso_alpha3:
-    bycon_defined: provenance.geoLocation.properties.ISO3166alpha3
+    bycon_defined: geoLocation.properties.ISO3166alpha3
 
   geoprov_long_latitude:
-    bycon_defined: provenance.geoLocation.properties.latitude
+    bycon_defined: geoLocation.properties.latitude
 
   geoprov_long_longitude:
-    bycon_defined: provenance.geoLocation.properties.longitude
+    bycon_defined: geoLocation.properties.longitude
 
   updated:
     bycon_defined: updated
