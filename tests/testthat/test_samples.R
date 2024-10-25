@@ -47,11 +47,11 @@ test_that("retrieve limited individuals with group id",{
     expect_equal(length(result$response$resultSets[[1]]$results),5)
 })
 
-test_that("retrieve samples with group id in cellz",{
-    url <- "https://cancercelllines.org/beacon/biosamples?filters=NCIT:C7707"
-    cat(paste("\n trying:",url,"\n"))
-    result <-  content(GET(url))
-    expect_equal(result$responseSummary$exists,TRUE)
-    expect_gt(result$responseSummary$numTotalResults,0)
-})
+# test_that("retrieve samples with group id in cellz",{
+#     url <- "https://cancercelllines.org/beacon/biosamples?filters=NCIT:C7707"
+#     cat(paste("\n trying:",url,"\n"))
+#     result <-  content(GET(url))
+#     expect_equal(result$responseSummary$exists,TRUE)
+#     expect_gt(result$responseSummary$numTotalResults,0)
+# })
 

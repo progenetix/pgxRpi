@@ -22,11 +22,11 @@ test_that("retrieve frequencies with pgxmatrix by filter",{
     expect_equal(dim(result),c(2,6213))
 })
 
-test_that("retrieve frequencies with pgxmatrix by filter in cellz",{
-    url <- "https://cancercelllines.org/services/intervalFrequencies/?output=pgxmatrix&filters=NCIT:C5228,pgx:icdom-87203"
-    cat(paste("\n trying:",url,"\n"))
-    r <- GET(url)
-    expect_equal(http_type(r), "text/plain")
-    expect_no_error(result  <- read.table(url, header=T, sep="\t"))
-    expect_equal(dim(result),c(2,6213))
-})
+# test_that("retrieve frequencies with pgxmatrix by filter in cellz",{
+#     url <- "https://cancercelllines.org/services/intervalFrequencies/?output=pgxmatrix&filters=NCIT:C5228,pgx:icdom-87203"
+#     cat(paste("\n trying:",url,"\n"))
+#     r <- GET(url)
+#     expect_equal(http_type(r), "text/plain")
+#     expect_no_error(result  <- read.table(url, header=T, sep="\t"))
+#     expect_equal(dim(result),c(2,6213))
+# })

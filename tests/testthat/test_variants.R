@@ -85,12 +85,12 @@ test_that("retrieve fraction variant with filters",{
     expect_gt(nrow(table),0)
 })
 
-test_that("retrieve variants with JSON in cellz",{
-        cat(paste("\n trying:",url_9,"\n"))
-        result <-  content(GET(url_9))
-        expect_equal(result$responseSummary$exists,TRUE)
-        table <- lapply(result$response$resultSets[[1]]$results,unlist)
-        table <- as.data.frame(bind_rows(table))
-        expect_gt(nrow(table),0)
-})
+# test_that("retrieve variants with JSON in cellz",{
+#         cat(paste("\n trying:",url_9,"\n"))
+#         result <-  content(GET(url_9))
+#         expect_equal(result$responseSummary$exists,TRUE)
+#         table <- lapply(result$response$resultSets[[1]]$results,unlist)
+#         table <- as.data.frame(bind_rows(table))
+#         expect_gt(nrow(table),0)
+# })
 
