@@ -48,3 +48,8 @@
 - Added support for accessing and visualizing level-specific CNV frequency data.
 - Enabled calculation of level-specific CNV frequencies from segment data.
 
+## Version: 1.3.1 (2025-01-14)
+
+- Removed the `pgxFilter` function and incorporated its functionality into `pgxLoader` with the "filtering_terms" type, following the Beacon v2 response mapping.
+- Updated vignette filenames for improved clarity.
+- Made parameter checks more flexible for Beacon queries.
