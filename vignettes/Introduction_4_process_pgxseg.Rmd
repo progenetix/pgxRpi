@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. Progenetix uses the ".pgxseg" data format to store variant data, which encompasses CNV (Copy Number Variation) and SNV (Single Nucleotide Variant), as well as the metadata of associated samples. This vignette describes how to work with local ".pgxseg" files using this package. For more details about the ".pgxseg" file format, please refer to the the [documentation](https://docs.progenetix.org/file-formats/?h=.pgxseg#pgxseg-sample-variant-files).
+[Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. Progenetix uses the ".pgxseg" data format to store variant data, which encompasses CNV (Copy Number Variation) and SNV (Single Nucleotide Variant), as well as the metadata of associated samples. This vignette describes how to work with local ".pgxseg" files using this package. For more details about the ".pgxseg" file format, please refer to the the [documentation](https://docs.progenetix.org/file-formats/?#pgxseg-sample-variant-files).
 
 # Load library 
 
@@ -41,7 +41,7 @@ The parameters of this function used in this tutorial:
 * `return_frequency`: A logical value determining whether to return CNV frequency data. The frequency calculation is based on segments in segment data and specified group id in metadata. Default is FALSE.
 * `cnv_column_idx`: Index of the column specifying the CNV state used for calculating CNV frequency. The index must be at least 6, with the default set to 6. The CNV states should either contain "DUP" for duplications and "DEL" for deletions, or level-specific CNV states represented using Experimental Factor Ontology (EFO) codes.
 * `assembly`: A string specifying the genome assembly version to apply to CNV frequency calculation and plotting. Allowed options are "hg19" and "hg38". Default is "hg38".
-* `...` Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot function from survminer package)
+* `...` Other parameters relevant to KM plot. These include `pval`, `pval.coord`, `pval.method`, `conf.int`, `linetype`, and `palette` (see ggsurvplot function from *survminer* package)
 
 # Extract segment data 
 
@@ -73,7 +73,7 @@ head(meta)
 
 # Visualize survival data in metadata 
 
-The KM plot is plotted from samples with available followup state and followup time. The default grouping is "group_id" column in metadata.
+The KM plot is generated using samples that have available follow-up state and follow-up time information. By default, the grouping is based on the 'group_id' column in the metadata.
 
 ```{r, fig.width=7, fig.height=5}
 pgxSegprocess(file=file_name,show_KM_plot = TRUE)
@@ -93,7 +93,7 @@ pgxSegprocess(file=file_name,show_KM_plot = TRUE,pval=TRUE,palette='npg')
 
 # Calculate CNV frequency 
 
-The CNV frequency is calculated from segments of samples with the same group id. The group id is specified in `group_id` parameter. More details about CNV frequency see the vignette Introduction_3_loadfrequency.  
+The CNV frequency is calculated from segments of samples with the same group id. The group id is specified in `group_id` parameter. More details about CNV frequency see the vignette *Introduction_3_access_cnv_frequency*.  
 
 ```{r}
 # Default is "group_id" in metadata
@@ -120,7 +120,7 @@ mcols(frequency)
 mcols(frequency_2)
 ```
 
-You can visualize the CNV frequency of the interesting group using `pgxFreqplot` function. For more details on this function, see the vignette Introduction_3_loadfrequency.
+You can visualize the CNV frequency of the interesting group using `pgxFreqplot` function. For more details on this function, see the vignette *Introduction_3_access_cnv_frequency*.
 
 ```{r, fig.width=7, fig.height=5}
 pgxFreqplot(frequency, filters="pgx:icdot-C16.9")

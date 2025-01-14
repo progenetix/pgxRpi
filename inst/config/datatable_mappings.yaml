@@ -1,3 +1,15 @@
+filtering_terms:
+  id:
+    beacon_model: id
+  label:
+    beacon_model: label
+  scopes:
+    beacon_model: scopes
+  type:
+    beacon_model: type
+
+#------------------------------------------------------------------------------#
+
 biosamples:
   biosample_id:
     beacon_model: id

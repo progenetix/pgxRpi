@@ -1,12 +1,12 @@
 ---
-title: "Introduction_3_loadfrequency"
+title: "Introduction_3_access_cnv_frequency"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
   toc: true
 vignette: >
-  %\VignetteIndexEntry{Introduction_3_loadfrequency}
+  %\VignetteIndexEntry{Introduction_3_access_cnv_frequency}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 [Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette offers a comprehensive guide on accessing and visualizing CNV frequency data within the Progenetix database. CNV frequency is pre-calculated based on CNV segment data in Progenetix and reflects the CNV pattern in a cohort. It is defined as the percentage of samples showing a CNV for a genomic region (1MB-sized genomic bins in this case) over the total number of samples in a cohort specified by filters. 
 
-If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to "https://cancercelllines.org" in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
+If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to `"https://cancercelllines.org"` in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 
 # Load library 
@@ -39,7 +39,7 @@ The parameters of this function used in this tutorial:
 
 * `type`: A string specifying output data type. Only "cnv_frequency" is used in this tutorial.
 * `output`: A string specifying output file format. When the parameter `type` is "cnv_frequency", available options are "pgxfreq" or "pgxmatrix".
-* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). When multiple filters are used, they are combined using OR logic when the parameter `type` is "cnv_frequency". For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
+* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). When multiple filters are used, they are combined using OR logic when the parameter `type` is "cnv_frequency". For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filtering-terms).
 * `dataset`: A string specifying the dataset to query from the Beacon response. Default is NULL, which includes results from all datasets.
 
 # Retrieve CNV frequency
@@ -53,9 +53,9 @@ freq_pgxfreq <- pgxLoader(type="cnv_frequency", output ="pgxfreq",
 freq_pgxfreq
 ```
 
-The returned data is stored in [*GRangesList*](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html) container which consists of multiple *GRanges* objects.
-Each *GRanges* object stores CNV frequency from samples pecified by a particular filter. 
-Within each GRanges object, there are annotation columns that provide information on CNV frequencies for each row, expressed as percentage values across samples (%). These percentages represent level-specific gains and losses that overlap the corresponding genomic intervals.
+The returned data is stored in [*GRangesList*](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html) container which consists of multiple *GRanges* objects. Each *GRanges* object stores CNV frequency from samples pecified by a particular filter. 
+
+Within each GRanges object, annotation columns provide the CNV frequencies for each genomic region, expressed as percentage values across samples (%). These percentages represent level-specific gains and losses that overlap the corresponding genomic intervals. For more details on CNV levels, refer to the [ontology tree](http://www.ebi.ac.uk/efo/EFO_0030066).
 
 These genomic intervals are derived from the partitioning of the entire genome (GRCh38). Most of these bins have a size of 1MB, except for a few bins located near the telomeres. In total, there are 3106 intervals encompassing the genome.
 
@@ -78,7 +78,7 @@ Choose 8 NCIt codes of interests that correspond to different tumor types
 ```{r}
 code <-c("C3059","C3716","C4917","C3512","C3493","C3771","C4017","C4001")
 # add prefix for query
-code <- sub(".",'NCIT:C',code)
+code <- paste0("NCIT:",code)
 ```
 
 load data with the specified codes
@@ -104,7 +104,7 @@ head(assay(freq_pgxmatrix,"lowlevel_cnv_frequency"))
 
 The matrix has 6212 rows (genomic regions) and 8 columns (filters). The rows comprised 3106 intervals with “gain status” plus 3106 intervals with “loss status”. 
 
-The value is the percentage of samples from the corresponding filter having one or more CNV events in the specific genomic intervals. For example, if the value in the second row and first column is 8.65, it means that 8.65% samples from the corresponding filter NCIT:C3059 having one or more duplication events in the genomic interval in chromosome 1: 400000-1400000.
+The value is the percentage of samples from the corresponding filter having one or more CNV events in the specific genomic intervals. For example, if the value in the second row and first column is 6.839, it means that 6.839% samples from the corresponding filter NCIT:C3059 having one or more low-level duplication events in the genomic interval in chromosome 1: 400000-1400000.
 
 You could get the interval information by `rowRanges` function from *SummarizedExperiment* package.
 
@@ -112,7 +112,7 @@ You could get the interval information by `rowRanges` function from *SummarizedE
 rowRanges(freq_pgxmatrix)
 ```
 
-Note: it is different from CNV fraction matrix introduced in Introduction_2_loadvariants. Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV fraction matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in one sample.
+Note: it is different from CNV fraction matrix introduced in *Introduction_2_query_variants*. Value in this matrix is **percentage (%) of samples** having one or more CNVs overlapped with the binned interval while the value in CNV fraction matrix is **fraction in individual samples** to indicate how much the binned interval overlaps with one or more CNVs in one sample.
 
 # Calculate CNV frequency 
 

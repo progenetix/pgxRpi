@@ -1,12 +1,12 @@
 ---
-title: "Introduction_2_loadvariants"
+title: "Introduction_2_query_variants"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
   toc: true
 vignette: >
-  %\VignetteIndexEntry{Introduction_2_loadvariants}
+  %\VignetteIndexEntry{Introduction_2_query_variants}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 [Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing genomic variant data within the Progenetix database. 
 
-If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to "https://cancercelllines.org" in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
+If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to `"https://cancercelllines.org"` in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 # Load library 
 
@@ -39,7 +39,8 @@ The parameters of this function used in this tutorial:
 * `output`: A string specifying output file format. The available options depend on the `type` parameter. When `type` is "g_variants", available options are NULL (default), "pgxseg", or "seg"; when `type` is "cnv_fraction", available options are NULL (default) or "pgxmatrix".
 * `biosample_id`: Identifiers used in the query database for identifying biosamples. 
 * `individual_id`: Identifiers used in the query database for identifying individuals. 
-* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
+* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167").
+For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filtering-terms).
 * `codematches`: A logical value determining whether to exclude samples from child concepts 
 of specified filters in the ontology tree. If TRUE, only samples exactly matching the specified filters will be included. 
 Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
@@ -48,16 +49,15 @@ Default is FALSE.
 * `skip`: Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip). 
 * `dataset`: A string specifying the dataset to query from the Beacon response. Default is NULL, which includes results from all datasets.
 * `save_file`: A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter `type` is "g_variants". Default is FALSE.
-* `filename`: A string specifying the path and name of the file to be saved. Only used if the parameter `save_file` is TRUE. Default is "variants" in current work directory.
+* `filename`: A string specifying the path and name of the file to be saved. Only used if the parameter `save_file` is TRUE. Default is "variants.tsv", saved in the current working directory..
 * `num_cores`: Integer to specify the number of cores used for the variant query. Only used when the parameter `type` is "g_variants". Default is 1.
-* `domain`: A string specifying the domain of the query data resource. Default is "http://progenetix.org".
-* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".
+* `domain`: A string specifying the domain of the query data resource. Default is `"http://progenetix.org"`.
+* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being `"http://progenetix.org/beacon"`.
 
 
-# Retrieve segment variants 
+# Retrieve variants 
 
-Because of a time-out issue, segment variant data can only be accessed by biosample id instead of filters. 
-To speed up this process, you can set the `num_cores` parameter for parallel processing. For more information about filters and how to get biosample ids, see the vignette Introduction_1_loadmetadata.
+Due to time-out constraints, variant data in Progenetix can only be queried using biosample ids, rather than filters or individual ids. To speed up the process, you can use the `num_cores` parameter to enable parallel processing. For more details about filters and retrieving biosample ids, refer to the vignette *Introduction_1_load_metadata*.
 
 ## Get biosample id 
 
@@ -74,7 +74,7 @@ There are three output formats.
 
 ## The first output format (by default)
 
-The default output format extracts variant data from the Beacon v2 response, containing variant id and associated analysis id, biosample id and individual id. The CNV data is represented as [copy number change class](https://vrs.ga4gh.org/en/2.x/concepts/systemic_variation/CopyNumber.html#copynumberchange) following the GA4GH Variation Representation Specification (VRS).
+The default output format extracts variant data from the Beacon v2 response, containing variant id and associated analysis id, biosample id and individual id. The CNV data is represented as [copy number change class](https://vrs.ga4gh.org/en/stable/terms_and_model.html#copynumberchange) following the GA4GH Variation Representation Specification (VRS).
 
 ```{r}
 variant_1 <- pgxLoader(type="g_variants", biosample_id = biosample_id)
@@ -108,7 +108,7 @@ only available for variants data (when `type='g_variants'`).
 
 ## Upload 'pgxseg' file to Progenetix website
 
-The following command creates a '.pgxseg' file with the name "variants.pgxseg" in "~/Downloads/" folder. 
+The following codes creates a '.pgxseg' file with the name "variants.pgxseg" in "~/Downloads/" folder. 
 
 ```{r eval=FALSE}
 pgxLoader(type="g_variants", output="pgxseg", biosample_id=biosample_id, save_file=TRUE, 
@@ -120,7 +120,7 @@ or use the [byconaut](https://byconaut.progenetix.org/) package for local visual
 
 ## Upload '.seg' file to IGV
 
-The following command creates a special '.seg' file with the name "variants.seg" in "~/Downloads/" folder. 
+The following codes creates a special '.seg' file with the name "variants.seg" in "~/Downloads/" folder. 
 
 ```{r eval=FALSE}
 pgxLoader(type="g_variants", output="seg", biosample_id=biosample_id, save_file=TRUE, 
@@ -131,7 +131,7 @@ You can upload this '.seg' file to [IGV tool](https://software.broadinstitute.or
 
 # Retrive CNV fraction of biosamples 
 
-Because segment variants are not harmonized across samples, Progenetix provides processed CNV features, known as CNV fractions. These fractions represent the proportion of genomic regions overlapping one or more CNVs of a given type, facilitating sample-wise comparisons. The following query is based on filters, but biosample id and individual id are also available for sample-specific CNV fraction queries. For more information about filters, biosample id and individual id, as well as the use of parameters `skip`, `limit`, and `codematches`, see the vignette Introduction_1_loadmetadata.
+Because segment variants are not harmonized across samples, Progenetix provides processed CNV features, known as CNV fractions. These fractions represent the proportion of genomic regions overlapping one or more CNVs of a given type, facilitating sample-wise comparisons. The following query is based on filters, but biosample id and individual id are also available for sample-specific CNV fraction queries. For more information about filters, biosample id and individual id, as well as the use of parameters `skip`, `limit`, and `codematches`, see the vignette *Introduction_1_load_metadata*.
 
 ## Across chromosomes or the whole genome 
 
@@ -187,7 +187,7 @@ To access the CNV fraction matrix, use `assay` accesssor from *SummarizedExperim
 assay(cnvfrac_matrix)[1:3,1:3]
 ```
 
-The matrix has 6212 rows (genomic regions) and 47 columns (analysis profiles derived from samples belonging to the input filter). The rows comprised 3106 intervals with “gain status” plus 3106 intervals with “loss status”. 
+The matrix contains 6212 rows, corresponding to genomic regions. These rows include 3,106 intervals with "gain status" and 3,106 intervals with "loss status". The columns represent analysis profiles derived from samples that belong to the input filter.
 
 The value is the fraction of the binned interval overlapping with one or more CNVs of the given type (DUP/DEL). For example, if the value in the second row, the first column is 0.2, it means that one or more duplication events overlapped with 20% of the genomic bin located in chromosome 1: 400000-1400000 in the first analysis profile.
 
@@ -197,7 +197,7 @@ To get associated biosample id and filters for analyses, use `colData` function 
 colData(cnvfrac_matrix)
 ```
 
-`analysis_id` is the identifier for individual analysis, `biosample_id` is the identifier for individual biosample. It is noted that the number of analysis profiles does not necessarily equal the number of samples. One biosample id may correspond to multiple analysis ids. `group_id` corresponds to the meaning of `filters`.
+It is noted that the number of analysis profiles does not necessarily equal the number of samples. One biosample id may correspond to multiple analysis ids. `group_id` corresponds to the meaning of `filters`.
 
 # Session Info
 
