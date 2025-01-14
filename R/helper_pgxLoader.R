@@ -87,21 +87,30 @@ extract_beacon_query <- function(url, type, dataset){
     mapping_rules <- mapping_rules[[type]]
     query <- GET(url)
     data <- content(query)
-    if (!data$responseSummary$exists) return(NULL)
-    if (!is.null(dataset)){
+    data_df <- c()
+    
+    # beaconFilteringTermsResults response
+    if (type == "filtering_terms"){
+      data_info <- lapply(data$response$filteringTerms, function(x){extract_all_results(x, mapping_rules, type)})
+      data_df <- rbind(data_df,do.call(rbind, data_info))
+    } else{
+    # beaconResultsets response 
+      if (!data$responseSummary$exists) return(NULL)
+      if (!is.null(dataset)){
         datasetids <- sapply(data$response$resultSets,function(x){x$id})
         id_idx <- which(datasetids %in% dataset)
         if (length(id_idx) == 0) stop("Data not found for the specified dataset ", dataset)
-    } else{
+      } else{
         id_idx <- seq(length(data$response$resultSets))
-    }
-    
-    data_df <- c()
-    for (i in id_idx){
+      }
+      
+      for (i in id_idx){
         data_list <- data$response$resultSets[[i]]$results
         data_info <- lapply(data_list, function(x){extract_all_results(x, mapping_rules, type)})
         data_df <- rbind(data_df,do.call(rbind, data_info))
+      }
     }
+
     return(data_df)
 }
 
@@ -149,9 +158,22 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
         if (exists('res_3')){res <- rbind(res,res_3)} 
     }
     
+    # query with no conditions
+    if (is.null(filters) & is.null(individual_id) & is.null(biosample_id)){
+        url <- paste0(domain,"/",entry_point, "/", type)
+        encoded_url <- URLencode(url)
+        attempt::try_catch(
+            res_4 <- extract_beacon_query(encoded_url, type, dataset),.e= function(e){
+            warning("\n Query fails for", type, "\n")
+            }
+        )
+    if (exists('res_4')){res <- rbind(res,res_4)} 
+    }
+    
     if (length(res) == 0) stop("No data retrieved")
     
     rownames(res) <- seq(dim(res)[1])
+    
     if (codematches){
         idx <- rownames(res)
         if (type == "biosamples"){
@@ -179,9 +201,9 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 ## beacon response
 
 read_variant_beacon <- function(biosample_id, domain, entry_point, dataset){
-    url <- paste0(domain,"/",entry_point, "/g_variants","?biosampleIds=",biosample_id)
+    url <- paste0(domain,"/",entry_point, "/g_variants")
+    if (!is.null(biosample_id)) url <- paste0(url,"?biosampleIds=",biosample_id)
     encoded_url <- URLencode(url)
-
     # make query not broken
     result <- NA
     attempt::try_catch(
@@ -238,53 +260,59 @@ read_variant_pgxseg <- function(biosample_id, domain){
 # function to query variants ----------------------------------------------
 
 pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, entry_point, dataset, num_cores){
-    num_cores <- min(num_cores, parallel::detectCores() - 1)
-    future::plan(future::multisession,workers = num_cores)
-    
-    if (!(is.null(output))){
-        check_pgx_domain(domain, "Variant data in non-beacon format")
-        results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_pgxseg(i, domain)})
+    # query with no condition
+    if (is.null(biosample_id)){
+        results <- read_variant_beacon(biosample_id, domain, entry_point, dataset)
+        if (all(is.na(results))) stop("No data retrieved")
     }else{
-        results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_beacon(i, domain, entry_point, dataset)})
-    }
- 
-    fail_idx <- which(is.na(results))
-    if (length(fail_idx) == length(results)) stop("Query fails for all samples")
-    if (length(fail_idx > 0)) warning("\n Query fails for biosample_id ", paste(biosample_id[fail_idx],collapse = ','), "\n")
-    
-    results[is.na(results)] <- NULL
-    
-    if (!(is.null(output))){
-      meta <- lapply(results,FUN= function(x){x[["meta"]]})
-      head <- meta[[1]][1:2]
-      meta <- lapply(meta, FUN = function(x){return(x[-c(1,2,3)])})
-      meta <- do.call(c,meta)
-      meta <- c(head,meta)
-      results <- lapply(results,FUN= function(x){x[["seg"]]})
-    }
+        # query by biosample id
+        num_cores <- min(num_cores, parallel::detectCores() - 1)
+        future::plan(future::multisession,workers = num_cores)
 
-    results <- do.call(rbind, results)
-    # if the query succeed but no data in database
-    if (is.null(results)) stop("No data retrieved")
-    # quality check
-    results <- results[results$biosample_id %in% biosample_id,]
-    rownames(results) <- seq(nrow(results))
-    
-    # format conversion
-    if (!(is.null(output))){
-      if (output == 'seg'){
-        results <- results[,c(1,2,3,4,6,5)]
-      }
+        if (!(is.null(output))){
+            check_pgx_domain(domain, "Variant data in non-beacon format")
+            results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_pgxseg(i, domain)})
+        }else{
+            results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_beacon(i, domain, entry_point, dataset)})
+        }
+
+        fail_idx <- which(is.na(results))
+        if (length(fail_idx) == length(results)) stop("No data retrieved")
+        if (length(fail_idx > 0)) warning("\n Query fails for biosample_id ", paste(biosample_id[fail_idx],collapse = ','), "\n")
+
+        results[is.na(results)] <- NULL
+
+        if (!(is.null(output))){
+            meta <- lapply(results,FUN= function(x){x[["meta"]]})
+            head <- meta[[1]][1:2]
+            meta <- lapply(meta, FUN = function(x){return(x[-c(1,2,3)])})
+            meta <- do.call(c,meta)
+            meta <- c(head,meta)
+            results <- lapply(results,FUN= function(x){x[["seg"]]})
+        }
+
+        results <- do.call(rbind, results)
+        # if the query succeed but no data in database
+        if (is.null(results)) stop("No data retrieved")
+        # quality check
+        results <- results[results$biosample_id %in% biosample_id,]
+        rownames(results) <- seq(nrow(results))
+
+        # format conversion
+        if (!(is.null(output))){
+            if (output == 'seg'){
+                results <- results[,c(1,2,3,4,6,5)]
+            }
+        }      
     }
-    
+  
     if (save_file){
       # pgxseg format
         if (!is.null(output)){
-          if (output=='pgxseg'){
-            # write result
-            write.table(meta, file=filename,row.names = FALSE,col.names = FALSE, quote = FALSE)
-            suppressWarnings(write.table(results, append=TRUE, sep='\t',file=filename,row.names = FALSE,col.names = TRUE, quote = FALSE))
-          } 
+            if (output=='pgxseg'){
+                write.table(meta, file=filename,row.names = FALSE,col.names = FALSE, quote = FALSE)
+                suppressWarnings(write.table(results, append=TRUE, sep='\t',file=filename,row.names = FALSE,col.names = TRUE, quote = FALSE))
+            } 
       # tsv format
         } else {
             write.table(results, file=filename, sep='\t',row.names = FALSE,col.names = TRUE, quote = FALSE)
@@ -568,5 +596,3 @@ pgxCount <- function(filters=NULL,domain="http://progenetix.org"){
   
     return (res)
 }
-
-

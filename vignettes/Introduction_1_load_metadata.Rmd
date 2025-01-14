@@ -1,12 +1,12 @@
 ---
-title: "Introduction_1_loadmetadata"
+title: "Introduction_1_load_metadata"
 author: "Hangjia Zhao"
 date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
   toc: true
 vignette: >
-  %\VignetteIndexEntry{Introduction_1_loadmetadata}
+  %\VignetteIndexEntry{Introduction_1_load_metadata}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 [Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing and utilizing metadata for samples or their corresponding individuals within the Progenetix database. 
 
-If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to "https://cancercelllines.org" in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
+If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to `"https://cancercelllines.org"` in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 # Load library 
 
@@ -34,10 +34,10 @@ This function loads various data from `Progenetix` database via the Beacon v2 AP
 
 The parameters of this function used in this tutorial:
 
-* `type`: A string specifying output data type. "biosamples", "individuals", "analyses", and "sample_count" are used in this tutorial.
-* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). When multiple filters are used, they are combined using AND logic when the parameter `type` is "biosamples", "individuals", or "analyses"; OR logic when the parameter `type` is "sample_count".
-* `biosample_id`: Identifiers used in the query database for identifying biosamples. 
+* `type`: A string specifying output data type. "individuals", "biosamples", "analyses", "filtering_terms", and "sample_count" are used in this tutorial.
+* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). When multiple filters are used, they are combined using AND logic when the parameter `type` is "individuals", "biosamples", or "analyses"; OR logic when the parameter `type` is "sample_count".
 * `individual_id`: Identifiers used in the query database for identifying individuals. 
+* `biosample_id`: Identifiers used in the query database for identifying biosamples. 
 * `codematches`: A logical value determining whether to exclude samples from child concepts 
 of specified filters in the ontology tree. If TRUE, only samples exactly matching the specified filters will be included. 
 Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
@@ -45,37 +45,25 @@ Default is FALSE.
 * `limit`: Integer to specify the number of returned profiles. Default is 0 (return all). 
 * `skip`: Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip). 
 * `dataset`: A string specifying the dataset to query from the Beacon response. Default is NULL, which includes results from all datasets.
-* `domain`: A string specifying the domain of the query data resource. Default is "http://progenetix.org".
-* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".
+* `domain`: A string specifying the domain of the query data resource. Default is `"http://progenetix.org"`.
+* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being `"http://progenetix.org/beacon"`.
 
 # Retrieve biosamples information
 
 ## Search by filters
 
-Filters are a significant enhancement to the [Beacon](https://www.ga4gh.org/product/beacon-api/) query API, providing a mechanism for specifying rules to select records based on their field values. To learn more about how to utilize filters in Progenetix, please refer to the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filters-filtering-terms).
+Filters are a significant enhancement to the [Beacon](https://www.ga4gh.org/product/beacon-api/) query API, providing a mechanism for specifying rules to select records based on their field values. To learn more about how to utilize filters in Progenetix, please refer to the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filtering-terms).
 
-The `pgxFilter` function helps access available filters used in Progenetix by default. It is also possible to query available filters used in other resources via the Beacon v2 API by setting the `domain` and `entry_point` parameters accordingly. 
-Here is an example usage:
+The following example demonstrates how to access all available filters in Progenetix:
 
 ```{r}
-# access all filters
-all_filters <- pgxFilter()
+all_filters <- pgxLoader(type="filtering_terms")
 head(all_filters)
 ```
 
-```{r}
-# get all prefix
-all_prefix <- pgxFilter(return_all_prefix = TRUE)
-all_prefix
-```
+You can also query filters available in other resources via the Beacon v2 API by setting the `domain` and `entry_point` parameters accordingly.
 
-```{r}
-# access specific filters based on prefix
-ncit_filters <- pgxFilter(prefix="NCIT")
-head(ncit_filters)
-```
-
-The following query retrieves metadata in Progenetix related to all samples of retinoblastoma, utilizing a specific filter based on an [NCIt code](https://ncit.nci.nih.gov) as a disease identifier.
+The following query retrieves information about all retinoblastoma samples in Progenetix, utilizing a specific filter based on an [NCIt code](https://ncit.nci.nih.gov) as a disease identifier.
 
 ```{r}
 biosamples <- pgxLoader(type="biosamples", filters = "NCIT:C7541")
@@ -136,13 +124,13 @@ pgxLoader(type="sample_count",filters = "NCIT:C7541")
 
 # Retrieve individuals information
 
-If you want to query metadata (e.g. survival data) of individuals where the samples 
+If you want to query details of individuals (e.g. clinical data) where the samples 
 of interest come from, set the parameter `type` to "individuals" and follow the same steps as above.
 
 ```{r}
 individuals <- pgxLoader(type="individuals",individual_id = "pgxind-kftx26ml",filters="NCIT:C7541")
 # data looks like this
-individuals[173:174,]
+tail(individuals,2)
 ```
 
 # Retrieve analyses information 
@@ -178,8 +166,8 @@ The parameters of this function:
 ```{r}
 # query metadata of individuals with lung adenocarcinoma
 luad_inds <- pgxLoader(type="individual",filters="NCIT:C3512")
-# use 65 years old as the splitting condition
-pgxMetaplot(data=luad_inds, group_id="age_iso", condition="P65Y", pval=TRUE)
+# use 70 years old as the splitting condition
+pgxMetaplot(data=luad_inds, group_id="age_iso", condition="P70Y", pval=TRUE)
 ```
 
 It's noted that not all individuals have available survival data. If you set `return_data` to TRUE, 

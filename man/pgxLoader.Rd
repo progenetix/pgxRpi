@@ -15,48 +15,59 @@ pgxLoader(
   dataset = NULL,
   codematches = FALSE,
   save_file = FALSE,
-  filename = "variant",
+  filename = "variants.tsv",
   num_cores = 1,
   domain = "http://progenetix.org",
   entry_point = "beacon"
 )
 }
 \arguments{
-\item{type}{A string specifying output data type. Available options are "biosamples", "individuals", "analyses",
-"g_variants", "cnv_frequency", "cnv_fraction", and "sample_count". The options "biosamples", "individuals", and "analyses"
-return corresponding information. "g_variants" returns variants data. The options "cnv_frequency", "cnv_fraction" and "sample_count"
-are based on data in Progenetix, returning precomputed CNV frequency, CNV fraction per sample, and the count of samples for the given filter, respectively.}
+\item{type}{A string specifying the type of output data. Available options include:
+\itemize{
+\item \code{"individuals"}: Returns information about individuals.
+\item \code{"biosamples"}: Returns information about biosamples.
+\item \code{"analyses"}: Returns information about analyses.
+\item \code{"g_variants"}: Returns variants data.
+\item \code{"filtering_terms"}: Returns all available filtering terms.
+\item \code{"cnv_frequency"}: Returns precomputed CNV frequency data from Progenetix.
+\item \code{"cnv_fraction"}: Returns CNV fraction per sample based on Progenetix data.
+\item \code{"sample_count"}: Returns the count of samples for the specified filter based on Progenetix data.
+}}
 
-\item{output}{A string specifying output data format. The available options depend on the \code{type} parameter. When \code{type} is "g_variants",
-available options are NULL (default), "pgxseg", or "seg"; When \code{type} is "cnv_frequency", available options are "pgxfreq" or "pgxmatrix";
-when \code{type} is "cnv_fraction", available options are NULL (default) or "pgxmatrix".}
+\item{output}{A string specifying the format of the output data. The available options depend on the value of the \code{type} parameter:
+\itemize{
+\item If \code{type} is \code{"g_variants"}, the available options are \code{NULL} (default), \code{"pgxseg"}, or \code{"seg"}.
+\item If \code{type} is \code{"cnv_frequency"}, the available options are \code{"pgxfreq"} or \code{"pgxmatrix"}.
+\item If \code{type} is \code{"cnv_fraction"}, the available options are \code{NULL} (default) or \code{"pgxmatrix"}.
+}}
 
 \item{biosample_id}{Identifiers used in the query database for identifying biosamples.}
 
 \item{individual_id}{Identifiers used in the query database for identifying individuals.}
 
-\item{filters}{Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID\if{html}{\out{<!-- -->}}:22824167").
-When multiple filters are used, they are combined using AND logic when the parameter \code{type} is "biosamples", "individuals", or "analyses"; OR logic when the parameter \code{type} is "cnv_frequency" or "sample_count".}
+\item{filters}{Identifiers used in public repositories, bio-ontology terms, or custom terms such as \code{c("NCIT:C7376", "PMID<!-- -->:22824167")}.
+When multiple filters are used, they are combined using AND logic when the parameter \code{type} is \code{"biosamples"}, \code{"individuals"}, or \code{"analyses"}; OR logic when the parameter \code{type} is \code{"cnv_frequency"} or \code{"sample_count"}.}
 
-\item{limit}{Integer to specify the number of returned profiles. Default is 0 (return all).}
+\item{limit}{Integer to specify the number of returned profiles. Default is \code{0} (return all).}
 
-\item{skip}{Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip).}
+\item{skip}{An integer specifying the number of profiles to skip. For example, if \code{skip = 2} and \code{limit = 500}, the first \code{2 * 500 = 1000} profiles are skipped,
+and the next 500 profiles are returned. Default is \code{NULL}, meaning no profiles are skipped.}
 
-\item{dataset}{A string specifying the dataset to query from the Beacon response. Default is NULL, which includes results from all datasets.}
+\item{dataset}{A string specifying the dataset to query from the Beacon response. Default is \code{NULL}, which includes results from all datasets.}
 
-\item{codematches}{A logical value determining whether to exclude samples from child concepts of specified filters in the ontology tree.
-If TRUE, only samples exactly matching the specified filters will be included.  Do not use this parameter when \code{filters} include ontology-irrelevant filters such as PMID and cohort identifiers.
-Default is FALSE.}
+\item{codematches}{A logical value indicating whether to exclude samples from child concepts of the specified filters in the ontology tree.
+If \code{TRUE}, only samples that exactly match the specified filters will be included. This parameter should not be used when \code{filters} include ontology-irrelevant filters, such as PMID or cohort identifiers.
+Default is \code{FALSE}. This option is applicable only when querying data resources are Progenetix or cancercelllines.org.}
 
-\item{save_file}{A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter \code{type} is "g_variants". Default is FALSE.}
+\item{save_file}{A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter \code{type} is \code{"g_variants"}. Default is \code{FALSE}.}
 
-\item{filename}{A string specifying the path and name of the file to be saved. Only used if the parameter \code{save_file} is TRUE. Default is "variants" in current work directory.}
+\item{filename}{A string specifying the path and name of the file to be saved. This parameter is used only when \code{save_file} is set to \code{TRUE}. The default value is \code{"variants.tsv"}, saved in the current working directory.}
 
-\item{num_cores}{Integer to specify the number of cores used for the variant query. Only used when the parameter \code{type} is "g_variants". Default is 1.}
+\item{num_cores}{Integer to specify the number of cores used for the variant query. Only used when the parameter \code{type} is \code{"g_variants"}. Default is \code{1}.}
 
-\item{domain}{A string specifying the domain of the query data resource. Default is "http://progenetix.org".}
+\item{domain}{A string specifying the domain of the query data resource. Default is \code{"http://progenetix.org"}.}
 
-\item{entry_point}{A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being "http://progenetix.org/beacon".}
+\item{entry_point}{A string specifying the entry point of the Beacon v2 API. Default is \code{"beacon"}, resulting in the endpoint being "http://progenetix.org/beacon".}
 }
 \value{
 Data from Progenetix database
