@@ -1,50 +1,8 @@
-## Version: 0.99.0 (2023-08-25)
+## Version: 1.2.0 (2024-10-29)
 
-- Submitted to Bioconductor
+bump 1.1.11 version to 1.2.0 prior to creation of RELEASE_3_20 branch
 
-## Version: 0.99.5 (2023-10-10)
-
-- Updated data structure for frequency data, transitioning from a simple list to Bioconductor containers.
-- Removed sections on survival analysis and frequency clustering analysis from the vignettes to align with the package's scope.
-
-## Version: 0.99.7 (2023-10-20)
-
-- Add `pgxFilter` function to expose all available filters.
-
-## Version: 1.1.2 (2024-05-03)
-
-- Add `segtoFreq` function to allow CNV frequency calculation from given segment data
-
-## Version: 1.1.3 (2024-06-14)
-
-- Add `pgxMetaplot` function to generate survival plots from metadata
-- Add `num_cores` parameter for parallel query of variants
-
-## Version: 1.1.5 (2024-07-30)
-
-- Added `config/datatable_mappings.yaml` to define mapping rules between Beacon JSON responses and data tables.
-- Modified metadata access to retrieve data directly from the Beacon API instead of using the `services/sampletable` API.
-- Enabled querying of `analyses` information.
-- Updated the `type` parameter in `pgxLoader` to align more closely with Beacon v2 model entities: biosamples, individuals, analyses, and g_variants.
-- Added `entry_point` parameter to `pgxLoader`.
-- Removed `filterLogic` parameter from `pgxLoader`.
-- Optimized parallel query for variants.
-- Cleaned up code and vignettes.
-
-## Version: 1.1.6 (2024-08-05)
-
-- Modified `extract_general_results` function to ensure it adapts correctly to arrays.
-- Moved callset and cnvstats data from the "g_variant" type to "cnv_fraction" to better align with data types.
-- Removed the `pgxCount` function and integrated its functionality into `pgxLoader` with the "sample_count" type, streamlining such query.
-
-## Version: 1.1.7 (2024-09-11)
-
-- Adapted to Progenetix API change: updated endpoint from "analyses/?output=cnvstats" to "services/cnvstats/".
-- The `dataset` parameter in `pgxLoader` is now used to select datasets directly from the Beacon response, rather than being used internally.
-- Modified `pgxSegprocess` to support usage with downloaded "pgxseg" files from Progenetix.
-
-## Version: 1.1.8 (2024-10-11)
+## Version: 1.2.1 (2025-01-14)
 
 - Added support for accessing and visualizing level-specific CNV frequency data.
 - Enabled calculation of level-specific CNV frequencies from segment data.
-
