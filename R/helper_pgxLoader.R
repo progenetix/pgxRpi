@@ -30,29 +30,52 @@ check_pgx_domain <- function(domain, data_type){
     }
 }
 
+
+camel_2_snake <- function(camelstring) {
+    # Use gsub to replace uppercase letters with _ followed by the lowercase version
+    snake_case <- gsub("([a-z])([A-Z])", "\\1_\\L\\2", camelstring, perl = TRUE)
+    # Convert the entire string to lowercase for consistency
+    return(tolower(snake_case))
+}
+
+
 # utility function for transforming beacon response -----------------------
 
 extract_general_results <- function(data, mapping){
     keys <- unlist(strsplit(mapping, "\\."))
     result <- data
     for (key in keys){
-        # if key doesn't exist
+      # if key doesn't exist
         if (!key %in% names(result)){
-          # in case a list
+          # in case JSON object
             if (length(result) == 1){
                 result <- result[[1]]
             } else{
-          # in case an array
+          # in case JSON array
                 result <- unlist(result)
             }
-        if (!key %in% names(result)) return(NA)
-        result <- result[which(names(result) == key)]
+            if (!key %in% names(result)) return(NA)
+            result <- unlist(lapply(which(names(result) == key), function(i){result[[i]]}))
         } else{
             result <- result[[key]]
         }
     }
+    
+    #  For columns containing dynamic (self-defined) information
+    if (is.list(result)){
+        result_lst <- list()
+        mapping_col <- mapping
+        for (i in seq_len(length(result))){
+            single_colname <- names(result)[i]
+            single_colname <- camel_2_snake(paste(mapping_col,single_colname,sep = "_"))
+            result_lst[[single_colname]] <- paste0(result[[i]],collapse = ",")
+        }
+        result <- result_lst
+    } else{
+      result <- paste0(result,collapse = ",")
+    }
+    
     if (length(result) == 0) return(NA)
-    result <- paste0(result,collapse = ",")
     return(result)
 }
 
@@ -76,7 +99,12 @@ extract_all_results <- function(data, mapping, type){
             result[[column]] <- extract_special_results(data,mapping[[column]][[1]],column_prefix)
         # general information for all entity types
         } else{
-            result[[column]] <- extract_general_results(data, mapping[[column]][[1]])
+            col_data <- extract_general_results(data, mapping[[column]][[1]])
+            if (is.list(col_data)){
+              result <- append(result,  col_data)
+            }else{
+              result[[column]] <- col_data
+            }
         }
     }  
   return(as.data.frame(result))
@@ -107,7 +135,7 @@ extract_beacon_query <- function(url, type, dataset){
       for (i in id_idx){
         data_list <- data$response$resultSets[[i]]$results
         data_info <- lapply(data_list, function(x){extract_all_results(x, mapping_rules, type)})
-        data_df <- rbind(data_df,do.call(rbind, data_info))
+        data_df <- dplyr::bind_rows(data_df,do.call(dplyr::bind_rows, data_info))
       }
     }
 
@@ -129,7 +157,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
                 warning("\n Query fails for the filters ", paste(filters,collapse=",") ,"\n")
             }
         )
-        if (exists('res_1')){res <- rbind(res,res_1)}               
+        if (exists('res_1')){res <- dplyr::bind_rows(res,res_1)}               
     }
 
      # query by biosample_id
@@ -142,7 +170,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
                 warning("\n Query fails for biosample_id ", paste(biosample_ids,collapse = ","), "\n")
             }
         )
-        if (exists('res_2')){res <- rbind(res,res_2)} 
+        if (exists('res_2')){res <- dplyr::bind_rows(res,res_2)} 
     }
 
     # query by individual_id
@@ -155,7 +183,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
                 warning("\n Query fails for individual_id ", paste(individual_ids,collapse = ","), "\n")
             }
         )
-        if (exists('res_3')){res <- rbind(res,res_3)} 
+        if (exists('res_3')){res <- dplyr::bind_rows(res,res_3)} 
     }
     
     # query with no conditions
@@ -167,7 +195,7 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
             warning("\n Query fails for", type, "\n")
             }
         )
-    if (exists('res_4')){res <- rbind(res,res_4)} 
+    if (exists('res_4')){res <- dplyr::bind_rows(res,res_4)} 
     }
     
     if (length(res) == 0) stop("No data retrieved")
@@ -291,7 +319,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, 
             results <- lapply(results,FUN= function(x){x[["seg"]]})
         }
 
-        results <- do.call(rbind, results)
+        results <- do.call(dplyr::bind_rows, results)
         # if the query succeed but no data in database
         if (is.null(results)) stop("No data retrieved")
         # quality check

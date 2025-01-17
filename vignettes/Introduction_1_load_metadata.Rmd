@@ -165,7 +165,7 @@ The parameters of this function:
 
 ```{r}
 # query metadata of individuals with lung adenocarcinoma
-luad_inds <- pgxLoader(type="individual",filters="NCIT:C3512")
+luad_inds <- pgxLoader(type="individuals",filters="NCIT:C3512")
 # use 70 years old as the splitting condition
 pgxMetaplot(data=luad_inds, group_id="age_iso", condition="P70Y", pval=TRUE)
 ```
