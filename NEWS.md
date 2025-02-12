@@ -58,4 +58,4 @@
 
 - Updated the "sample_count" extraction method from "services/collations" to beacon count response, expanding counts to include all available entities (analyses, biosamples, individuals) and changing the type from "sample_count" to "counts" in `pgxLoader`.
 - Enabled parallel queries across multiple resource domains (in `pgxmetaLoader`).
-
+- Optimized code for Beacon response mapping and updated YAML mapping rules.
