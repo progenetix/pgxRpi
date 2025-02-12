@@ -8,7 +8,7 @@ bump 1.1.11 version to 1.2.0 prior to creation of RELEASE_3_20 branch
 - Updated vignette filenames for improved clarity.
 - Made parameter checks more flexible for Beacon queries.
 
-## Version: 1.2.2 (2025-02-12)
+## Version: 1.2.3 (2025-02-12)
 
 - Updated the "sample_count" extraction method from "services/collations" to beacon count response, expanding counts to include all available entities (analyses, biosamples, individuals) and changing the type from "sample_count" to "counts" in `pgxLoader`.
 - Enabled parallel queries across multiple resource domains (in `pgxmetaLoader`).
