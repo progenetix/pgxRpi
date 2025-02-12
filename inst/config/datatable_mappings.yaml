@@ -1,12 +1,18 @@
+counts:
+  count:
+    beacon_model: numTotalResults
+
+#------------------------------------------------------------------------------#
+
 filtering_terms:
   id:
     beacon_model: id
   label:
     beacon_model: label
-  scopes:
-    beacon_model: scopes
   type:
     beacon_model: type
+  scopes:
+    beacon_model: scopes
 
 #------------------------------------------------------------------------------#
 
@@ -17,47 +23,26 @@ biosamples:
   individual_id:
     beacon_model: individualId
 
-  biosample_status_id:
-    beacon_model: biosampleStatus.id
-  
-  biosample_status_label:
-    beacon_model: biosampleStatus.label
+  biosample_status:
+    beacon_model: biosampleStatus
 
-  sample_origin_type_id:
-    beacon_model: sampleOriginType.id
-  
-  sample_origin_type_label:
-    beacon_model: sampleOriginType.label
+  sample_origin_type:
+    beacon_model: sampleOriginType
     
-  histological_diagnosis_id:      
-    beacon_model: histologicalDiagnosis.id
+  histological_diagnosis:      
+    beacon_model: histologicalDiagnosis
   
-  histological_diagnosis_label:
-    beacon_model: histologicalDiagnosis.label
-
-  sampled_tissue_id:
-    beacon_model: sampleOriginDetail.id
+  sampled_tissue:
+    beacon_model: sampleOriginDetail
   
-  sampled_tissue_label:
-    beacon_model: sampleOriginDetail.label
-  
-  pathological_stage_id:
-    beacon_model: pathologicalStage.id
-  
-  pathological_stage_label:
-    beacon_model: pathologicalStage.label
-             
-  tnm_id:
-    beacon_model: pathologicalTnmFindings.id
-  
-  tnm_label:
-    beacon_model: pathologicalTnmFindings.label
+  pathological_stage:
+    beacon_model: pathologicalStage
+               
+  tnm:
+    beacon_model: pathologicalTnmFindings
    
-  tumor_grade_id:
-    beacon_model: tumorGrade.id
-
-  tumor_grade_label:
-    beacon_model: tumorGrade.label
+  tumor_grade:
+    beacon_model: tumorGrade
 
   age_iso:
     beacon_model: collectionMoment
@@ -70,56 +55,23 @@ biosamples:
 
   # bycon specials 
   
-  icdo_morphology_id:
-    bycon_defined: icdoMorphology.id
- 
-  icdo_morphology_label:
-    bycon_defined: icdoMorphology.label
+  icdo_morphology:
+    bycon_defined: icdoMorphology
   
-  icdo_topography_id:
-    bycon_defined: icdoTopography.id
-
-  icdo_topography_label:
-    bycon_defined: icdoTopography.label
+  icdo_topography:
+    bycon_defined: icdoTopography
   
-  pubmed_id:
-    bycon_defined: externalReferences.id
+  external_references:
+    bycon_defined: externalReferences
 
-  cellosaurus_id:
-    bycon_defined: externalReferences.id
+  analysis_info:
+    bycon_defined: analysisInfo
 
-  cbioportal_id:
-    bycon_defined: externalReferences.id
-  
-  tcga_project_id:
-    bycon_defined: externalReferences.id
+  cohorts:
+    bycon_defined: cohorts
 
-  analysis_info_experiment_id:
-    bycon_defined: analysisInfo.experimentId
-
-  analysis_info_series_id:
-    bycon_defined: analysisInfo.seriesId
-
-  analysis_info_platform_id:
-    bycon_defined: analysisInfo.platformId
-
-  cohort_ids:
-    bycon_defined: cohorts.id 
-
-  geoprov_city:
-    bycon_defined: geoLocation.properties.city
-
-  geoprov_country:
-    bycon_defined: geoLocation.properties.country
- 
-  geoprov_iso_alpha3:
-    bycon_defined: geoLocation.properties.ISO3166alpha3
-
-  geoprov_long_latitude:
-    bycon_defined: geoLocation.properties.latitude
-
-  geoprov_long_longitude:
-    bycon_defined: geoLocation.properties.longitude
+  geo_location:
+    bycon_defined: geoLocation
 
   updated:
     bycon_defined: updated
@@ -131,11 +83,8 @@ individuals:
   individual_id:
     beacon_model: id
  
-  sex_id:
-    beacon_model: sex.id
-
-  sex_label:
-    beacon_model: sex.label
+  sex:
+    beacon_model: sex
 
   age_iso:
     beacon_model: diseases.onset.age
@@ -166,8 +115,6 @@ individuals:
   updated:
     bycon_defined: updated
 
-
-
 #------------------------------------------------------------------------------#
 
 analyses:
@@ -178,28 +125,16 @@ analyses:
     beacon_model: biosampleId
 
   individual_id:
-    beacon_model: individualId
-        
-  analysis_operation_id:
-    bycon_defined: analysisInfo.operation.id
-        
-  analysis_operation_label:
-    bycon_defined: analysisInfo.operation.label
-       
-  experiment_id:
-    bycon_defined: analysisInfo.experimentId
-     
-  series_id:
-    bycon_defined: analysisInfo.seriesId
+    beacon_model: individualId 
   
   calling_pipeline:
     beacon_model: pipelineName
+
+  analysis_info: 
+    bycon_defined: analysisInfo   
   
-  platform_id:
-    bycon_defined: platformModel.id
-      
-  platform_label:
-    bycon_defined: platformModel.label     
+  platform:
+    bycon_defined: platformModel     
        
   updated:
     bycon_defined: updated
@@ -222,14 +157,14 @@ g_variants:
   variant_internal_id:
     beacon_model: variantInternalId
 
-  sequence_id:
-    beacon_model: variation.location.sequenceReference
-
-  start:
-    beacon_model: variation.location.start
-
-  end:
-    beacon_model: variation.location.end
+  variation_location:
+    beacon_model: variation.location
 
   variant_copychange:
     beacon_model: variation.copyChange
+
+  identifiers:
+    beacon_model: identifiers
+
+  molecularAttributes:
+    beacon_model: molecularAttributes

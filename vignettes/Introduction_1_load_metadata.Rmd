@@ -34,19 +34,20 @@ This function loads various data from `Progenetix` database via the Beacon v2 AP
 
 The parameters of this function used in this tutorial:
 
-* `type`: A string specifying output data type. "individuals", "biosamples", "analyses", "filtering_terms", and "sample_count" are used in this tutorial.
-* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167"). When multiple filters are used, they are combined using AND logic when the parameter `type` is "individuals", "biosamples", or "analyses"; OR logic when the parameter `type` is "sample_count".
+* `type`: A string specifying output data type. `"individuals"`, `"biosamples"`, `"analyses"`, `"filtering_terms"`, and `"counts"` are used in this tutorial.
+* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as `c("NCIT:C7376", "PMID:22824167")`. When multiple filters are used, they are combined using AND logic when the parameter `type` is `"individuals"`, `"biosamples"`, or `"analyses"`; OR logic when the parameter `type` is `"counts"`.
 * `individual_id`: Identifiers used in the query database for identifying individuals. 
 * `biosample_id`: Identifiers used in the query database for identifying biosamples. 
 * `codematches`: A logical value determining whether to exclude samples from child concepts 
-of specified filters in the ontology tree. If TRUE, only samples exactly matching the specified filters will be included. 
+of specified filters in the ontology tree. If `TRUE`, only samples exactly matching the specified filters will be included. 
 Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
-Default is FALSE.
-* `limit`: Integer to specify the number of returned profiles. Default is 0 (return all). 
-* `skip`: Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip). 
-* `dataset`: A string specifying the dataset to query from the Beacon response. Default is NULL, which includes results from all datasets.
+Default is `FALSE`.
+* `limit`: Integer to specify the number of returned profiles. Default is `0` (return all). 
+* `skip`: Integer to specify the number of skipped profiles. E.g. if `skip = 2, limit=500`, the first 2*500=1000 profiles are skipped and the next 500 profiles are returned. Default is `0` (no skip). 
+* `dataset`: A string specifying the dataset to query from the Beacon response. Default is `NULL`, which includes results from all datasets.
 * `domain`: A string specifying the domain of the query data resource. Default is `"http://progenetix.org"`.
-* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being `"http://progenetix.org/beacon"`.
+* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the endpoint being `"http://progenetix.org/beacon"`.
+* `num_cores`: An integer specifying the number of cores to use for parallel processing during Beacon v2 phenotypic/meta-data queries from multiple domains. Default is `1`.
 
 # Retrieve biosamples information
 
@@ -61,8 +62,6 @@ all_filters <- pgxLoader(type="filtering_terms")
 head(all_filters)
 ```
 
-You can also query filters available in other resources via the Beacon v2 API by setting the `domain` and `entry_point` parameters accordingly.
-
 The following query retrieves information about all retinoblastoma samples in Progenetix, utilizing a specific filter based on an [NCIt code](https://ncit.nci.nih.gov) as a disease identifier.
 
 ```{r}
@@ -75,7 +74,7 @@ The data contains many columns representing different aspects of sample informat
 
 ## Search by biosample id and individual id 
 
-In Progenetix, biosample id and individual id serve as unique identifiers for biosamples and the corresponding individuals. You can obtain these IDs through metadata search with filters as described above, or through [website](https://progenetix.org/search) interface query.
+In the Beacon v2 specification, biosample id and individual id are unique identifiers for biosamples and their corresponding individuals, respectively. These identifiers can be obtained through metadata searches using filters as described above or by querying the [Progenetix search interface](https://progenetix.org/search), which provides access to the IDs used in the Progenetix database.
 
 ```{r}
 biosamples_2 <- pgxLoader(type="biosamples", biosample_id = "pgxbs-kftvki7h",individual_id = "pgxind-kftx6ltu")
@@ -114,12 +113,14 @@ biosamples_4 <- pgxLoader(type="biosamples", filters = "NCIT:C7541",codematches 
 unique(biosamples_4$histological_diagnosis_id)
 ```
 
-## Query the number of samples in Progenetix
+## Query from multiple data resources
 
-The number of samples in specific filters can be queried as follows:
+You can query data from multiple resources via the Beacon v2 API by setting the `domain` and `entry_point` parameters accordingly. To speed up the process, use the `num_cores` parameter to enable parallel processing across different domains.
 
 ```{r}
-pgxLoader(type="sample_count",filters = "NCIT:C7541")
+biosamples_5 <- pgxLoader(type="biosamples",filters = "NCIT:C7541",domain=c("progenetix.org","cancercelllines.org"), entry_point="beacon") # both resources use the same entry point
+
+biosamples_5[["cancercelllines.org"]][1:2,1:10]
 ```
 
 # Retrieve individuals information
@@ -143,6 +144,14 @@ analyses data do not include filter information, even though it can be searched 
 analyses <- pgxLoader(type="analyses",biosample_id = c("pgxbs-kftvik5i","pgxbs-kftvik96"))
 
 analyses
+```
+
+# Retrieve the number of results for a specific filter
+
+To retrieve the number of results for a specific filter in Progenetix, set the `type` parameter to `"counts"`. You can query different Beacon v2 resources by setting the `domain` and `entry_point` parameters accordingly.
+
+```{r}
+pgxLoader(type="counts",filters = "NCIT:C7541")
 ```
 
 # Visualization of survival data

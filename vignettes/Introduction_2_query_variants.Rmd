@@ -35,29 +35,26 @@ This function loads various data from `Progenetix` database via the Beacon v2 AP
 
 The parameters of this function used in this tutorial:
 
-* `type`: A string specifying output data type. "g_variants" and "cnv_fraction" are used in this tutorial. 
-* `output`: A string specifying output file format. The available options depend on the `type` parameter. When `type` is "g_variants", available options are NULL (default), "pgxseg", or "seg"; when `type` is "cnv_fraction", available options are NULL (default) or "pgxmatrix".
+* `type`: A string specifying output data type. `"g_variants"` and `"cnv_fraction"` are used in this tutorial. 
+* `output`: A string specifying output file format. The available options depend on the `type` parameter. When `type` is `"g_variants"`, available options are `NULL` (default), `"pgxseg"`, or `"seg"`; when `type` is `"cnv_fraction"`, available options are `NULL` (default) or `"pgxmatrix"`.
 * `biosample_id`: Identifiers used in the query database for identifying biosamples. 
 * `individual_id`: Identifiers used in the query database for identifying individuals. 
-* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as c("NCIT:C7376", "PMID<!-- -->:22824167").
-For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filtering-terms).
+* `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as `"NCIT:C7376"`. For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filtering-terms).
 * `codematches`: A logical value determining whether to exclude samples from child concepts 
-of specified filters in the ontology tree. If TRUE, only samples exactly matching the specified filters will be included. 
-Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
-Default is FALSE.
-* `limit`: Integer to specify the number of returned profiles. Default is 0 (return all). 
-* `skip`: Integer to specify the number of skipped profiles. E.g. if skip = 2, limit=500, the first 2*500 =1000 profiles are skipped and the next 500 profiles are returned. Default is NULL (no skip). 
-* `dataset`: A string specifying the dataset to query from the Beacon response. Default is NULL, which includes results from all datasets.
-* `save_file`: A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter `type` is "g_variants". Default is FALSE.
-* `filename`: A string specifying the path and name of the file to be saved. Only used if the parameter `save_file` is TRUE. Default is "variants.tsv", saved in the current working directory..
-* `num_cores`: Integer to specify the number of cores used for the variant query. Only used when the parameter `type` is "g_variants". Default is 1.
+of specified filters in the ontology tree. If `TRUE`, only samples exactly matching the specified filters will be included. Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
+Default is `FALSE`.
+* `limit`: Integer to specify the number of returned profiles. Default is `0` (return all). 
+* `skip`: Integer to specify the number of skipped profiles. E.g. if `skip = 2,limit=500`, the first 2*500=1000 profiles are skipped and the next 500 profiles are returned. Default is `0` (no skip). 
+* `dataset`: A string specifying the dataset to query from the Beacon response. Default is `NULL`, which includes results from all datasets.
+* `save_file`: A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter `type` is `"g_variants"`. Default is `FALSE`.
+* `filename`: A string specifying the path and name of the file to be saved. Only used if the parameter `save_file` is `TRUE`. Default is `"variants.tsv"`, saved in the current working directory..
+* `num_cores`: An integer specifying the number of cores to use for parallel processing during Beacon v2 variant data queries from multiple biosamples. Default is `1`.
 * `domain`: A string specifying the domain of the query data resource. Default is `"http://progenetix.org"`.
-* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is "beacon", resulting in the endpoint being `"http://progenetix.org/beacon"`.
-
+* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the endpoint being `"http://progenetix.org/beacon"`.
 
 # Retrieve variants 
 
-Due to time-out constraints, variant data in Progenetix can only be queried using biosample ids, rather than filters or individual ids. To speed up the process, you can use the `num_cores` parameter to enable parallel processing. For more details about filters and retrieving biosample ids, refer to the vignette *Introduction_1_load_metadata*.
+Due to time-out constraints, variant data in Progenetix or cancercelllines can only be queried using biosample ids, rather than filters or individual ids. To speed up the process, you can use the `num_cores` parameter to enable parallel processing. For more details about retrieving biosample ids, refer to the vignette *Introduction_1_load_metadata*.
 
 ## Get biosample id 
 
@@ -81,22 +78,29 @@ variant_1 <- pgxLoader(type="g_variants", biosample_id = biosample_id)
 head(variant_1)
 ```
 
-## The second output format (`output` = "pgxseg")
-
-This format accesses data from [Progenetix API services](https://docs.progenetix.org/services/). The '.pgxseg' file format contains segment mean values (in `log2` column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)). A few variants are point mutations represented by columns `reference_bases` and `alternate_bases`.
+You can also query variant data from other Beacon v2 resources by setting the `domain` and `entry_point` parameters accordingly.
 
 ```{r}
-variant_2 <- pgxLoader(type="g_variants", biosample_id = biosample_id,output = "pgxseg")
+variant_2 <- pgxLoader(type="g_variants", biosample_id = "cellzbs-018033FF", domain = "https://cancercelllines.org", entry_point="beacon")
 head(variant_2)
+```
+
+## The second output format (`output` = "pgxseg")
+
+This format accesses data from [Progenetix services API](https://docs.progenetix.org/services/), which utilizes specialized resources within Progenetix. The '.pgxseg' file format contains segment mean values (in `log2` column), which are equal to log2(copy number of measured sample/copy number of control sample (usually 2)). A few variants are point mutations represented by columns `reference_bases` and `alternate_bases`.
+
+```{r}
+variant_3 <- pgxLoader(type="g_variants", biosample_id = biosample_id,output = "pgxseg")
+head(variant_3)
 ```
 
 ## The third output format (`output` = "seg")
 
-This format accesses data from [Progenetix API services](https://docs.progenetix.org/services/). This format is similar to the general '.seg' file format and compatible with IGV tool for visualization. The only difference between this file format and the general '.seg' file format is the fifth column. It represents variant type in this format while in the general '.seg' file format, it represents number of probes or bins covered by the segment.
+This format accesses data from [Progenetix services API](https://docs.progenetix.org/services/), which utilizes specialized resources within Progenetix. This format is similar to the general '.seg' file format and compatible with IGV tool for visualization. The only difference between this file format and the general '.seg' file format is the fifth column. It represents variant type in this format while in the general '.seg' file format, it represents number of probes or bins covered by the segment.
 
 ```{r}
-variant_3 <- pgxLoader(type="g_variants", biosample_id = biosample_id,output = "seg")
-head(variant_3)
+variant_4 <- pgxLoader(type="g_variants", biosample_id = biosample_id,output = "seg")
+head(variant_4)
 ```
 
 # Export variants data for visualization
@@ -132,6 +136,8 @@ You can upload this '.seg' file to [IGV tool](https://software.broadinstitute.or
 # Retrive CNV fraction of biosamples 
 
 Because segment variants are not harmonized across samples, Progenetix provides processed CNV features, known as CNV fractions. These fractions represent the proportion of genomic regions overlapping one or more CNVs of a given type, facilitating sample-wise comparisons. The following query is based on filters, but biosample id and individual id are also available for sample-specific CNV fraction queries. For more information about filters, biosample id and individual id, as well as the use of parameters `skip`, `limit`, and `codematches`, see the vignette *Introduction_1_load_metadata*.
+
+CNV fraction data is retrieved through the [Progenetix services API](https://docs.progenetix.org/services/). When making a query, the domain of the data resource should be set to either `"http://progenetix.org"` (by default) or `"https://cancercelllines.org"`.
 
 ## Across chromosomes or the whole genome 
 
