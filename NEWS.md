@@ -59,3 +59,9 @@
 - Updated the "sample_count" extraction method from "services/collations" to beacon count response, expanding counts to include all available entities (analyses, biosamples, individuals) and changing the type from "sample_count" to "counts" in `pgxLoader`.
 - Enabled parallel queries across multiple resource domains (in `pgxmetaLoader`).
 - Optimized code for Beacon response mapping and updated YAML mapping rules.
+
+## Version: 1.3.3 (2025-03-03)
+
+- Updated `pgxfreqplot` to set `ylim` as `max(lowfreq, highfreq)`, ensuring proper scaling when high-level frequency exceeds low-level frequency.
+- Replaced id parameter with the standard query path for Beacon queries.
+- Modified variant data retrieval in `seg` format to fetch directly from the service API.
