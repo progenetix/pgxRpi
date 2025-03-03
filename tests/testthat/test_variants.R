@@ -1,7 +1,7 @@
 context("Retrieve variants")
 require(httr)
 require(dplyr)
-url <- "http://progenetix.org/beacon/g_variants?biosampleIds=pgxbs-kftvh94d"
+url <- "http://progenetix.org/beacon/biosamples/pgxbs-kftvh94d/g_variants"
 url_2 <- "https://progenetix.org/services/pgxsegvariants/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
 
 url_3 <- "https://progenetix.org/services/samplematrix/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"

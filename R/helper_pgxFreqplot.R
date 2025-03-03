@@ -60,7 +60,7 @@ genomeFreq <- function(data,pos.unit="bp",id,assembly,...){
   
     par(fig=fig,new=new,oma=c(0,0,1,0),mar=op$mar)
   
-    op <- updateFreqParameters(loss.freq1,gain.freq1,op)
+    op <- updateFreqParameters(max(loss.freq1,loss.freq2),max(gain.freq1,gain.freq2),op)
     plot(1,1,type="n",ylim=op$ylim,xlim=op$xlim,xaxs="i",main="",frame.plot=TRUE,yaxt="n",xaxt="n",ylab="",xlab="")
     chromPattern(pos.unit,op)
   
@@ -165,7 +165,7 @@ chromosomeFreq <- function(data,pos.unit="bp",chrom,layout,id,assembly,...){
   
     #Find default ylimits and at.y (tickmarks):
     use <- which(as.numeric(GenomicRanges::seqnames(range.info)) %in% chrom)
-    op <- updateFreqParameters(loss.freq1[use],gain.freq1[use],op)
+    op <- updateFreqParameters(max(loss.freq1[use],loss.freq2[use]),max(gain.freq1[use],gain.freq2[use]),op)
   
     #Make separate plots for each chromosome:
   

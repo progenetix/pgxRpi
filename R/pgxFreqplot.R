@@ -5,7 +5,7 @@
 #' @param data CNV frequency object returned by the `pgxLoader` or `segtoFreq` functions.
 #' @param chrom A vector specifying which chromosomes to plot. If NULL, the plot will cover the entire genome. 
 #' If specified, the frequencies are plotted with one panel for each chromosome. Default is NULL.
-#' @param layout Number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1).
+#' @param layout Number of rows and columns in plot. Only used in plot by chromosome. Default is c(1,1).
 #' @param filters Index or string value indicating which filter to plot. The length of filters
 #' is limited to one if the parameter `circos` is FALSE. Default is the first filter.
 #' @param circos A logical value indicating whether to return a circos plot. If TRUE, it returns a circos plot 

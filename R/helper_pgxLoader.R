@@ -168,7 +168,7 @@ metaLoader <- function(type, biosample_id, individual_id, filters, codematches, 
   # query by biosample_id
   if (!(is.null(biosample_id))){
     biosample_ids <- transform_id(biosample_id)
-    url <- paste0(domain,"/",entry_point, "/", type, "?biosampleIds=",biosample_ids)
+    url <- paste0(domain,"/",entry_point, "/biosamples/", biosample_ids, "/", type)
     encoded_url <- URLencode(url)
     attempt::try_catch(
       res_2 <- extract_beacon_query(encoded_url, type, dataset),.e= function(e){
@@ -181,7 +181,7 @@ metaLoader <- function(type, biosample_id, individual_id, filters, codematches, 
   # query by individual_id
   if (!(is.null(individual_id))){
     individual_ids <- transform_id(individual_id)
-    url <- paste0(domain,"/",entry_point, "/", type,"?individualIds=",individual_ids)
+    url <- paste0(domain,"/",entry_point, "/individuals/", individual_ids, "/", type)
     encoded_url <- URLencode(url)
     attempt::try_catch(
       res_3 <- extract_beacon_query(encoded_url, type, dataset),.e= function(e){
@@ -259,8 +259,12 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 ## beacon response
 
 read_variant_beacon <- function(biosample_id, domain, entry_point, dataset){
-    url <- paste0(domain,"/",entry_point, "/g_variants")
-    if (!is.null(biosample_id)) url <- paste0(url,"?biosampleIds=",biosample_id)
+    if (is.null(biosample_id)){
+        url <- paste0(domain,"/",entry_point, "/g_variants")
+    }else{
+        url <- paste0(domain,"/",entry_point,"/biosamples/",biosample_id,"/g_variants")
+    }
+    
     encoded_url <- URLencode(url)
     # make query not broken
     result <- NA
@@ -292,26 +296,32 @@ read_variant_beacon <- function(biosample_id, domain, entry_point, dataset){
 
 ## exported pgxseg data by bycon service 
 
-read_variant_pgxseg <- function(biosample_id, domain){
-    url <- paste0(domain,"/services/pgxsegvariants/?biosampleIds=",biosample_id)
+read_variant_pgxseg <- function(biosample_id, output, domain){
+    url <- switch(output,
+                  pgxseg= paste0(domain,"/services/pgxsegvariants/?biosampleIds=",biosample_id),
+                  seg= paste0(domain,"/services/variantsbedfile/?output=igv&biosampleIds=",biosample_id))
+    
     encoded_url <- URLencode(url)
     
     seg <- read.table(encoded_url, header = TRUE, sep="\t",quote="")
     if (dim(seg)[1] == 0) return(NA)
-    col <- c("start","end","log2")
+    col <- switch(output,
+                  pgxseg=c(3,4,5),
+                  seg=c(3,4,6))
     suppressWarnings(seg[,col] <- sapply(seg[,col], as.numeric))
-    seg <- seg[order(seg$start),]
+    seg <- seg[order(seg[,3]),]
     chr <- seg[,2]
     chr[which(chr == 'X')] <- 23
     chr[which(chr == 'Y')] <- 24
     chr <- as.integer(chr)
     seg <- seg[order(chr),]
-    seg <- seg[order(seg$biosample_id),]
-
-    meta <- readLines(encoded_url)
-    idx <- length(grep("#",meta))
-    meta <- meta[seq_len(idx)]
-
+    seg <- seg[order(seg[,1]),]
+    meta <- NULL
+    if (output=="pgxseg"){
+      meta <- readLines(encoded_url)
+      idx <- length(grep("#",meta))
+      if (length(idx) != 0)  meta <- meta[seq_len(idx)]
+    }
     return(list(seg=seg, meta=meta))
 }
 
@@ -331,7 +341,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, 
         future::plan(future::multisession,workers = num_cores)
 
         if (!(is.null(output))){
-            results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_pgxseg(i, domain)})
+            results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_pgxseg(i, output, domain)})
         }else{
             results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_beacon(i, domain, entry_point, dataset)})
         }
@@ -344,10 +354,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, 
 
         if (!(is.null(output))){
             meta <- lapply(results,FUN= function(x){x[["meta"]]})
-            head <- meta[[1]][1:2]
-            meta <- lapply(meta, FUN = function(x){return(x[-c(1,2,3)])})
             meta <- do.call(c,meta)
-            meta <- c(head,meta)
             results <- lapply(results,FUN= function(x){x[["seg"]]})
         }
 
@@ -355,28 +362,22 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, 
         # if the query succeed but no data in database
         if (is.null(results)) stop("No data retrieved")
         # quality check
-        results <- results[results$biosample_id %in% biosample_id,]
+        id_col <- which(colnames(results) == "biosample_id")
+        if (length(id_col) == 0) id_col <- 1
+        results <- results[results[,id_col] %in% biosample_id,]
         rownames(results) <- seq(nrow(results))
-
-        # format conversion
-        if (!(is.null(output))){
-            if (output == 'seg'){
-                results <- results[,c(1,2,3,4,6,5)]
-            }
-        }      
     }
-  
+    
     if (save_file){
-      # pgxseg format
+        append <- FALSE
+        # pgxseg format
         if (!is.null(output)){
             if (output=='pgxseg'){
                 write.table(meta, file=filename,row.names = FALSE,col.names = FALSE, quote = FALSE)
-                suppressWarnings(write.table(results, append=TRUE, sep='\t',file=filename,row.names = FALSE,col.names = TRUE, quote = FALSE))
-            } 
-      # tsv format
-        } else {
-            write.table(results, file=filename, sep='\t',row.names = FALSE,col.names = TRUE, quote = FALSE)
-        } 
+                append <- TRUE
+            }
+        }
+        suppressWarnings(write.table(results, append=append, sep='\t',file=filename,row.names = FALSE,col.names = TRUE, quote = FALSE))
         message("\n The file is saved \n")
         return()
     }
@@ -566,7 +567,7 @@ read_cnvstats_json <- function(url,codematches=FALSE,all_biosample_id=NULL){
     return( t(data.frame(val,row.names=names)))
     }) 
 
-    data_3 <- Reduce(rbind,data_3)
+    data_3 <- as.data.frame(Reduce(rbind,data_3))
     rownames(data_3) <- analyses_ids
 
     arm_frac <- data_3[,seq_len(96)]

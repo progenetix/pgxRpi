@@ -16,7 +16,7 @@ test_that("retrieve samples with group id",{
 })
 
 test_that("retrieve samples with biosample id",{
-    url <- "http://progenetix.org/beacon/biosamples?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g"
+    url <- "http://progenetix.org/beacon/biosamples/pgxbs-kftvh94d,pgxbs-kftvh94g"
     cat(paste("\n trying:",url,"\n"))
     result <-  content(GET(url))
     expect_equal(result$responseSummary$exists,TRUE)
@@ -24,7 +24,7 @@ test_that("retrieve samples with biosample id",{
 })
 
 test_that("retrieve individuals with biosample id",{
-    url <- "http://progenetix.org/beacon/individuals?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvjji1"
+    url <- "http://progenetix.org/beacon/biosamples/pgxbs-kftvh94d,pgxbs-kftvjji1/individuals"
     cat(paste("\n trying:",url,"\n"))
     result <-  content(GET(url))
     expect_equal(result$responseSummary$exists,TRUE)
@@ -32,7 +32,7 @@ test_that("retrieve individuals with biosample id",{
 })
 
 test_that("retrieve individuals with individual id",{
-    url <- "http://progenetix.org/beacon/individuals?individualIds=pgxind-kftx3565,pgxind-kftx5g4v"
+    url <- "http://progenetix.org/beacon/individuals/pgxind-kftx3565,pgxind-kftx5g4v"
     cat(paste("\n trying:",url,"\n"))
     result <-  content(GET(url))
     expect_equal(result$responseSummary$exists,TRUE)

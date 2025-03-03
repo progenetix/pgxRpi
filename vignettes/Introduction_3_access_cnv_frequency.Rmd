@@ -167,7 +167,7 @@ The parameters of this function:
 * `data`: CNV frequency object returned by `pgxLoader` or `segtoFreq` functions. 
 * `chrom`: A vector specifying which chromosomes to plot. If NULL, the plot will cover the entire genome. 
 #' If specified, the frequencies are plotted with one panel for each chromosome. Default is NULL.
-* `layout`: Number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1).
+* `layout`: Number of rows and columns in plot. Only used in plot by chromosome. Default is c(1,1).
 * `filters`: Index or string value indicating which filter to plot. The length of filters is limited to one if the parameter `circos` is FALSE. Default is the first filter.
 * `circos`: A logical value indicating whether to return a circos plot. If TRUE, it returns a circos plot that can display and compare multiple filters. Default is FALSE.
 * `assembly`: A string specifying the genome assembly version to apply to CNV frequency plotting. Allowed options are "hg19" and "hg38". Default is "hg38".

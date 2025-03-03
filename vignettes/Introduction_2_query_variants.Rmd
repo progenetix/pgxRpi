@@ -96,7 +96,7 @@ head(variant_3)
 
 ## The third output format (`output` = "seg")
 
-This format accesses data from [Progenetix services API](https://docs.progenetix.org/services/), which utilizes specialized resources within Progenetix. This format is similar to the general '.seg' file format and compatible with IGV tool for visualization. The only difference between this file format and the general '.seg' file format is the fifth column. It represents variant type in this format while in the general '.seg' file format, it represents number of probes or bins covered by the segment.
+This format accesses data from [Progenetix services API](https://docs.progenetix.org/services/), which utilizes specialized resources within Progenetix. This format is compatible with IGV tool for visualization.
 
 ```{r}
 variant_4 <- pgxLoader(type="g_variants", biosample_id = biosample_id,output = "seg")

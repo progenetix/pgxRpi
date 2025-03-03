@@ -19,7 +19,7 @@ pgxFreqplot(
 \item{chrom}{A vector specifying which chromosomes to plot. If NULL, the plot will cover the entire genome.
 If specified, the frequencies are plotted with one panel for each chromosome. Default is NULL.}
 
-\item{layout}{Number of columns and rows in plot. Only used in plot by chromosome. Default is c(1,1).}
+\item{layout}{Number of rows and columns in plot. Only used in plot by chromosome. Default is c(1,1).}
 
 \item{filters}{Index or string value indicating which filter to plot. The length of filters
 is limited to one if the parameter \code{circos} is FALSE. Default is the first filter.}
