@@ -41,8 +41,7 @@ The parameters of this function used in this tutorial:
 * `individual_id`: Identifiers used in the query database for identifying individuals. 
 * `filters`: Identifiers used in public repositories, bio-ontology terms, or custom terms such as `"NCIT:C7376"`. For more information about filters, see the [documentation](https://docs.progenetix.org/common/beacon-api/#filters-filtering-terms).
 * `codematches`: A logical value determining whether to exclude samples from child concepts 
-of specified filters in the ontology tree. If `TRUE`, only samples exactly matching the specified filters will be included. Do not use this parameter when `filters` include ontology-irrelevant filters such as PMID and cohort identifiers.
-Default is `FALSE`.
+of specified filters in the ontology tree. If `TRUE`, only samples exactly matching the specified filters will be included. Do not use this parameter when `filters` include ontology-irrelevant filters such as pubmed or cohort identifiers. Default is `FALSE`.
 * `limit`: Integer to specify the number of returned profiles. Default is `0` (return all). 
 * `skip`: Integer to specify the number of skipped profiles. E.g. if `skip = 2,limit=500`, the first 2*500=1000 profiles are skipped and the next 500 profiles are returned. Default is `0` (no skip). 
 * `dataset`: A string specifying the dataset to query from the Beacon response. Default is `NULL`, which includes results from all datasets.
@@ -60,7 +59,7 @@ Due to time-out constraints, variant data in Progenetix or cancercelllines can o
 
 ```{r}
 # get 2 samples for demonstration
-biosamples <- pgxLoader(type="biosamples", filters = "PMID:20229506", limit=2)
+biosamples <- pgxLoader(type="biosamples", filters = "NCIT:C3512", limit=2)
 
 biosample_id <- biosamples$biosample_id
 

@@ -42,8 +42,8 @@ pgxSegprocess <- function(file,group_id = 'group_id', show_KM_plot=FALSE,return_
     } else{
       meta <- data.frame(dplyr::bind_rows(meta))
       rownames(meta) <- seq(dim(meta)[1])
-      if (!group_id %in% colnames(meta)){
-        stop('group_id: ',group_id,' is not in metadata')
+      if (!group_id %in% colnames(meta) & any(return_frequency, show_KM_plot)){
+        stop('The specified `group_id` parameter "',group_id,'" is not present in the metadata.')
       }
     }
 

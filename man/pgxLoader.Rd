@@ -45,7 +45,7 @@ pgxLoader(
 
 \item{individual_id}{Identifiers used in the query database for identifying individuals.}
 
-\item{filters}{Identifiers used in public repositories, bio-ontology terms, or custom terms such as \code{c("NCIT:C7376", "PMID:22824167")}.
+\item{filters}{Identifiers used in public repositories, bio-ontology terms, or custom terms such as \code{c("NCIT:C7376", "pgx:icdom-85003")}.
 When multiple filters are used, they are combined using AND logic when the parameter \code{type} is \code{"individuals"}, \code{"biosamples"}, or \code{"analyses"}; OR logic when the parameter \code{type} is \code{"counts"} or \code{"cnv_frequency"}.}
 
 \item{limit}{Integer to specify the number of returned profiles. Default is \code{0} (return all).}
@@ -56,7 +56,7 @@ and the next 500 profiles are returned. Default is \code{0}, meaning no profiles
 \item{dataset}{Datasets to query from the Beacon response. Default is \code{NULL}, which includes results from all datasets.}
 
 \item{codematches}{A logical value indicating whether to exclude samples from child concepts of the specified filters in the ontology tree.
-If \code{TRUE}, only samples that exactly match the specified filters will be included. This parameter should not be used when \code{filters} include ontology-irrelevant filters, such as PMID or cohort identifiers.
+If \code{TRUE}, only samples that exactly match the specified filters will be included. This parameter should not be used when \code{filters} include ontology-irrelevant filters, such as pubmed or cohort identifiers.
 Default is \code{FALSE}. This option is applicable only when querying data resources are Progenetix or cancercelllines.org.}
 
 \item{save_file}{A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter \code{type} is \code{"g_variants"}. Default is \code{FALSE}.}

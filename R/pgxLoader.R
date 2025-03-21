@@ -17,14 +17,14 @@
 #'   - If `type` is `"cnv_fraction"`, the available options are `NULL` (default) or `"pgxmatrix"`.
 #' @param biosample_id Identifiers used in the query database for identifying biosamples. 
 #' @param individual_id  Identifiers used in the query database for identifying individuals. 
-#' @param filters Identifiers used in public repositories, bio-ontology terms, or custom terms such as `c("NCIT:C7376", "PMID:22824167")`. 
+#' @param filters Identifiers used in public repositories, bio-ontology terms, or custom terms such as `c("NCIT:C7376", "pgx:icdom-85003")`. 
 #' When multiple filters are used, they are combined using AND logic when the parameter `type` is `"individuals"`, `"biosamples"`, or `"analyses"`; OR logic when the parameter `type` is `"counts"` or `"cnv_frequency"`.
 #' @param limit Integer to specify the number of returned profiles. Default is `0` (return all). 
 #' @param skip An integer specifying the number of profiles to skip. For example, if `skip = 2` and `limit = 500`, the first `2 * 500 = 1000` profiles are skipped, 
 #' and the next 500 profiles are returned. Default is `0`, meaning no profiles are skipped.
 #' @param dataset Datasets to query from the Beacon response. Default is `NULL`, which includes results from all datasets.
 #' @param codematches A logical value indicating whether to exclude samples from child concepts of the specified filters in the ontology tree. 
-#' If `TRUE`, only samples that exactly match the specified filters will be included. This parameter should not be used when `filters` include ontology-irrelevant filters, such as PMID or cohort identifiers. 
+#' If `TRUE`, only samples that exactly match the specified filters will be included. This parameter should not be used when `filters` include ontology-irrelevant filters, such as pubmed or cohort identifiers. 
 #' Default is `FALSE`. This option is applicable only when querying data resources are Progenetix or cancercelllines.org.
 #' @param save_file A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter `type` is `"g_variants"`. Default is `FALSE`.
 #' @param filename A string specifying the path and name of the file to be saved. This parameter is used only when `save_file` is set to `TRUE`. The default value is `"variants.tsv"`, saved in the current working directory.
