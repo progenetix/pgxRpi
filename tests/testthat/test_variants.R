@@ -1,20 +1,20 @@
 context("Retrieve variants")
 require(httr)
 require(dplyr)
-url <- "http://progenetix.org/beacon/biosamples/pgxbs-kftvh94d/g_variants"
-url_2 <- "https://progenetix.org/services/pgxsegvariants/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
+url_1 <- "http://progenetix.org/beacon/biosamples/pgxbs-kftvh94d/g_variants"
+url_2 <- "https://progenetix.org/services/pgxsegvariants/?biosampleIds=pgxbs-kftvlaih,pgxbs-kftvjgcc"
+url_3 <- "https://progenetix.org/services/variantsbedfile/?output=igv&biosampleIds=pgxbs-kftvlaih,pgxbs-kftvjgcc"
+url_4 <- "https://progenetix.org/services/samplematrix/?biosampleIds=pgxbs-kftvlaih,pgxbs-kftvjgcc"
+url_5 <- "https://progenetix.org/services/samplematrix/?individualIds=pgxind-kftx3565,pgxind-kftx5g4v"
+url_6 <- "https://progenetix.org/services/samplematrix/?filters=pgx:icdom-88503"
+url_7 <- "https://progenetix.org/services/cnvstats/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
+url_8 <- "https://progenetix.org/services/cnvstats/?individualIds=pgxind-kftx3565,pgxind-kftx5g4v"
+url_9 <- "https://progenetix.org/services/cnvstats/?filters=pgx:icdom-88503"
+url_10 <- "https://cancercelllines.org/beacon/biosamples/cellzbs-kftvksak/g_variants"
 
-url_3 <- "https://progenetix.org/services/samplematrix/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
-url_4 <- "https://progenetix.org/services/samplematrix/?individualIds=pgxind-kftx3565,pgxind-kftx5g4v"
-url_5 <- "https://progenetix.org/services/samplematrix/?filters=pgx:icdom-88503"
-
-url_6 <- "https://progenetix.org/services/cnvstats/?biosampleIds=pgxbs-kftvh94d,pgxbs-kftvh94g,pgxbs-kftvh972"
-url_7 <- "https://progenetix.org/services/cnvstats/?individualIds=pgxind-kftx3565,pgxind-kftx5g4v"
-url_8 <- "https://progenetix.org/services/cnvstats/?filters=pgx:icdom-88503"
-url_9 <- "https://cancercelllines.org/beacon/biosamples/cellzbs-0821E6df/g_variants"
 test_that("retrieve variants with JSON",{
-        cat(paste("\n trying:",url,"\n"))
-        result <-  content(GET(url))
+        cat(paste("\n trying:",url_1,"\n"))
+        result <-  content(GET(url_1))
         expect_equal(result$responseSummary$exists,TRUE)
         table <- lapply(result$response$resultSets[[1]]$results,unlist)
         table <- as.data.frame(bind_rows(table))
@@ -31,16 +31,16 @@ test_that("retrieve variants with pgxseg",{
     expect_gt(ncol(result),5)
 })
 
-test_that("retrieve pgxmatrix variant with biosample id",{
+test_that("retrieve variants with igv-bed",{
     cat(paste("\n trying:",url_3,"\n"))
     r <- GET(url_3)
-    expect_equal(http_type(r), "text/plain")
+    expect_equal(http_type(r), "application/vnd.realvnc.bed")
     expect_no_error(result <- read.table(url_3, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
     expect_gt(nrow(result),0)
-    expect_gt(ncol(result),6212)
+    expect_gt(ncol(result),5)
 })
 
-test_that("retrieve pgxmatrix variant with individual id",{
+test_that("retrieve pgxmatrix variant with biosample id",{
     cat(paste("\n trying:",url_4,"\n"))
     r <- GET(url_4)
     expect_equal(http_type(r), "text/plain")
@@ -49,7 +49,7 @@ test_that("retrieve pgxmatrix variant with individual id",{
     expect_gt(ncol(result),6212)
 })
 
-test_that("retrieve pgxmatrix variant with filters",{
+test_that("retrieve pgxmatrix variant with individual id",{
     cat(paste("\n trying:",url_5,"\n"))
     r <- GET(url_5)
     expect_equal(http_type(r), "text/plain")
@@ -58,17 +58,17 @@ test_that("retrieve pgxmatrix variant with filters",{
     expect_gt(ncol(result),6212)
 })
 
-test_that("retrieve fraction variant with biosample id",{
-    cat(paste("\n trying:",url_6,"\n")) 
-    result <-  content(GET(url_6))
-    expect_equal(result$responseSummary$exists,TRUE)
-    table <- lapply(result$response$resultSets[[1]]$results,unlist)
-    table <- as.data.frame(bind_rows(table))
-    expect_gt(nrow(table),0)
+test_that("retrieve pgxmatrix variant with filters",{
+    cat(paste("\n trying:",url_6,"\n"))
+    r <- GET(url_6)
+    expect_equal(http_type(r), "text/plain")
+    expect_no_error(result <- read.table(url_6, stringsAsFactors = FALSE, sep = "\t",fill=TRUE,header=T))
+    expect_gt(nrow(result),0)
+    expect_gt(ncol(result),6212)
 })
 
-test_that("retrieve fraction variant with individual id",{
-    cat(paste("\n trying:",url_7,"\n"))
+test_that("retrieve fraction variant with biosample id",{
+    cat(paste("\n trying:",url_7,"\n")) 
     result <-  content(GET(url_7))
     expect_equal(result$responseSummary$exists,TRUE)
     table <- lapply(result$response$resultSets[[1]]$results,unlist)
@@ -76,7 +76,7 @@ test_that("retrieve fraction variant with individual id",{
     expect_gt(nrow(table),0)
 })
 
-test_that("retrieve fraction variant with filters",{
+test_that("retrieve fraction variant with individual id",{
     cat(paste("\n trying:",url_8,"\n"))
     result <-  content(GET(url_8))
     expect_equal(result$responseSummary$exists,TRUE)
@@ -85,12 +85,21 @@ test_that("retrieve fraction variant with filters",{
     expect_gt(nrow(table),0)
 })
 
-# test_that("retrieve variants with JSON in cellz",{
-#         cat(paste("\n trying:",url_9,"\n"))
-#         result <-  content(GET(url_9))
-#         expect_equal(result$responseSummary$exists,TRUE)
-#         table <- lapply(result$response$resultSets[[1]]$results,unlist)
-#         table <- as.data.frame(bind_rows(table))
-#         expect_gt(nrow(table),0)
-# })
+test_that("retrieve fraction variant with filters",{
+    cat(paste("\n trying:",url_9,"\n"))
+    result <-  content(GET(url_9))
+    expect_equal(result$responseSummary$exists,TRUE)
+    table <- lapply(result$response$resultSets[[1]]$results,unlist)
+    table <- as.data.frame(bind_rows(table))
+    expect_gt(nrow(table),0)
+})
+
+test_that("retrieve variants with JSON in cellz",{
+        cat(paste("\n trying:",url_10,"\n"))
+        result <-  content(GET(url_10))
+        expect_equal(result$responseSummary$exists,TRUE)
+        table <- lapply(result$response$resultSets[[1]]$results,unlist)
+        table <- as.data.frame(bind_rows(table))
+        expect_gt(nrow(table),0)
+})
 
