@@ -108,7 +108,7 @@ pgxLoader <- function(
            analyses   = pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
            filtering_terms = pgxmetaLoader(type=type,biosample_id=NULL,individual_id=NULL,filters=NULL,codematches=FALSE,skip=NULL,limit=NULL,domain=domain,entry_point=entry_point,dataset=NULL,num_cores=num_cores),
            counts = pgxCount(filters,domain,entry_point,num_cores=num_cores),
-           g_variants = pgxVariantLoader(biosample_id=biosample_id,output=output,save_file=save_file,filename=filename,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
+           g_variants = pgxVariantLoader(biosample_id=biosample_id,output=output,limit=limit,save_file=save_file,filename=filename,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
            cnv_frequency = pgxFreqLoader(output=output,filters=filters,domain=domain),
            samplematrix = pgxcallsetLoader(biosample_id=biosample_id,individual_id=individual_id,filters=filters,limit=limit,skip=skip,codematches=codematches,domain=domain),
            cnv_fraction = pgxFracLoader(biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,domain=domain))     
