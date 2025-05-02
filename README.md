@@ -6,6 +6,8 @@ You can install this package using either of the following methods:
 
 ### From Bioconductor
 
+Note: this requires Bioconductor release version ≥ 3.19. We strongly recommend using the latest Bioconductor release to ensure compatibility and access to the most up-to-date features.
+
 ```r
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")

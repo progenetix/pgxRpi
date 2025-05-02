@@ -258,11 +258,11 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
 ## beacon response
 
-read_variant_beacon <- function(biosample_id, domain, entry_point, dataset){
+read_variant_beacon <- function(biosample_id, limit, domain, entry_point, dataset){
     if (is.null(biosample_id)){
         url <- paste0(domain,"/",entry_point, "/g_variants")
     }else{
-        url <- paste0(domain,"/",entry_point,"/biosamples/",biosample_id,"/g_variants")
+        url <- paste0(domain,"/",entry_point,"/biosamples/",biosample_id,"/g_variants","?limit=",limit)
     }
     
     encoded_url <- URLencode(url)
@@ -296,10 +296,10 @@ read_variant_beacon <- function(biosample_id, domain, entry_point, dataset){
 
 ## exported pgxseg data by bycon service 
 
-read_variant_pgxseg <- function(biosample_id, output, domain){
+read_variant_pgxseg <- function(biosample_id, output, limit, domain){
     url <- switch(output,
-                  pgxseg= paste0(domain,"/services/pgxsegvariants/?biosampleIds=",biosample_id),
-                  seg= paste0(domain,"/services/variantsbedfile/?output=igv&biosampleIds=",biosample_id))
+                  pgxseg= paste0(domain,"/services/pgxsegvariants/?biosampleIds=",biosample_id,"&limit=",limit),
+                  seg= paste0(domain,"/services/variantsbedfile/?output=igv&biosampleIds=",biosample_id, "&limit=",limit))
     
     encoded_url <- URLencode(url)
     
@@ -327,7 +327,7 @@ read_variant_pgxseg <- function(biosample_id, output, domain){
 
 # function to query variants ----------------------------------------------
 
-pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, entry_point, dataset, num_cores){
+pgxVariantLoader <- function(biosample_id, output, limit, save_file, filename, domain, entry_point, dataset, num_cores){
     if (length(domain) > 1 | length(entry_point) > 1) stop("This query only supports one domain")
     if (!(is.null(output))) check_pgx_domain(domain, "Variant data in non-beacon output format")
 
@@ -341,9 +341,9 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, 
         future::plan(future::multisession,workers = num_cores)
 
         if (!(is.null(output))){
-            results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_pgxseg(i, output, domain)})
+            results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_pgxseg(i, output, limit, domain)})
         }else{
-            results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_beacon(i, domain, entry_point, dataset)})
+            results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_beacon(i, limit, domain, entry_point, dataset)})
         }
 
         fail_idx <- which(is.na(results))
@@ -360,7 +360,7 @@ pgxVariantLoader <- function(biosample_id, output, save_file, filename, domain, 
 
         results <- do.call(dplyr::bind_rows, results)
         # if the query succeed but no data in database
-        if (is.null(results)) stop("No data retrieved")
+        if (length(results) == 0) stop("No data retrieved")
         # quality check
         id_col <- which(colnames(results) == "biosample_id")
         if (length(id_col) == 0) id_col <- 1
