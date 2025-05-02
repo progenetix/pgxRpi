@@ -80,7 +80,7 @@ head(variant_1)
 You can also query variant data from other Beacon v2 resources by setting the `domain` and `entry_point` parameters accordingly.
 
 ```{r}
-variant_2 <- pgxLoader(type="g_variants", biosample_id = "cellzbs-018033FF", domain = "https://cancercelllines.org", entry_point="beacon")
+variant_2 <- pgxLoader(type="g_variants", biosample_id = "cellzbs-kftvksak", domain = "https://cancercelllines.org", entry_point="beacon")
 head(variant_2)
 ```
 
