@@ -1,8 +1,16 @@
 # pgxRpi
 
-Welcome to our R wrapper package for Progenetix REST API that leverages the capabilities of [Beacon v2](https://docs.genomebeacons.org/) specification. Please note that a stable internet connection is required for the query functionality. This package is aimed to simplify the process of accessing oncogenomic data from [Progenetix](https://progenetix.org/) database via the Beacon v2 API with some extensions (BeaconPlus). 
+Welcome to our R wrapper package for Progenetix REST API that leverages the capabilities of [Beacon v2](https://docs.genomebeacons.org/) specification. Please note that a stable internet connection is required for the query functionality. This package is aimed to simplify the process of accessing oncogenomic data from [Progenetix](https://progenetix.org/) database via the Beacon v2 API with some extensions (BeaconPlus). Although *pgxRpi* is designed primarily for Progenetix, it is also compatible with other resources that implement the Beacon v2 API.
 
 You can install this package using either of the following methods:
+
+### From Github for the latest development version 
+
+```r
+if (!require("remotes", quietly = TRUE))
+    install.packages("remotes")
+remotes::install_github("progenetix/pgxRpi")
+```
 
 ### From Bioconductor
 
@@ -12,14 +20,6 @@ Note: this requires Bioconductor release version ≥ 3.19. We strongly recommend
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install("pgxRpi")
-```
-
-### From Github for the latest development version 
-
-```r
-if (!require("remotes", quietly = TRUE))
-    install.packages("remotes")
-remotes::install_github("progenetix/pgxRpi")
 ```
 
 For details on accessing biosample or individual information, get started from the vignette [Introduction_1_load_metadata](https://bioconductor.org/packages/devel/bioc/vignettes/pgxRpi/inst/doc/Introduction_1_load_metadata.html).

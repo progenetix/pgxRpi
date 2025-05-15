@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 [Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing genomic variant data within the Progenetix database. 
 
-If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to `"https://cancercelllines.org"` in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
+If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to `"cancercelllines.org"` in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 # Load library 
 
@@ -48,7 +48,7 @@ of specified filters in the ontology tree. If `TRUE`, only samples exactly match
 * `save_file`: A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter `type` is `"g_variants"`. Default is `FALSE`.
 * `filename`: A string specifying the path and name of the file to be saved. Only used if the parameter `save_file` is `TRUE`. Default is `"variants.tsv"`, saved in the current working directory..
 * `num_cores`: An integer specifying the number of cores to use for parallel processing during Beacon v2 variant data queries from multiple biosamples. Default is `1`.
-* `domain`: A string specifying the domain of the query data resource. Default is `"http://progenetix.org"`.
+* `domain`: A string specifying the domain of the query data resource. Default is `"progenetix.org"`.
 * `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the endpoint being `"http://progenetix.org/beacon"`.
 
 # Retrieve variants 
@@ -70,7 +70,7 @@ There are three output formats.
 
 ## The first output format (by default)
 
-The default output format extracts variant data from the Beacon v2 response, containing variant id and associated analysis id, biosample id and individual id. The CNV data is represented as [copy number change class](https://vrs.ga4gh.org/en/stable/terms_and_model.html#copynumberchange) following the GA4GH Variation Representation Specification (VRS).
+The default output format extracts variant data from the Beacon v2 response, containing variant id and associated analysis id, biosample id and individual id. The CNV data is represented as [copy number change class](https://vrs.ga4gh.org/en/stable/concepts/SystemicVariation/CopyNumberChange.html#copy-change-term-definitions) following the GA4GH Variation Representation Specification (VRS).
 
 ```{r}
 variant_1 <- pgxLoader(type="g_variants", biosample_id = biosample_id)
@@ -80,7 +80,7 @@ head(variant_1)
 You can also query variant data from other Beacon v2 resources by setting the `domain` and `entry_point` parameters accordingly.
 
 ```{r}
-variant_2 <- pgxLoader(type="g_variants", biosample_id = "cellzbs-kftvksak", domain = "https://cancercelllines.org", entry_point="beacon")
+variant_2 <- pgxLoader(type="g_variants", biosample_id = "cellzbs-kftvksak", domain = "cancercelllines.org", entry_point="beacon")
 head(variant_2)
 ```
 
@@ -136,7 +136,7 @@ You can upload this '.seg' file to [IGV tool](https://software.broadinstitute.or
 
 Because segment variants are not harmonized across samples, Progenetix provides processed CNV features, known as CNV fractions. These fractions represent the proportion of genomic regions overlapping one or more CNVs of a given type, facilitating sample-wise comparisons. The following query is based on filters, but biosample id and individual id are also available for sample-specific CNV fraction queries. For more information about filters, biosample id and individual id, as well as the use of parameters `skip`, `limit`, and `codematches`, see the vignette *Introduction_1_load_metadata*.
 
-CNV fraction data is retrieved through the [Progenetix services API](https://docs.progenetix.org/services/). When making a query, the domain of the data resource should be set to either `"http://progenetix.org"` (by default) or `"https://cancercelllines.org"`.
+CNV fraction data is retrieved through the [Progenetix services API](https://docs.progenetix.org/services/). When making a query, the domain of the data resource should be set to either `"progenetix.org"` (by default) or `"cancercelllines.org"`.
 
 ## Across chromosomes or the whole genome 
 
