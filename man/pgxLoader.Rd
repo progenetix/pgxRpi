@@ -14,9 +14,10 @@ pgxLoader(
   skip = 0,
   dataset = NULL,
   codematches = FALSE,
+  filter_pattern = NULL,
   save_file = FALSE,
   filename = "variants.tsv",
-  domain = "http://progenetix.org",
+  domain = "progenetix.org",
   entry_point = "beacon",
   num_cores = 1
 )
@@ -28,7 +29,7 @@ pgxLoader(
 \item \code{"biosamples"}: Returns information about biosamples.
 \item \code{"analyses"}: Returns information about analyses.
 \item \code{"g_variants"}: Returns variants data.
-\item \code{"filtering_terms"}: Returns all available filtering terms.
+\item \code{"filtering_terms"}: Returns available filtering terms.
 \item \code{"counts"}: Returns the count of results based on the specified filters.
 \item \code{"cnv_frequency"}: Returns precomputed CNV frequency data from Progenetix.
 \item \code{"cnv_fraction"}: Returns CNV fraction per sample based on Progenetix data.
@@ -59,21 +60,23 @@ and the next 500 profiles are returned. Default is \code{0}, meaning no profiles
 If \code{TRUE}, only samples that exactly match the specified filters will be included. This parameter should not be used when \code{filters} include ontology-irrelevant filters, such as pubmed or cohort identifiers.
 Default is \code{FALSE}. This option is applicable only when querying data resources are Progenetix or cancercelllines.org.}
 
+\item{filter_pattern}{Optional string pattern to match against the \code{label} field of available filters. Only used when the parameter \code{type} is \code{"filtering_terms"}. Default is \code{NULL}, which includes all filters.}
+
 \item{save_file}{A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter \code{type} is \code{"g_variants"}. Default is \code{FALSE}.}
 
 \item{filename}{A string specifying the path and name of the file to be saved. This parameter is used only when \code{save_file} is set to \code{TRUE}. The default value is \code{"variants.tsv"}, saved in the current working directory.}
 
-\item{domain}{The domain of the query data resource. Default is \code{"http://progenetix.org"}.}
+\item{domain}{The domain of the query data resource. Default is \code{"progenetix.org"}.}
 
 \item{entry_point}{The entry point of the Beacon v2 API. Default is \code{"beacon"}, resulting in the default endpoint being "http://progenetix.org/beacon"}
 
 \item{num_cores}{An integer specifying the number of cores to use for parallel processing during Beacon v2 phenotypic/meta-data queries from multiple domains or variant data queries from multiple biosamples. Default is \code{1}.}
 }
 \value{
-Data from Progenetix database
+Data from Progenetix database and other Beacon v2-compatible resources
 }
 \description{
-This function loads various data from \code{Progenetix} database via the Beacon v2 API with some extensions (BeaconPlus).
+This function loads various data from \code{Progenetix} database via the Beacon v2 API with some extensions (BeaconPlus). It is also compatible with other Beacon v2-compliant resources.
 }
 \examples{
 ## query metadata

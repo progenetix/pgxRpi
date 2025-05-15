@@ -1,13 +1,13 @@
 #' Load data from Progenetix database via the Beacon v2 API with some extensions
 #'
-#' This function loads various data from `Progenetix` database via the Beacon v2 API with some extensions (BeaconPlus).   
+#' This function loads various data from `Progenetix` database via the Beacon v2 API with some extensions (BeaconPlus). It is also compatible with other Beacon v2-compliant resources.  
 #'
 #' @param type A string specifying the type of output data. Available options include:
 #'   - `"individuals"`: Returns information about individuals.
 #'   - `"biosamples"`: Returns information about biosamples.
 #'   - `"analyses"`: Returns information about analyses.
 #'   - `"g_variants"`: Returns variants data.
-#'   - `"filtering_terms"`: Returns all available filtering terms.
+#'   - `"filtering_terms"`: Returns available filtering terms.
 #'   - `"counts"`: Returns the count of results based on the specified filters.
 #'   - `"cnv_frequency"`: Returns precomputed CNV frequency data from Progenetix.
 #'   - `"cnv_fraction"`: Returns CNV fraction per sample based on Progenetix data.
@@ -26,14 +26,15 @@
 #' @param codematches A logical value indicating whether to exclude samples from child concepts of the specified filters in the ontology tree. 
 #' If `TRUE`, only samples that exactly match the specified filters will be included. This parameter should not be used when `filters` include ontology-irrelevant filters, such as pubmed or cohort identifiers. 
 #' Default is `FALSE`. This option is applicable only when querying data resources are Progenetix or cancercelllines.org.
+#' @param filter_pattern Optional string pattern to match against the `label` field of available filters. Only used when the parameter `type` is `"filtering_terms"`. Default is `NULL`, which includes all filters.
 #' @param save_file A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter `type` is `"g_variants"`. Default is `FALSE`.
 #' @param filename A string specifying the path and name of the file to be saved. This parameter is used only when `save_file` is set to `TRUE`. The default value is `"variants.tsv"`, saved in the current working directory.
-#' @param domain The domain of the query data resource. Default is `"http://progenetix.org"`.
+#' @param domain The domain of the query data resource. Default is `"progenetix.org"`.
 #' @param entry_point The entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the default endpoint being "http://progenetix.org/beacon"
 #' @param num_cores An integer specifying the number of cores to use for parallel processing during Beacon v2 phenotypic/meta-data queries from multiple domains or variant data queries from multiple biosamples. Default is `1`.
 #' @importFrom utils URLencode modifyList read.table write.table
-#' @importFrom httr GET content
-#' @return Data from Progenetix database
+#' @importFrom httr GET content status_code
+#' @return Data from Progenetix database and other Beacon v2-compatible resources 
 #' @export
 #' @examples
 #' ## query metadata
@@ -52,15 +53,16 @@ pgxLoader <- function(
     limit=0,
     skip=0,
     dataset=NULL,
-    codematches = FALSE, 
+    codematches = FALSE,
+    filter_pattern = NULL,
     save_file=FALSE,
     filename="variants.tsv",
-    domain="http://progenetix.org",
+    domain="progenetix.org",
     entry_point="beacon",
     num_cores=1){
     
     type <- match.arg(type, c("biosamples", "individuals","g_variants","analyses","filtering_terms","cnv_frequency","cnv_fraction","counts"))
-       
+    
     # specify output 
     if (is.null(output) & type %in% c("g_variants","cnv_fraction")){
         output <-  switch(type,
@@ -76,13 +78,21 @@ pgxLoader <- function(
       
     # parameter usage warnings     
     if (type %in% c("cnv_frequency","counts")){
-        check_missing_parameters(filters,"'filters'")
+        if (any(domain %in% c("http://progenetix.org","https://cancercelllines.org"))){
+            check_missing_parameters(filters,"'filters'")
+        }
         check_unused_parameters(biosample_id, "'biosample_id'", "'filters'")
         check_unused_parameters(individual_id, "'individual_id'", "'filters'")      
     }
 
+    if (type=="filtering_terms"){
+        check_unused_parameters(biosample_id, "'biosample_id'", "'filter_pattern'")
+        check_unused_parameters(individual_id, "'individual_id'", "'filter_pattern'")  
+        check_unused_parameters(filters, "'filters'", "'filter_pattern'")
+    }
+
     if (type=="g_variants"){
-        if (any(domain %in% c("http://progenetix.org","progenetix.org","https://cancercelllines.org","cancercelllines.org"))){
+        if (any(domain %in% c("http://progenetix.org","https://cancercelllines.org"))){
             check_missing_parameters(biosample_id,"'biosample_id'")
         } 
         check_unused_parameters(individual_id, "'individual_id'", "'biosample_id'")
@@ -103,10 +113,10 @@ pgxLoader <- function(
 
     options(timeout=500)
     switch(type,
-           biosamples = pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
-           individuals= pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
-           analyses   = pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
-           filtering_terms = pgxmetaLoader(type=type,biosample_id=NULL,individual_id=NULL,filters=NULL,codematches=FALSE,skip=NULL,limit=NULL,domain=domain,entry_point=entry_point,dataset=NULL,num_cores=num_cores),
+           biosamples = pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,filter_pattern=filter_pattern,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
+           individuals= pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,filter_pattern=filter_pattern,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
+           analyses   = pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,filter_pattern=filter_pattern,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
+           filtering_terms = pgxmetaLoader(type=type,biosample_id=NULL,individual_id=NULL,filters=NULL,codematches=FALSE,filter_pattern=filter_pattern,skip=NULL,limit=NULL,domain=domain,entry_point=entry_point,dataset=NULL,num_cores=num_cores),
            counts = pgxCount(filters,domain,entry_point,num_cores=num_cores),
            g_variants = pgxVariantLoader(biosample_id=biosample_id,output=output,limit=limit,save_file=save_file,filename=filename,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
            cnv_frequency = pgxFreqLoader(output=output,filters=filters,domain=domain),

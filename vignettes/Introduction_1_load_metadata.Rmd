@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 [Progenetix](https://progenetix.org/) is an open data resource that provides curated individual cancer copy number variation (CNV) profiles along with associated metadata sourced from published oncogenomic studies and various data repositories. This vignette provides a comprehensive guide on accessing and utilizing metadata for samples or their corresponding individuals within the Progenetix database. 
 
-If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to `"https://cancercelllines.org"` in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
+If your focus lies in cancer cell lines, you can access data from [*cancercelllines.org*](https://cancercelllines.org/) by setting the `domain` parameter to `"cancercelllines.org"` in `pgxLoader` function. This data repository originates from CNV profiling data of cell lines initially collected as part of Progenetix and currently includes additional types of genomic mutations.
 
 # Load library 
 
@@ -41,10 +41,11 @@ The parameters of this function used in this tutorial:
 * `codematches`: A logical value determining whether to exclude samples from child concepts 
 of specified filters in the ontology tree. If `TRUE`, only samples exactly matching the specified filters will be included. 
 Do not use this parameter when `filters` include ontology-irrelevant filters such as pubmed or cohort identifiers. Default is `FALSE`.
+* `filter_pattern`: Optional string pattern to match against the `label` field of available filters. Only used when the parameter type is `"filtering_terms"`. Default is `NULL`, which includes all filters.
 * `limit`: Integer to specify the number of returned profiles. Default is `0` (return all). 
 * `skip`: Integer to specify the number of skipped profiles. E.g. if `skip = 2, limit=500`, the first 2*500=1000 profiles are skipped and the next 500 profiles are returned. Default is `0` (no skip). 
 * `dataset`: A string specifying the dataset to query from the Beacon response. Default is `NULL`, which includes results from all datasets.
-* `domain`: A string specifying the domain of the query data resource. Default is `"http://progenetix.org"`.
+* `domain`: A string specifying the domain of the query data resource. Default is `"progenetix.org"`.
 * `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the endpoint being `"http://progenetix.org/beacon"`.
 * `num_cores`: An integer specifying the number of cores to use for parallel processing during Beacon v2 phenotypic/meta-data queries from multiple domains. Default is `1`.
 
@@ -61,7 +62,14 @@ all_filters <- pgxLoader(type="filtering_terms")
 head(all_filters)
 ```
 
-The following query retrieves information about all retinoblastoma samples in Progenetix, utilizing a specific filter based on an [NCIt code](https://ncit.nci.nih.gov) as a disease identifier.
+If you're interested in filters related to a specific disease or phenotype, you can use the `filter_pattern` argument to narrow down the list. For example, to search for filters related to retinoblastoma:
+
+```{r}
+query_filter <- pgxLoader(type="filtering_terms",filter_pattern="retinoblastoma")
+query_filter
+```
+
+To retrieve biosamples associated with a specific disease, use appropriate filter terms. In this example, we use an [NCIt](https://ncit.nci.nih.gov) code corresponding to **retinoblastoma** (`NCIT:C7541`):
 
 ```{r}
 biosamples <- pgxLoader(type="biosamples", filters = "NCIT:C7541")
@@ -112,16 +120,6 @@ biosamples_4 <- pgxLoader(type="biosamples", filters = "NCIT:C7541",codematches 
 unique(biosamples_4$histological_diagnosis_id)
 ```
 
-## Query from multiple data resources
-
-You can query data from multiple resources via the Beacon v2 API by setting the `domain` and `entry_point` parameters accordingly. To speed up the process, use the `num_cores` parameter to enable parallel processing across different domains.
-
-```{r}
-biosamples_5 <- pgxLoader(type="biosamples",filters = "NCIT:C7541",domain=c("progenetix.org","cancercelllines.org"), entry_point="beacon") # both resources use the same entry point
-
-biosamples_5[["cancercelllines.org"]][1:2,1:10]
-```
-
 # Retrieve individuals information
 
 If you want to query details of individuals (e.g. clinical data) where the samples 
@@ -151,6 +149,16 @@ To retrieve the number of results for a specific filter in Progenetix, set the `
 
 ```{r}
 pgxLoader(type="counts",filters = "NCIT:C7541")
+```
+
+# Query from multiple data resources
+
+You can query data from multiple resources via the Beacon v2 API by setting the `domain` and `entry_point` parameters accordingly. To speed up the process, use the `num_cores` parameter to enable parallel processing across different domains.
+
+```{r}
+record_counts <- pgxLoader(type="counts",filters = "NCIT:C9245",domain=c("progenetix.org","cancercelllines.org"), entry_point=c("beacon","beacon"))
+
+record_counts
 ```
 
 # Visualization of survival data

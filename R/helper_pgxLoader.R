@@ -1,17 +1,17 @@
 # general utility function ------------------------------------------------
 
 check_unused_parameters <- function(param, param_name, rightparam_name) {
-  if (!is.null(param)) {
-    rightparam <- paste(rightparam_name,collapse = " and ")
-    warning("\n The parameter ", param_name, " is not used in this query. Only ",rightparam," are accepted. \n")
-  }
+    if (!is.null(param)) {
+        rightparam <- paste(rightparam_name,collapse = " and ")
+        warning("\n The parameter ", param_name, " is not used in this query. Only ",rightparam," are accepted. \n")
+    }
 }
 
 check_missing_parameters <- function(param, param_name){
-  if (length(param) < 1) {
-    param_name <- paste(param_name,collapse = " or ")
-    stop("\n The parameter ",param_name," is missing. \n")
-  }
+    if (length(param) < 1) {
+        param_name <- paste(param_name,collapse = " or ")
+        stop("\n The parameter ",param_name," is missing. \n")
+    }
 }
 
 transform_id <- function(id){
@@ -20,7 +20,7 @@ transform_id <- function(id){
 }
 
 check_pgx_domain <- function(domain, data_type){
-    if (!domain %in% c("http://progenetix.org","progenetix.org","https://cancercelllines.org","cancercelllines.org")){
+    if (!domain %in% c("progenetix.org","cancercelllines.org")){
       stop(data_type," can only be accessed from progenetix.org or cancercelllines.org")
     }
 }
@@ -28,7 +28,6 @@ check_pgx_domain <- function(domain, data_type){
 camel_2_snake <- function(camelstring) {
     # Use gsub to replace uppercase letters with _ followed by the lowercase version
     snake_case <- gsub("([a-z])([A-Z])", "\\1_\\L\\2", camelstring, perl = TRUE)
-    # Convert the entire string to lowercase for consistency
     return(tolower(snake_case))
 }
 
@@ -115,7 +114,14 @@ extract_all_results <- function(data, mapping, type){
 extract_beacon_query <- function(url, type, dataset){
     mapping_rules <- yaml::read_yaml(system.file("config", "datatable_mappings.yaml", package = "pgxRpi"))
     mapping_rules <- mapping_rules[[type]]
-    query <- GET(url)
+    query <- attempt::try_catch(
+        GET(url),.e= function(e){
+        return(list(error=conditionMessage(e)))
+      }
+    )
+    if (!inherits(query, "response")) return(query)
+    query_code <- status_code(query)
+    if (status_code(query) != 200) return(list(status=query_code))
     data <- content(query)
     data_df <- c()
     
@@ -125,16 +131,16 @@ extract_beacon_query <- function(url, type, dataset){
       data_df <- do.call(rbind, data_info)
     } else if(type == "counts"){
     # beaconCountResponseSection
-      if (!"responseSummary" %in% names(data)) return(NA)
+      if (!"responseSummary" %in% names(data)) stop()
       data_df <- extract_all_results(data$responseSummary, mapping_rules, type)
       data_df <- data_df$count
     } else{
     # beaconResultsets response 
-      if (!data$responseSummary$exists) return(NULL)
+      if (!data$responseSummary$exists) stop()
       if (!is.null(dataset)){
         datasetids <- sapply(data$response$resultSets,function(x){x$id})
         id_idx <- which(datasetids %in% dataset)
-        if (length(id_idx) == 0) stop("Data not found for the specified dataset ", dataset)
+        if (length(id_idx) == 0) stop()
       } else{
         id_idx <- seq(length(data$response$resultSets))
       }
@@ -146,102 +152,127 @@ extract_beacon_query <- function(url, type, dataset){
       }
     }
 
+    if (length(data_df) == 0) stop()
     return(data_df)
+}
+
+beacon_query <- function(url, type, dataset, domain, search_type, search_values){
+    res <- NULL
+    
+    attempt::try_catch(
+      res <- extract_beacon_query(url, type, dataset),.e= function(e){
+        # no data in the successful response
+        warning("\n No matching data for ",search_type," ",search_values," in ",domain,"\n")
+      }
+    )
+
+    # request is failed
+    if ("status" %in% names(res)){
+        warning("\n Request failed for ",search_type," ",search_values," in ",domain," (status code: ",res$status,")","\n")
+        return()
+    } else if ("error" %in% names(res)){
+        warning("\n",res$error,"\n")
+        return()
+    }
+
+    return(res)
 }
 
 # function to query metadata for biosamples, individuals, analyses --------
 
-metaLoader <- function(type, biosample_id, individual_id, filters, codematches, skip, limit, domain, entry_point, dataset){
-  res <- c()
-  # query by filters
-  if (!(is.null(filters))){               
-    url <- paste0(domain,"/",entry_point, "/", type, "?filters=",transform_id(filters),"&limit=",limit,"&skip=",skip)
-    encoded_url <- URLencode(url)
-    attempt::try_catch(
-      res_1 <- extract_beacon_query(encoded_url, type, dataset),.e= function(e){
-        warning("\n Query to ", domain, " fails for the filters ", paste(filters,collapse=",") ,"\n")
-      }
-    )
-    if (exists('res_1')){res <- dplyr::bind_rows(res,res_1)}               
-  }
-  
-  # query by biosample_id
-  if (!(is.null(biosample_id))){
-    biosample_ids <- transform_id(biosample_id)
-    url <- paste0(domain,"/",entry_point, "/biosamples/", biosample_ids, "/", type)
-    encoded_url <- URLencode(url)
-    attempt::try_catch(
-      res_2 <- extract_beacon_query(encoded_url, type, dataset),.e= function(e){
-        warning("\n Query to ", domain, " fails for biosample_id ", paste(biosample_ids,collapse = ","), "\n")
-      }
-    )
-    if (exists('res_2')){res <- dplyr::bind_rows(res,res_2)} 
-  }
-  
-  # query by individual_id
-  if (!(is.null(individual_id))){
-    individual_ids <- transform_id(individual_id)
-    url <- paste0(domain,"/",entry_point, "/individuals/", individual_ids, "/", type)
-    encoded_url <- URLencode(url)
-    attempt::try_catch(
-      res_3 <- extract_beacon_query(encoded_url, type, dataset),.e= function(e){
-        warning("\n Query to ", domain, " fails for individual_id ", paste(individual_ids,collapse = ","), "\n")
-      }
-    )
-    if (exists('res_3')){res <- dplyr::bind_rows(res,res_3)} 
-  }
-  
-  # query with no conditions
-  if (is.null(filters) & is.null(individual_id) & is.null(biosample_id)){
-    url <- paste0(domain,"/",entry_point, "/", type)
-    encoded_url <- URLencode(url)
-    attempt::try_catch(
-      res_4 <- extract_beacon_query(encoded_url, type, dataset),.e= function(e){
-        warning("\n Query to ", domain, " fails for ", type, "\n")
-      }
-    )
-    if (exists('res_4')){res <- dplyr::bind_rows(res,res_4)} 
-  }
-  
-  if (length(res) == 0) return(NA)
-  
-  rownames(res) <- seq(dim(res)[1])
-  
-  if (codematches){
-    idx <- rownames(res)
-    if (type == "biosamples"){
-      idx <- res$biosample_id %in% biosample_id | res$individual_id %in% individual_id | 
-        res$histological_diagnosis_id %in% filters | res$sampled_tissue_id %in% filters | 
-        res$icdo_morphology_id %in% filters | res$icdo_topography_id %in% filters 
-    } else if (type == "individuals"){
-      idx <- res$histological_diagnosis_id %in% filters | res$individual_id %in% individual_id
-      if (!is.null(biosample_id)){
-        warning("\n The option `codematches=TRUE` filters out samples accessed by biosample_id \n")
-      }
-    }       
-    res <- res[idx,]
-    if (dim(res)[1] == 0){
-      warning("\n The option `codematches=TRUE` filters out all samples \n")
+metaLoader <- function(type, biosample_id, individual_id, filters, codematches, filter_pattern, skip, limit, domain, entry_point, dataset){
+    
+    domain_url <- domain
+    if (!grepl("^https?://", domain_url)){
+        domain_url <- paste0("http://", domain_url)
     }
-  }
+   
+    res <- NULL
+    # query by filters
+    if (!(is.null(filters))){               
+        transformed_filter <- transform_id(filters)
+        url <- paste0(domain_url,"/",entry_point, "/", type, "?filters=",transformed_filter,"&limit=",limit,"&skip=",skip)
+        encoded_url <- URLencode(url)
+        res <- dplyr::bind_rows(res, beacon_query(encoded_url, type, dataset, domain, "filter",transformed_filter))            
+    }
   
-  res <- res[!duplicated(res),]
-  return(res)
+    # query by biosample_id
+    if (!(is.null(biosample_id))){
+        biosample_ids <- transform_id(biosample_id)
+        url <- paste0(domain_url,"/",entry_point, "/biosamples/", biosample_ids, "/", type)
+        encoded_url <- URLencode(url)
+        res <- dplyr::bind_rows(res, beacon_query(encoded_url, type, dataset, domain, "biosample_id", biosample_ids))
+    }
+  
+      # query by individual_id
+    if (!(is.null(individual_id))){
+        individual_ids <- transform_id(individual_id)
+        url <- paste0(domain_url,"/",entry_point, "/individuals/", individual_ids, "/", type)
+        encoded_url <- URLencode(url)
+        res <- dplyr::bind_rows(res, beacon_query(encoded_url, type, dataset, domain, "individual_id", individual_ids))
+    }
+  
+    # query with no conditions
+    if (is.null(filters) & is.null(individual_id) & is.null(biosample_id)){
+        url <- paste0(domain_url,"/",entry_point, "/", type)
+        encoded_url <- URLencode(url)
+        res <- dplyr::bind_rows(res, beacon_query(encoded_url, type, dataset, domain, type, ""))
+    }
+  
+    if (length(res) == 0) return(NA)
+    if (nrow(res) == 0) return(NA)
+    
+    # transfrom tibble to dataframe
+    res <- as.data.frame(res)
+
+    if (type == "filtering_terms" & !is.null(filter_pattern)){
+        idx <- unique(unlist(lapply(filter_pattern,function(x){which(grepl(x, res$label, ignore.case = TRUE))})))
+        if (length(idx) == 0) {
+            warning("\n All data from ",domain," is filtered out by the specified filter patterns","\n")
+            return()
+        }
+        res <- res[idx,]
+    }
+  
+    if (codematches){
+        idx <- rownames(res)
+        if (type == "biosamples"){
+            idx <- res$biosample_id %in% biosample_id | res$individual_id %in% individual_id | 
+            res$histological_diagnosis_id %in% filters | res$sampled_tissue_id %in% filters | 
+            res$icdo_morphology_id %in% filters | res$icdo_topography_id %in% filters 
+        } else if (type == "individuals"){
+            idx <- res$histological_diagnosis_id %in% filters | res$individual_id %in% individual_id
+            if (!is.null(biosample_id)){
+                warning("\n The option `codematches=TRUE` filters out data accessed by biosample_id from ",domain, "\n")
+            }
+        }       
+        res <- res[idx,]
+        if (nrow(res) == 0){
+            warning("\n The option `codematches=TRUE` filters out all data from ",domain,"\n")
+            return() 
+        }   
+    }
+  
+    res <- res[!duplicated(res),]
+    rownames(res) <- seq(dim(res)[1])
+    return(res)
 }
 
-pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematches, skip, limit, domain, entry_point, dataset, num_cores){
+pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematches, filter_pattern, skip, limit, domain, entry_point, dataset, num_cores){
     if (length(entry_point) == 1) entry_point <- rep(entry_point,length(domain))
     if (length(entry_point) != length(domain)) stop("The parameters 'domain' and 'entry_point' do not match")
         
     num_cores <- min(num_cores, parallel::detectCores() - 1)
     future::plan(future::multisession,workers = num_cores)
   
-    results <- future.apply::future_lapply(seq_len(length(domain)),FUN = function(i){metaLoader(type, biosample_id, individual_id, filters, codematches, skip, limit, domain[i], entry_point[i], dataset)})
+    results <- future.apply::future_lapply(seq_len(length(domain)),FUN = function(i){metaLoader(type, biosample_id, individual_id, filters, codematches, filter_pattern, skip, limit, domain[i], entry_point[i], dataset)})
     
     fail_idx <- which(is.na(results))
-    if (length(fail_idx) == length(results)) stop("No data retrieved")
+    if (length(fail_idx) == length(results)){
+        warning("No data retrieved")
+        return()
+    }
     if (length(fail_idx > 0)) {
-        warning("\n Query fails for domain ", paste(domain[fail_idx],collapse = ','), "\n")
         domain <- domain[-fail_idx]
         results <- results[-fail_idx]
     }
@@ -259,20 +290,22 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 ## beacon response
 
 read_variant_beacon <- function(biosample_id, limit, domain, entry_point, dataset){
+
+    domain_url <- domain
+    if (!grepl("^https?://", domain_url)){
+        domain_url <- paste0("http://", domain_url)
+    }
+
     if (is.null(biosample_id)){
-        url <- paste0(domain,"/",entry_point, "/g_variants")
+        url <- paste0(domain_url,"/",entry_point, "/g_variants")
     }else{
-        url <- paste0(domain,"/",entry_point,"/biosamples/",biosample_id,"/g_variants","?limit=",limit)
+        url <- paste0(domain_url,"/",entry_point,"/biosamples/",biosample_id,"/g_variants","?limit=",limit)
     }
     
     encoded_url <- URLencode(url)
-    # make query not broken
-    result <- NA
-    attempt::try_catch(
-    result <- extract_beacon_query(encoded_url, type="g_variants", dataset),.e= function(e){NULL}
-    )        
+    result <- beacon_query(encoded_url, "g_variants", dataset, domain, "biosample_id", biosample_id)
+     
     if (is.null(result)) return(result)
-    if (all(is.na(result))) return(result)
 
     # variantInternalId in progenetix is interval-based and used for sorting
     if (domain %in% c("http://progenetix.org","progenetix.org","https://cancercelllines.org","cancercelllines.org")){
@@ -296,15 +329,40 @@ read_variant_beacon <- function(biosample_id, limit, domain, entry_point, datase
 
 ## exported pgxseg data by bycon service 
 
+read_service_table <- function(url,search_type,seacrh_values){
+    data <- data.frame()
+    attempt::try_catch(
+      data <- read.table(url, header = TRUE, sep="\t",quote=""),.e= function(e){invisible()}
+    )
+    if (nrow(data) == 0){
+        query <- GET(url)
+        if (status_code(query) != 200){
+            # since this is single-domain query, no need to specify the domain
+            warning("\n Request failed for ",search_type," ",seacrh_values," (status code: ",status_code(query),")","\n")
+        } else{
+            warning("\n No matching data for ",search_type," ",seacrh_values,"\n")
+        }
+        return()
+    }
+    return(data)
+}
+
 read_variant_pgxseg <- function(biosample_id, output, limit, domain){
+    domain_url <- domain
+    
+    if (!grepl("^https?://", domain_url)){
+        domain_url <- paste0("http://", domain_url)
+    }
     url <- switch(output,
-                  pgxseg= paste0(domain,"/services/pgxsegvariants/?biosampleIds=",biosample_id,"&limit=",limit),
-                  seg= paste0(domain,"/services/variantsbedfile/?output=igv&biosampleIds=",biosample_id, "&limit=",limit))
+                  pgxseg= paste0(domain_url,"/services/pgxsegvariants/?biosampleIds=",biosample_id,"&limit=",limit),
+                  seg= paste0(domain_url,"/services/variantsbedfile/?output=igv&biosampleIds=",biosample_id, "&limit=",limit))
     
     encoded_url <- URLencode(url)
     
-    seg <- read.table(encoded_url, header = TRUE, sep="\t",quote="")
-    if (dim(seg)[1] == 0) return(NA)
+    seg <- read_service_table(encoded_url,"biosample_id",biosample_id)
+
+    if (length(seg) == 0) return()
+
     col <- switch(output,
                   pgxseg=c(3,4,5),
                   seg=c(3,4,6))
@@ -316,6 +374,7 @@ read_variant_pgxseg <- function(biosample_id, output, limit, domain){
     chr <- as.integer(chr)
     seg <- seg[order(chr),]
     seg <- seg[order(seg[,1]),]
+    seg[,2] <- as.character(seg[,2])   
     meta <- NULL
     if (output=="pgxseg"){
       meta <- readLines(encoded_url)
@@ -334,7 +393,10 @@ pgxVariantLoader <- function(biosample_id, output, limit, save_file, filename, d
     # query with no condition
     if (is.null(biosample_id)){
         results <- read_variant_beacon(biosample_id, domain, entry_point, dataset)
-        if (all(is.na(results))) stop("No data retrieved")
+        if (length(results) == 0) {
+            warning("No data retrieved")
+            return()
+        }
     # query by biosample id
     }else{
         num_cores <- min(num_cores, parallel::detectCores() - 1)
@@ -346,11 +408,10 @@ pgxVariantLoader <- function(biosample_id, output, limit, save_file, filename, d
             results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_beacon(i, limit, domain, entry_point, dataset)})
         }
 
-        fail_idx <- which(is.na(results))
-        if (length(fail_idx) == length(results)) stop("No data retrieved")
-        if (length(fail_idx > 0)) warning("\n Query fails for biosample_id ", paste(biosample_id[fail_idx],collapse = ','), "\n")
-
-        results[is.na(results)] <- NULL
+        if (all(sapply(results,is.null))){
+            warning("No data retrieved")
+            return()
+        }
 
         if (!(is.null(output))){
             meta <- lapply(results,FUN= function(x){x[["meta"]]})
@@ -359,12 +420,13 @@ pgxVariantLoader <- function(biosample_id, output, limit, save_file, filename, d
         }
 
         results <- do.call(dplyr::bind_rows, results)
-        # if the query succeed but no data in database
-        if (length(results) == 0) stop("No data retrieved")
-        # quality check
-        id_col <- which(colnames(results) == "biosample_id")
-        if (length(id_col) == 0) id_col <- 1
-        results <- results[results[,id_col] %in% biosample_id,]
+        # if the query succeed but the data is null in database
+        if (nrow(results) == 0) {
+            warning("No data retrieved")
+            return()
+        }
+        
+        results <- as.data.frame(results)
         rownames(results) <- seq(nrow(results))
     }
     
@@ -379,7 +441,7 @@ pgxVariantLoader <- function(biosample_id, output, limit, save_file, filename, d
         }
         suppressWarnings(write.table(results, append=append, sep='\t',file=filename,row.names = FALSE,col.names = TRUE, quote = FALSE))
         message("\n The file is saved \n")
-        return()
+        return(invisible())
     }
 
     return(results)
@@ -388,23 +450,45 @@ pgxVariantLoader <- function(biosample_id, output, limit, save_file, filename, d
 # function to query sample count -----------------------------
 
 countLoader <- function(filters,domain,entry_point){
-    individual_url <- paste0(domain,"/",entry_point, "/individuals?filters=")
-    sample_url <- paste0(domain,"/",entry_point, "/biosamples?filters=")
-    analyses_url <- paste0(domain,"/",entry_point, "/analyses?filters=")
+    domain_url <- domain
+    
+    if (!grepl("^https?://", domain_url)){
+        domain_url <- paste0("http://", domain_url)
+    }
+
+    individual_url <- paste0(domain_url,"/",entry_point, "/individuals")
+    sample_url <- paste0(domain_url,"/",entry_point, "/biosamples")
+    analyses_url <- paste0(domain_url,"/",entry_point, "/analyses")
+
+    filter_len <- length(filters)
+    filter_str <- "?filters="
+    if (is.null(filters)){
+        filter_len <- 1
+        filter_str <- ""
+    }
   
     res <- list()
-    for (i in seq_len(length(filters))){
-        info1 <- extract_beacon_query(paste0(individual_url,filters[i]),"counts",NULL)
-        info2 <- extract_beacon_query(paste0(sample_url,filters[i]),"counts",NULL)
-        info3 <- extract_beacon_query(paste0(analyses_url,filters[i]),"counts",NULL)
-        res[[i]] <- data.frame(filter=filters[i],entity=c("individuals","biosamples","analyses"),count=c(info1,info2,info3))
+    for (i in seq_len(filter_len)){
+        info1 <- beacon_query(paste0(individual_url,filter_str,filters[i]),"counts",NULL,domain, "counts","")
+        info1 <- if (is.null(info1)) NA else info1
+        
+        info2 <- beacon_query(paste0(sample_url,filter_str,filters[i]),"counts",NULL,domain, "counts","")
+        info2 <- if (is.null(info2)) NA else info2
+        
+        info3 <- beacon_query(paste0(analyses_url,filter_str,filters[i]),"counts",NULL,domain, "counts","")
+        info3 <- if (is.null(info3)) NA else info3
+        
+        ind_filter <- filters[i]
+        if (is.null(ind_filter)) ind_filter <- ""
+        res[[i]] <- data.frame(filter=ind_filter,entity=c("individuals","biosamples","analyses"),count=c(info1,info2,info3))
     } 
   
     res <- do.call(rbind,res)
-    if (length(res) == 0) return(NA)
-  
+    
+    if (all(is.na(res$count))) return(NA)
     return (res)
 }
+
 
 pgxCount <- function(filters,domain,entry_point,num_cores){
     if (length(entry_point) == 1) entry_point <- rep(entry_point,length(domain))
@@ -416,9 +500,13 @@ pgxCount <- function(filters,domain,entry_point,num_cores){
     results <- future.apply::future_lapply(seq_len(length(domain)),FUN = function(i){countLoader(filters,domain[i],entry_point[i])})
   
     fail_idx <- which(is.na(results))
-    if (length(fail_idx) == length(results)) stop("No data retrieved")
+
+    if (length(fail_idx) == length(results)){
+        warning("No data retrieved")
+        return()
+    }
+
     if (length(fail_idx > 0)) {
-        warning("\n Query fails for domain ", paste(domain[fail_idx],collapse = ','), "\n")
         domain <- domain[-fail_idx]
         results <- results[-fail_idx]
     }
@@ -436,18 +524,31 @@ pgxCount <- function(filters,domain,entry_point,num_cores){
 pgxFreqLoader <- function(output, filters, domain) {
     if (length(domain) > 1) stop("This query only supports one domain")
     check_pgx_domain(domain, "CNV frequency data")
-
+    
+    domain_url <- domain
+    if (!grepl("^https?://", domain_url)){
+        domain_url <- paste0("http://", domain_url)
+    }
     # start query
-    url <- paste0(domain,"/services/intervalFrequencies?filters=",transform_id(filters))
+    transformed_filter <- transform_id(filters)
+    url <- paste0(domain_url,"/services/intervalFrequencies?filters=",transformed_filter)
     encoded_url <- URLencode(url)
 
     # access data 
-    pg_data  <- content(GET(encoded_url))
+    query <- GET(encoded_url)
+    # since this is single-domain query, no need to specify the domain
+    if (status_code(query) != 200) stop("Request failed for filter ",transformed_filter," (status code: ",status_code(query),")")
+    
+    pg_data  <- content(query)
 
-    if (!pg_data$responseSummary$exists) stop("No data retrieved")
+    if (!pg_data$responseSummary$exists){
+        warning("No data retrieved")
+        return()
+    }
+
     if (pg_data$responseSummary$numTotalResults != length(filters)){
         pg_allids <- sapply(pg_data$response$results,function(x){x$groupId})
-        warning("\n Query to ", domain, " fails for filter ", paste(filters[!filters %in% pg_allids],collapse = ','), "\n")
+        warning("\n No matching data for filter ",paste(filters[!filters %in% pg_allids],collapse = ','),"\n")
     }
 
     pg_data_lst <- lapply(pg_data$response$results, function(x){
@@ -497,23 +598,35 @@ pgxFreqLoader <- function(output, filters, domain) {
 
 # utility function for transforming cnv fraction data ---------------------
 
-read_cnvstats_json <- function(url,codematches=FALSE,all_biosample_id=NULL){
+read_cnvstats_json <- function(url,codematches=FALSE,all_biosample_id=NULL,search_type,search_values){
     encoded_url <- URLencode(url)
-    data <- content(GET(encoded_url))
+    query <- GET(encoded_url)
+    
+    if (status_code(query) != 200) {
+        # since this is single-domain query, no need to specify the domain
+        warning("\n Request failed for ",search_type," ",search_values," (status code: ",status_code(query),")","\n")
+        return()
+    }
+
+    data <- content(query)
+    
     # this is progenetix/cellz specific data format, so the length of dataset is 1 and this function doesn't require dataset parameter  
-    sample <- unlist(lapply(data$response$resultSets[[1]]$results, function(x){
-    return(x$biosampleId)
-    }))
+    sample <- unlist(lapply(data$response$resultSets[[1]]$results, function(x){x$biosampleId}))
+    
+    if (length(sample) == 0){
+        warning("\n No matching data for ",search_type," ",search_values,"\n")
+        return()
+    }
 
     # filter with exact code match
     if (codematches){
-    sel_sample_idx <- sample %in% all_biosample_id 
-    if (sum(sel_sample_idx) == 0 & length(sample) > 0){
-      warning("\n The option `codematches=TRUE` filters out all samples accessed by filters \n")
-      return()
-    }
+        sel_sample_idx <- sample %in% all_biosample_id 
+        if (sum(sel_sample_idx) == 0 & length(sample) > 0){
+            warning("\n The option `codematches=TRUE` filters out all samples accessed by filters \n")
+            return()
+        }
     } else{
-    sel_sample_idx <- seq(length(sample))
+        sel_sample_idx <- seq(length(sample))
     }
 
     # extract fraction
@@ -585,10 +698,16 @@ read_cnvstats_json <- function(url,codematches=FALSE,all_biosample_id=NULL){
 pgxFracLoader <- function(biosample_id, individual_id, filters, codematches, skip, limit, domain){
     if (length(domain) > 1) stop("This query only supports one domain")
     check_pgx_domain(domain, "CNV fraction data")
-  
+    
+    domain_url <- domain
+    if (!grepl("^https?://", domain_url)){
+        domain_url <- paste0("http://", domain_url)
+    }
+
     pg.data <- list()
     if (!is.null(filters)){
-        url <- paste0(domain,"/services/cnvstats/?filters=",transform_id(filters),"&limit=",limit,"&skip=",skip)
+        transformed_filter <- transform_id(filters)
+        url <- paste0(domain_url,"/services/cnvstats/?filters=",transformed_filter,"&limit=",limit,"&skip=",skip)
 
         if (codematches){
           suppressWarnings(all_biosample_id <- pgxmetaLoader(type = 'biosamples', 
@@ -597,17 +716,19 @@ pgxFracLoader <- function(biosample_id, individual_id, filters, codematches, ski
                                                              skip = NULL,limit = 0,domain = domain,entry_point = "beacon",dataset = NULL))
           all_biosample_id <- all_biosample_id$biosample_id    
         }
-        pg.data[[1]] <- read_cnvstats_json(url,codematches,all_biosample_id)
+        pg.data <- append(pg.data,list(read_cnvstats_json(url,codematches,all_biosample_id,"filter",transformed_filter)))
     } 
   
     if (!is.null(biosample_id)){
-        url  <- paste0(domain,"/services/cnvstats/?biosampleIds=",transform_id(biosample_id))
-        pg.data[[2]] <- read_cnvstats_json(url)
+        biosample_ids <- transform_id(biosample_id)
+        url  <- paste0(domain_url,"/services/cnvstats/?biosampleIds=",biosample_ids)
+        pg.data <- append(pg.data,list(read_cnvstats_json(url,search_type="biosample_id",search_values=biosample_ids)))
     }
     
     if (!is.null(individual_id)){
-        url <- paste0(domain,"/services/cnvstats/?individualIds=",transform_id(individual_id))
-        pg.data[[3]] <- read_cnvstats_json(url)
+        individual_ids <- transform_id(individual_id)
+        url <- paste0(domain_url,"/services/cnvstats/?individualIds=",individual_ids)
+        pg.data <- append(pg.data,list(read_cnvstats_json(url,search_type="individual_id",search_values=individual_ids)))
     }
     
     result <- list()
@@ -623,35 +744,51 @@ pgxFracLoader <- function(biosample_id, individual_id, filters, codematches, ski
 pgxcallsetLoader <- function(biosample_id, individual_id, filters, limit, skip, codematches, domain){
     if (length(domain) > 1) stop("This query only supports one domain")
     check_pgx_domain(domain, "pgxmatrix data")
-  
-    pg.data <- list()
+    domain_url <- domain
+    if (!grepl("^https?://", domain_url)){
+        domain_url <- paste0("http://", domain_url)
+    }
+    
+    pg.data <- NULL
 
     if (!is.null(filters)){
-        url  <- paste0(domain,"/services/samplematrix/?filters=",transform_id(filters),"&limit=",limit,"&skip=",skip)
+        transformed_filter <- transform_id(filters)
+        url  <- paste0(domain_url,"/services/samplematrix/?filters=",transformed_filter,"&limit=",limit,"&skip=",skip)
         encoded_url <- URLencode(url)
 
-        pg.data[[1]] <- read.table(encoded_url, header=TRUE, sep="\t",quote="")
-        ori.dim <- dim(pg.data[[1]])[1]
-        if (codematches){
-            pg.data[[1]] <- pg.data[[1]][pg.data[[1]]$group_id %in% filters,]
-        if (ori.dim > 0 & dim(pg.data[[1]])[1] == 0){
-            warning("\n The option `codematches=TRUE` filters out all samples accessed by filters \n")
-        }}
+        res1 <- read_service_table(encoded_url,"filter",transformed_filter)
+        ori.dim <- length(res1)
+        if (codematches & ori.dim > 0){
+            res1 <- res1[res1$group_id %in% filters,]
+            if (nrow(res1) == 0){
+                warning("\n The option `codematches=TRUE` filters out all samples accessed by filters \n")
+                res1 <- NULL
+            }
+        }
+        pg.data <- rbind(pg.data,res1)
     } 
     
     if (!is.null(biosample_id)){
-        url  <- paste0(domain,"/services/samplematrix/?biosampleIds=",transform_id(biosample_id))
+        biosample_ids <- transform_id(biosample_id)
+        url  <- paste0(domain_url,"/services/samplematrix/?biosampleIds=",biosample_ids)
         encoded_url <- URLencode(url)
-        pg.data[[2]] <- read.table(encoded_url, header=TRUE, sep="\t",quote="")
+        res2 <- read_service_table(encoded_url,"biosample_id",biosample_ids)
+        pg.data <- rbind(pg.data,res2)
     }  
     
     if (!is.null(individual_id)){
-      url  <- paste0(domain,"/services/samplematrix/?individualIds=",transform_id(individual_id))
-      encoded_url <- URLencode(url)
-      pg.data[[3]] <- read.table(encoded_url, header=TRUE, sep="\t",quote="")
+        individual_ids <- transform_id(individual_id)
+        url  <- paste0(domain_url,"/services/samplematrix/?individualIds=",individual_ids)
+        encoded_url <- URLencode(url)
+        res3 <- read_service_table(encoded_url,"individual_id",individual_ids)
+        pg.data <- rbind(pg.data,res3)
     }
 
-    pg.data <- do.call(rbind,pg.data)
+    if (length(pg.data) == 0){
+        warning("No data retrieved")
+        return()
+    }
+
     # remove automatic prefix X 
     colnames(pg.data) <- gsub("X","",colnames(pg.data))
     # add chr prefix to avoid colnames with numeric start
