@@ -65,3 +65,9 @@
 - Updated `pgxfreqplot` to set `ylim` as `max(lowfreq, highfreq)`, ensuring proper scaling when high-level frequency exceeds low-level frequency.
 - Replaced id parameter with the standard query path for Beacon queries.
 - Modified variant data retrieval in `seg` format to fetch directly from the service API.
+
+## Version: 1.5.3 (2025-05-15)
+
+- Added `filter_pattern` parameter to `pgxLoader` to enable keyword-based search of available filter terms.
+- Improved warning messages to include HTTP status codes for failed requests, and clarified domain information in queries involving multiple domains.
+- Simplified `domain` field description by retaining only the domain address.
