@@ -43,17 +43,18 @@ The parameters of this function used in this tutorial:
 * `codematches`: A logical value determining whether to exclude samples from child concepts 
 of specified filters in the ontology tree. If `TRUE`, only samples exactly matching the specified filters will be included. Do not use this parameter when `filters` include ontology-irrelevant filters such as pubmed or cohort identifiers. Default is `FALSE`.
 * `limit`: Integer to specify the number of returned profiles. Default is `0` (return all). 
-* `skip`: Integer to specify the number of skipped profiles. E.g. if `skip = 2,limit=500`, the first 2*500=1000 profiles are skipped and the next 500 profiles are returned. Default is `0` (no skip). 
+* `skip`: Integer to specify the number of skipped profiles. E.g. if `skip = 2,limit=500`, the first 2*500=1000 profiles are skipped and the next 500 profiles are returned. Default is `0` (no skip).
 * `dataset`: A string specifying the dataset to query from the Beacon response. Default is `NULL`, which includes results from all datasets.
 * `save_file`: A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter `type` is `"g_variants"`. Default is `FALSE`.
 * `filename`: A string specifying the path and name of the file to be saved. Only used if the parameter `save_file` is `TRUE`. Default is `"variants.tsv"`, saved in the current working directory..
 * `num_cores`: An integer specifying the number of cores to use for parallel processing during Beacon v2 variant data queries from multiple biosamples. Default is `1`.
+* `use_https`: A logical value indicating whether to use the HTTPS protocol. If `TRUE`, the domain will be prefixed with `"https://"`; otherwise, `"http://"` will be used. Default is `TRUE`.
 * `domain`: A string specifying the domain of the query data resource. Default is `"progenetix.org"`.
-* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the endpoint being `"http://progenetix.org/beacon"`.
+* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the endpoint being `"https://progenetix.org/beacon"`.
 
 # Retrieve variants 
 
-Due to time-out constraints, variant data in Progenetix or cancercelllines can only be queried using biosample ids, rather than filters or individual ids. To speed up the process, you can use the `num_cores` parameter to enable parallel processing. For more details about retrieving biosample ids, refer to the vignette *Introduction_1_load_metadata*.
+Due to time-out constraints, variant data in Progenetix or cancercelllines can only be queried using biosample ids, rather than filters or individual ids. To speed up the process, you can use the `num_cores` parameter to enable parallel processing across multiple samples. For more details about retrieving biosample ids, refer to the vignette *Introduction_1_load_metadata*.
 
 ## Get biosample id 
 
