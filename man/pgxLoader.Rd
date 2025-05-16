@@ -17,6 +17,7 @@ pgxLoader(
   filter_pattern = NULL,
   save_file = FALSE,
   filename = "variants.tsv",
+  use_https = TRUE,
   domain = "progenetix.org",
   entry_point = "beacon",
   num_cores = 1
@@ -66,9 +67,11 @@ Default is \code{FALSE}. This option is applicable only when querying data resou
 
 \item{filename}{A string specifying the path and name of the file to be saved. This parameter is used only when \code{save_file} is set to \code{TRUE}. The default value is \code{"variants.tsv"}, saved in the current working directory.}
 
+\item{use_https}{A logical value indicating whether to use the HTTPS protocol. If \code{TRUE}, the domain will be prefixed with \code{"https://"}; otherwise, \code{"http://"} will be used. Default is \code{TRUE}.}
+
 \item{domain}{The domain of the query data resource. Default is \code{"progenetix.org"}.}
 
-\item{entry_point}{The entry point of the Beacon v2 API. Default is \code{"beacon"}, resulting in the default endpoint being "http://progenetix.org/beacon"}
+\item{entry_point}{The entry point of the Beacon v2 API. Default is \code{"beacon"}, resulting in the default endpoint being "https://progenetix.org/beacon".}
 
 \item{num_cores}{An integer specifying the number of cores to use for parallel processing during Beacon v2 phenotypic/meta-data queries from multiple domains or variant data queries from multiple biosamples. Default is \code{1}.}
 }

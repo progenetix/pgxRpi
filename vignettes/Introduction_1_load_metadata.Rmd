@@ -44,9 +44,10 @@ Do not use this parameter when `filters` include ontology-irrelevant filters suc
 * `filter_pattern`: Optional string pattern to match against the `label` field of available filters. Only used when the parameter type is `"filtering_terms"`. Default is `NULL`, which includes all filters.
 * `limit`: Integer to specify the number of returned profiles. Default is `0` (return all). 
 * `skip`: Integer to specify the number of skipped profiles. E.g. if `skip = 2, limit=500`, the first 2*500=1000 profiles are skipped and the next 500 profiles are returned. Default is `0` (no skip). 
+* `use_https`: A logical value indicating whether to use the HTTPS protocol. If `TRUE`, the domain will be prefixed with `"https://"`; otherwise, `"http://"` will be used. Default is `TRUE`.
 * `dataset`: A string specifying the dataset to query from the Beacon response. Default is `NULL`, which includes results from all datasets.
 * `domain`: A string specifying the domain of the query data resource. Default is `"progenetix.org"`.
-* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the endpoint being `"http://progenetix.org/beacon"`.
+* `entry_point`: A string specifying the entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the endpoint being `"https://progenetix.org/beacon"`.
 * `num_cores`: An integer specifying the number of cores to use for parallel processing during Beacon v2 phenotypic/meta-data queries from multiple domains. Default is `1`.
 
 # Retrieve biosamples information
@@ -153,7 +154,7 @@ pgxLoader(type="counts",filters = "NCIT:C7541")
 
 # Query from multiple data resources
 
-You can query data from multiple resources via the Beacon v2 API by setting the `domain` and `entry_point` parameters accordingly. To speed up the process, use the `num_cores` parameter to enable parallel processing across different domains.
+You can query data from multiple resources via the Beacon v2 API by setting the `domain` and `entry_point` parameters accordingly. To speed up the process, use the `num_cores` parameter to enable parallel processing across different domains. For resources that only support `http` (e.g., local or internal network instances), set `use_https = FALSE` to avoid connection issues.
 
 ```{r}
 record_counts <- pgxLoader(type="counts",filters = "NCIT:C9245",domain=c("progenetix.org","cancercelllines.org"), entry_point=c("beacon","beacon"))

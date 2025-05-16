@@ -31,6 +31,14 @@ camel_2_snake <- function(camelstring) {
     return(tolower(snake_case))
 }
 
+normalize_domain <- function(domain, use_https){
+    if (grepl("^https?://", domain)) {
+        return(domain)
+    }
+    default_scheme <- ifelse(use_https, "https://", "http://")
+    return(paste0(default_scheme,domain))
+}
+
 # utility function for transforming beacon response -----------------------
 
 extract_list_data <- function(original_column, data){
@@ -131,7 +139,7 @@ extract_beacon_query <- function(url, type, dataset){
       data_df <- do.call(rbind, data_info)
     } else if(type == "counts"){
     # beaconCountResponseSection
-      if (!"responseSummary" %in% names(data)) stop()
+      if (!data$responseSummary$exists) stop()
       data_df <- extract_all_results(data$responseSummary, mapping_rules, type)
       data_df <- data_df$count
     } else{
@@ -180,12 +188,8 @@ beacon_query <- function(url, type, dataset, domain, search_type, search_values)
 
 # function to query metadata for biosamples, individuals, analyses --------
 
-metaLoader <- function(type, biosample_id, individual_id, filters, codematches, filter_pattern, skip, limit, domain, entry_point, dataset){
-    
-    domain_url <- domain
-    if (!grepl("^https?://", domain_url)){
-        domain_url <- paste0("http://", domain_url)
-    }
+metaLoader <- function(type, biosample_id, individual_id, filters, codematches, filter_pattern, skip, limit, use_https, domain, entry_point, dataset){    
+    domain_url <- normalize_domain(domain, use_https)
    
     res <- NULL
     # query by filters
@@ -258,14 +262,14 @@ metaLoader <- function(type, biosample_id, individual_id, filters, codematches, 
     return(res)
 }
 
-pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematches, filter_pattern, skip, limit, domain, entry_point, dataset, num_cores){
+pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematches, filter_pattern, skip, limit, use_https, domain, entry_point, dataset, num_cores){
     if (length(entry_point) == 1) entry_point <- rep(entry_point,length(domain))
     if (length(entry_point) != length(domain)) stop("The parameters 'domain' and 'entry_point' do not match")
         
     num_cores <- min(num_cores, parallel::detectCores() - 1)
     future::plan(future::multisession,workers = num_cores)
   
-    results <- future.apply::future_lapply(seq_len(length(domain)),FUN = function(i){metaLoader(type, biosample_id, individual_id, filters, codematches, filter_pattern, skip, limit, domain[i], entry_point[i], dataset)})
+    results <- future.apply::future_lapply(seq_len(length(domain)),FUN = function(i){metaLoader(type, biosample_id, individual_id, filters, codematches, filter_pattern, skip, limit, use_https, domain[i], entry_point[i], dataset)})
     
     fail_idx <- which(is.na(results))
     if (length(fail_idx) == length(results)){
@@ -289,12 +293,9 @@ pgxmetaLoader <- function(type, biosample_id, individual_id, filters, codematche
 
 ## beacon response
 
-read_variant_beacon <- function(biosample_id, limit, domain, entry_point, dataset){
+read_variant_beacon <- function(biosample_id, limit, use_https, domain, entry_point, dataset){
 
-    domain_url <- domain
-    if (!grepl("^https?://", domain_url)){
-        domain_url <- paste0("http://", domain_url)
-    }
+    domain_url <- normalize_domain(domain, use_https)
 
     if (is.null(biosample_id)){
         url <- paste0(domain_url,"/",entry_point, "/g_variants")
@@ -329,7 +330,7 @@ read_variant_beacon <- function(biosample_id, limit, domain, entry_point, datase
 
 ## exported pgxseg data by bycon service 
 
-read_service_table <- function(url,search_type,seacrh_values){
+read_service_table <- function(url, search_type, seacrh_values){
     data <- data.frame()
     attempt::try_catch(
       data <- read.table(url, header = TRUE, sep="\t",quote=""),.e= function(e){invisible()}
@@ -348,11 +349,8 @@ read_service_table <- function(url,search_type,seacrh_values){
 }
 
 read_variant_pgxseg <- function(biosample_id, output, limit, domain){
-    domain_url <- domain
+    domain_url <- normalize_domain(domain, use_https=TRUE) # progenetix service API
     
-    if (!grepl("^https?://", domain_url)){
-        domain_url <- paste0("http://", domain_url)
-    }
     url <- switch(output,
                   pgxseg= paste0(domain_url,"/services/pgxsegvariants/?biosampleIds=",biosample_id,"&limit=",limit),
                   seg= paste0(domain_url,"/services/variantsbedfile/?output=igv&biosampleIds=",biosample_id, "&limit=",limit))
@@ -386,7 +384,7 @@ read_variant_pgxseg <- function(biosample_id, output, limit, domain){
 
 # function to query variants ----------------------------------------------
 
-pgxVariantLoader <- function(biosample_id, output, limit, save_file, filename, domain, entry_point, dataset, num_cores){
+pgxVariantLoader <- function(biosample_id, output, limit, save_file, filename, use_https, domain, entry_point, dataset, num_cores){
     if (length(domain) > 1 | length(entry_point) > 1) stop("This query only supports one domain")
     if (!(is.null(output))) check_pgx_domain(domain, "Variant data in non-beacon output format")
 
@@ -405,7 +403,7 @@ pgxVariantLoader <- function(biosample_id, output, limit, save_file, filename, d
         if (!(is.null(output))){
             results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_pgxseg(i, output, limit, domain)})
         }else{
-            results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_beacon(i, limit, domain, entry_point, dataset)})
+            results <- future.apply::future_lapply(biosample_id,FUN = function(i){read_variant_beacon(i, limit, use_https, domain, entry_point, dataset)})
         }
 
         if (all(sapply(results,is.null))){
@@ -449,13 +447,9 @@ pgxVariantLoader <- function(biosample_id, output, limit, save_file, filename, d
 
 # function to query sample count -----------------------------
 
-countLoader <- function(filters,domain,entry_point){
-    domain_url <- domain
+countLoader <- function(filters, use_https, domain, entry_point){
+    domain_url <- normalize_domain(domain, use_https)
     
-    if (!grepl("^https?://", domain_url)){
-        domain_url <- paste0("http://", domain_url)
-    }
-
     individual_url <- paste0(domain_url,"/",entry_point, "/individuals")
     sample_url <- paste0(domain_url,"/",entry_point, "/biosamples")
     analyses_url <- paste0(domain_url,"/",entry_point, "/analyses")
@@ -469,13 +463,13 @@ countLoader <- function(filters,domain,entry_point){
   
     res <- list()
     for (i in seq_len(filter_len)){
-        info1 <- beacon_query(paste0(individual_url,filter_str,filters[i]),"counts",NULL,domain, "counts","")
+        info1 <- beacon_query(paste0(individual_url,filter_str,filters[i]),"counts",NULL,domain, "counts","of individuals")
         info1 <- if (is.null(info1)) NA else info1
         
-        info2 <- beacon_query(paste0(sample_url,filter_str,filters[i]),"counts",NULL,domain, "counts","")
+        info2 <- beacon_query(paste0(sample_url,filter_str,filters[i]),"counts",NULL,domain, "counts","of biosamples")
         info2 <- if (is.null(info2)) NA else info2
         
-        info3 <- beacon_query(paste0(analyses_url,filter_str,filters[i]),"counts",NULL,domain, "counts","")
+        info3 <- beacon_query(paste0(analyses_url,filter_str,filters[i]),"counts",NULL,domain, "counts","of analyses")
         info3 <- if (is.null(info3)) NA else info3
         
         ind_filter <- filters[i]
@@ -490,14 +484,14 @@ countLoader <- function(filters,domain,entry_point){
 }
 
 
-pgxCount <- function(filters,domain,entry_point,num_cores){
+pgxCount <- function(filters, use_https, domain, entry_point, num_cores){
     if (length(entry_point) == 1) entry_point <- rep(entry_point,length(domain))
     if (length(entry_point) != length(domain)) stop("The parameters 'domain' and 'entry_point' do not match")
   
     num_cores <- min(num_cores, parallel::detectCores() - 1)
     future::plan(future::multisession,workers = num_cores)
   
-    results <- future.apply::future_lapply(seq_len(length(domain)),FUN = function(i){countLoader(filters,domain[i],entry_point[i])})
+    results <- future.apply::future_lapply(seq_len(length(domain)),FUN = function(i){countLoader(filters,use_https,domain[i],entry_point[i])})
   
     fail_idx <- which(is.na(results))
 
@@ -523,12 +517,9 @@ pgxCount <- function(filters,domain,entry_point,num_cores){
 
 pgxFreqLoader <- function(output, filters, domain) {
     if (length(domain) > 1) stop("This query only supports one domain")
-    check_pgx_domain(domain, "CNV frequency data")
-    
-    domain_url <- domain
-    if (!grepl("^https?://", domain_url)){
-        domain_url <- paste0("http://", domain_url)
-    }
+    check_pgx_domain(domain, "CNV frequency data")    
+    domain_url <- normalize_domain(domain, use_https=TRUE)
+
     # start query
     transformed_filter <- transform_id(filters)
     url <- paste0(domain_url,"/services/intervalFrequencies?filters=",transformed_filter)
@@ -697,12 +688,8 @@ read_cnvstats_json <- function(url,codematches=FALSE,all_biosample_id=NULL,searc
 
 pgxFracLoader <- function(biosample_id, individual_id, filters, codematches, skip, limit, domain){
     if (length(domain) > 1) stop("This query only supports one domain")
-    check_pgx_domain(domain, "CNV fraction data")
-    
-    domain_url <- domain
-    if (!grepl("^https?://", domain_url)){
-        domain_url <- paste0("http://", domain_url)
-    }
+    check_pgx_domain(domain, "CNV fraction data")    
+    domain_url <- normalize_domain(domain, use_https=TRUE)
 
     pg.data <- list()
     if (!is.null(filters)){
@@ -744,10 +731,7 @@ pgxFracLoader <- function(biosample_id, individual_id, filters, codematches, ski
 pgxcallsetLoader <- function(biosample_id, individual_id, filters, limit, skip, codematches, domain){
     if (length(domain) > 1) stop("This query only supports one domain")
     check_pgx_domain(domain, "pgxmatrix data")
-    domain_url <- domain
-    if (!grepl("^https?://", domain_url)){
-        domain_url <- paste0("http://", domain_url)
-    }
+    domain_url <- normalize_domain(domain, use_https=TRUE)
     
     pg.data <- NULL
 

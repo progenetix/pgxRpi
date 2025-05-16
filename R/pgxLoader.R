@@ -29,8 +29,9 @@
 #' @param filter_pattern Optional string pattern to match against the `label` field of available filters. Only used when the parameter `type` is `"filtering_terms"`. Default is `NULL`, which includes all filters.
 #' @param save_file A logical value determining whether to save variant data as a local file instead of direct return. Only used when the parameter `type` is `"g_variants"`. Default is `FALSE`.
 #' @param filename A string specifying the path and name of the file to be saved. This parameter is used only when `save_file` is set to `TRUE`. The default value is `"variants.tsv"`, saved in the current working directory.
+#' @param use_https A logical value indicating whether to use the HTTPS protocol. If `TRUE`, the domain will be prefixed with `"https://"`; otherwise, `"http://"` will be used. Default is `TRUE`.
 #' @param domain The domain of the query data resource. Default is `"progenetix.org"`.
-#' @param entry_point The entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the default endpoint being "http://progenetix.org/beacon"
+#' @param entry_point The entry point of the Beacon v2 API. Default is `"beacon"`, resulting in the default endpoint being "https://progenetix.org/beacon".
 #' @param num_cores An integer specifying the number of cores to use for parallel processing during Beacon v2 phenotypic/meta-data queries from multiple domains or variant data queries from multiple biosamples. Default is `1`.
 #' @importFrom utils URLencode modifyList read.table write.table
 #' @importFrom httr GET content status_code
@@ -57,6 +58,7 @@ pgxLoader <- function(
     filter_pattern = NULL,
     save_file=FALSE,
     filename="variants.tsv",
+    use_https=TRUE,
     domain="progenetix.org",
     entry_point="beacon",
     num_cores=1){
@@ -113,12 +115,12 @@ pgxLoader <- function(
 
     options(timeout=500)
     switch(type,
-           biosamples = pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,filter_pattern=filter_pattern,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
-           individuals= pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,filter_pattern=filter_pattern,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
-           analyses   = pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,filter_pattern=filter_pattern,skip=skip,limit=limit,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
-           filtering_terms = pgxmetaLoader(type=type,biosample_id=NULL,individual_id=NULL,filters=NULL,codematches=FALSE,filter_pattern=filter_pattern,skip=NULL,limit=NULL,domain=domain,entry_point=entry_point,dataset=NULL,num_cores=num_cores),
-           counts = pgxCount(filters,domain,entry_point,num_cores=num_cores),
-           g_variants = pgxVariantLoader(biosample_id=biosample_id,output=output,limit=limit,save_file=save_file,filename=filename,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
+           biosamples = pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,filter_pattern=filter_pattern,skip=skip,limit=limit,use_https=use_https,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
+           individuals= pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,filter_pattern=filter_pattern,skip=skip,limit=limit,use_https=use_https,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
+           analyses   = pgxmetaLoader(type=type,biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,filter_pattern=filter_pattern,skip=skip,limit=limit,use_https=use_https,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
+           filtering_terms = pgxmetaLoader(type=type,biosample_id=NULL,individual_id=NULL,filters=NULL,codematches=FALSE,filter_pattern=filter_pattern,skip=NULL,limit=NULL,use_https=use_https,domain=domain,entry_point=entry_point,dataset=NULL,num_cores=num_cores),
+           counts = pgxCount(filters=filters,use_https=use_https,domain=domain,entry_point=entry_point,num_cores=num_cores),
+           g_variants = pgxVariantLoader(biosample_id=biosample_id,output=output,limit=limit,save_file=save_file,filename=filename,use_https=use_https,domain=domain,entry_point=entry_point,dataset=dataset,num_cores=num_cores),
            cnv_frequency = pgxFreqLoader(output=output,filters=filters,domain=domain),
            samplematrix = pgxcallsetLoader(biosample_id=biosample_id,individual_id=individual_id,filters=filters,limit=limit,skip=skip,codematches=codematches,domain=domain),
            cnv_fraction = pgxFracLoader(biosample_id=biosample_id,individual_id=individual_id,filters=filters,codematches=codematches,skip=skip,limit=limit,domain=domain))     
