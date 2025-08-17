@@ -31,3 +31,9 @@ To access CNV frequency data, get started from this vignette [Introduction_3_acc
 For processing local ".pgxseg" files, get started from this vignette [Introduction_4_process_pgxseg](https://bioconductor.org/packages/devel/bioc/vignettes/pgxRpi/inst/doc/Introduction_4_process_pgxseg.html).
 
 If you encounter problems, try to reinstall the latest version. If reinstallation doesn't help, please contact us.
+
+### Citation
+
+If you use *pgxRpi* in your research, please cite our associated publication:
+
+Zhao H, Baudis M (2025). *pgxRpi: an R/bioconductor package for user-friendly access to the Beacon v2 API*. **Bioinformatics Advances**, 5(1): vbaf172. doi: [10.1093/bioadv/vbaf172](https://doi.org/10.1093/bioadv/vbaf172)
