@@ -1,0 +1,22 @@
+bibentry(
+  bibtype = "Article",
+  key     = "ZhaoBaudis2025",
+  title   = "pgxRpi: an R/bioconductor package for user-friendly access to the Beacon v2 API",
+  author  = c(
+    person("Hangjia", "Zhao"),
+    person("Michael", "Baudis")
+  ),
+  journal = "Bioinformatics Advances",
+  year    = "2025",
+  volume  = "5",
+  number  = "1",
+  pages   = "vbaf172",
+  doi     = "10.1093/bioadv/vbaf172",
+  url     = "https://doi.org/10.1093/bioadv/vbaf172",
+  textVersion = paste(
+    "Zhao H, Baudis M (2025).",
+    "pgxRpi: an R/bioconductor package for user-friendly access to the Beacon v2 API.",
+    "Bioinformatics Advances, 5(1): vbaf172.",
+    "doi:10.1093/bioadv/vbaf172"
+  )
+)
